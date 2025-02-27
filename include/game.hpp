@@ -1,4 +1,7 @@
+#pragma once
 #include <SDL2/SDL.h>
+#include "window.hpp"
+#include "workspace.hpp"
 
 class Game {
 public:
@@ -8,8 +11,8 @@ public:
 	void Process();
 	void Render();
 private:
-	SDL_Window* m_window;
-	SDL_Renderer* m_renderer;
+	Window* m_window;
+	Workspace* m_workspace;
 
 	bool m_should_shutdown;
 };

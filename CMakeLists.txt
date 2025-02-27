@@ -9,6 +9,8 @@ add_executable(
 	WIN32
 	src/main.cxx
 	src/game.cxx
+	src/window.cxx
+	src/workspace.cxx
 )
 target_include_directories(cpp_final_project PRIVATE include)
 

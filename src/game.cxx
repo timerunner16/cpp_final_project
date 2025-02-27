@@ -1,9 +1,14 @@
 #include "game.hpp"
+#include "window.hpp"
 
 Game::Game() {
-	m_window = SDL_CreateWindow("Test", 0, 0, 1280, 960, SDL_WINDOW_SHOWN);
-	m_renderer = SDL_CreateRenderer(m_window, 0, SDL_RENDERER_ACCELERATED);
+	m_window = new Window(this, 640, 480);
+	m_workspace = new Workspace();
 	m_should_shutdown = false;
+
+	m_workspace->Test();
+	delete m_workspace;
+	m_workspace = nullptr;
 
 	while (!m_should_shutdown) {
 		Process();
@@ -12,8 +17,8 @@ Game::Game() {
 }
 
 Game::~Game() {
-	SDL_DestroyWindow(m_window);
-	SDL_DestroyRenderer(m_renderer);
+	delete m_window;
+	m_window = nullptr;
 }
 
 void Game::Process() {
@@ -24,7 +29,6 @@ void Game::Process() {
 }
 
 void Game::Render() {
-	SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 0);
-	SDL_RenderClear(m_renderer);
-	SDL_RenderPresent(m_renderer);
+	m_window->Clear();
+	m_window->Present();
 }
