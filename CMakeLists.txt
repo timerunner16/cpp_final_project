@@ -39,3 +39,10 @@ set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL REQUIRED)
 target_link_libraries(cpp_final_project PRIVATE ${OPENGL_gl_LIBRARY})
 target_include_directories(cpp_final_project PRIVATE ${OPENGL_INCLUDE_DIR})
+
+add_custom_command(
+	TARGET cpp_final_project POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+			${CMAKE_SOURCE_DIR}/assets/
+			$<TARGET_FILE_DIR:cpp_final_project>/assets/
+)
