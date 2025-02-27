@@ -28,6 +28,11 @@ target_link_libraries(cpp_final_project PRIVATE ${SDL2_LIBRARIES})
 target_include_directories(cpp_final_project PRIVATE ${SDL2_INCLUDE_DIRS})
 
 
+find_package(Lua 5.3 EXACT REQUIRED)
+target_link_libraries(cpp_final_project PRIVATE ${LUA_LIBRARIES})
+target_include_directories(cpp_final_project PRIVATE ${LUA_INCLUDE_DIR})
+
+
 set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL REQUIRED)
 target_link_libraries(cpp_final_project PRIVATE ${OPENGL_gl_LIBRARY})
