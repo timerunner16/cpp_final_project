@@ -40,6 +40,29 @@ The `Workspace` class will handle:
 - storage of current game data
 - running lua game scripts
 
+Game data will be stored through several different classes that represent different data types.
+
+The `GameObject` class will include:
+- a reference to mesh data
+- a reference to a texture
+- a transform
+- a reference to a lua script with:
+	- an init function (optional)
+	- a process function (optional)
+
+The `Camera` class will include:
+- a transform
+- a FOV
+and will handle:
+- providing the projection & view matrices to the `Renderer`
+
+The `Mesh` class will include:
+- a reference to a Vertex Buffer Object
+- a reference to an Index Buffer Object
+
+The `Texture` class will include:
+- a reference to a Texture Buffer
+
 ## Build Process
 This game was designed and programmed on Linux (specifically Ubuntu 24.04), and as such I only have build instructions for Linux.
 To build on linux, simply:
