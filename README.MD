@@ -63,6 +63,12 @@ The `Mesh` class will include:
 The `Texture` class will include:
 - a reference to a Texture Buffer
 
+The `Shader` class will handle:
+- generating Programs from vertex and fragment shaders
+- setting shader uniforms
+and will include:
+- a reference to its Program
+
 ## Build Process
 This game was designed and programmed on Linux (specifically Ubuntu 24.04), and as such I only have build instructions for Linux.
 To build on linux, simply:
