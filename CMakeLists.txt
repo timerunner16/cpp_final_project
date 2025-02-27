@@ -11,6 +11,7 @@ add_executable(
 	src/game.cxx
 	src/window.cxx
 	src/workspace.cxx
+	src/game_object.cxx
 )
 target_include_directories(cpp_final_project PRIVATE include)
 

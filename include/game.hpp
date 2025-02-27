@@ -1,7 +1,8 @@
 #pragma once
 #include <SDL2/SDL.h>
-#include "window.hpp"
-#include "workspace.hpp"
+
+class Window;
+class Workspace;
 
 class Game {
 public:

@@ -1,23 +1,19 @@
 #include "workspace.hpp"
 
-extern "C" {
-	#include "lua.h"
-	#include "lualib.h"
-	#include "lauxlib.h"
+Workspace::Workspace(Game* game) {
+	m_game = game;
 }
 
-Workspace::Workspace() {}
-Workspace::~Workspace() {}
+Workspace::~Workspace() {
+	m_game = nullptr;
+}
 
-void Workspace::Test() {
-	lua_State* L;
-	L = luaL_newstate();
-	luaL_openlibs(L);
-	luaL_loadfile(L, "assets/test.lua");
-	lua_pcall(L,0,0,0);
-	lua_getglobal(L, "process");
-	if (lua_isfunction(L, -1)) {
-		lua_pcall(L,0,0,0);
+void Workspace::CreateGameObject(GameObject game_object) {
+	m_game_objects.push_back(game_object);
+}
+
+void Workspace::Process() {
+	for (GameObject game_object : m_game_objects) {
+		game_object.Process();
 	}
-	lua_close(L);
 }
