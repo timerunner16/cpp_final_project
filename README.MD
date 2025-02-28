@@ -81,7 +81,7 @@ This game was designed and programmed on Linux (specifically Ubuntu 24.04), and 
 To build on linux, simply:
 
 1. Install build requirements
-`sudo apt install cmake libsdl2-dev libglew-dev libgl libgl-dev liblua5.3 liblua5.3-dev`
+`sudo apt install cmake libsdl2-dev libglew-dev libgl libgl-dev libglm-dev liblua5.3 liblua5.3-dev`
 2. Clone the repository
 `git clone https://github.com/timerunner16/cpp-final-project`
 `cd cpp-final-project`
