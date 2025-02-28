@@ -1,5 +1,8 @@
 #pragma once
 #include <SDL.h>
+#include <GL/glew.h>
+#include <GL/glu.h>
+
 class Game;
 
 class Window {
@@ -12,5 +15,5 @@ public:
 private:
 	Game* m_game;
 	SDL_Window* m_window;
-	SDL_Renderer* m_renderer;
+	SDL_GLContext m_context;
 };
