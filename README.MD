@@ -88,7 +88,6 @@ To build on linux, simply:
 3. Prepare build directory
 `mkdir build && cd build`
 4. Create build files
-`cmake ..`
-(plus additional)
+`cmake <OPTIONS> ..`
 5. Build the project
-`make`
+`cmake --build .`
