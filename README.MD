@@ -43,18 +43,18 @@ The `Workspace` class will handle:
 Game data will be stored through several different classes that represent different data types.
 
 The `GameObject` class will include:
-- a reference to mesh data
-- a reference to a texture
-- a transform
+- a reference to a `Mesh`
+- a reference to a `Texture`
+- a `Transform`
 - a reference to a lua script with:
 	- an init function (optional)
 	- a process function (optional)
 
-The `Camera` class will include:
-- a transform
-- a FOV
-and will handle:
-- providing the projection & view matrices to the `Renderer`
+The `Camera` class will handle:
+- constructing a view projection matrix from its values
+and will include:
+- a `Transform`
+- an FOV
 
 The `Mesh` class will include:
 - a reference to a Vertex Buffer Object
@@ -62,6 +62,13 @@ The `Mesh` class will include:
 
 The `Texture` class will include:
 - a reference to a Texture Buffer
+
+The `Transform` class will handle:
+- constructing a model matrix from its values
+and will include:
+- an X, Y, Z position
+- a Pitch, Roll, Yaw (Euclid Angle) rotation
+- an X, Y, Z scale
 
 The `Shader` class will handle:
 - generating Programs from vertex and fragment shaders
