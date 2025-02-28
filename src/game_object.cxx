@@ -8,6 +8,17 @@ extern "C" {
 
 GameObject::GameObject(std::string script_path) {
 	m_script_path = script_path;
+
+	lua_State* L;
+	L = luaL_newstate();
+	luaL_openlibs(L);
+	luaL_loadfile(L, m_script_path.c_str());
+	lua_pcall(L,0,0,0);
+	lua_getglobal(L, "init");
+	if (lua_isfunction(L,-1)) {
+		lua_pcall(L,0,0,0);
+	}
+	lua_close(L);
 }
 
 GameObject::~GameObject() {}
