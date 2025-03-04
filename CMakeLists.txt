@@ -14,6 +14,7 @@ add_executable(
 	src/game_object.cxx
 	src/mesh.cxx
 	src/shader.cxx
+	src/camera.cxx
 )
 target_include_directories(cpp_final_project PRIVATE include)
 

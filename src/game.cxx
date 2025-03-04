@@ -13,6 +13,7 @@ Game::Game() {
 	m_workspace->CreateGameObject(std::string("TestObject"), new GameObject{"assets/test.lua"});
 
 	GameObject* game_object = m_workspace->GetGameObject(std::string("TestObject"));
+	game_object->SetTransform(Transform{glm::vec3(0.0f, 0.0f, -6.0f), glm::vec3(0.0f), glm::vec3(1.0f)});
 	game_object->SetMesh(new Mesh(std::string("assets/test.obj")));
 	game_object->SetShader(new Shader(std::string("assets/basic_vertex.glsl"), std::string("assets/basic_frag.glsl")));
 
@@ -39,6 +40,10 @@ void Game::Process() {
 
 void Game::Render() {
 	m_window->Clear();
-	m_window->DrawGameObject(m_workspace->GetGameObject(std::string("TestObject")));
+	m_window->DrawGameObject(m_workspace->GetCamera(), m_workspace->GetGameObject(std::string("TestObject")));
 	m_window->Present();
+}
+
+Window* Game::GetWindow() {
+	return m_window;
 }

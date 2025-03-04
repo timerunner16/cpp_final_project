@@ -19,6 +19,9 @@ Window::Window(Game* game, int width, int height) {
 	GLenum glewError = glewInit();
 
 	glEnable(GL_DEPTH_TEST);
+
+	m_width = width;
+	m_height = height;
 }
 
 Window::~Window() {
@@ -31,7 +34,7 @@ void Window::Clear() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Window::DrawGameObject(GameObject* game_object) {
+void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 	Mesh* mesh = game_object->GetMesh();
 	Shader* shader = game_object->GetShader();
 	GLuint vertex_buffer_object, index_buffer_object, num_indices;
@@ -40,9 +43,9 @@ void Window::DrawGameObject(GameObject* game_object) {
 
 	glUseProgram(game_object->GetShader()->GetProgramID());
 
-	game_object->GetShader()->UniformMat4("model", glm::mat4(1.0f));
-	game_object->GetShader()->UniformMat4("view", glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f)));
-	game_object->GetShader()->UniformMat4("projection", glm::perspective<float>(glm::radians(55.0f), 640.0f/480.0f, 0.1f, 15.0f));
+	game_object->GetShader()->UniformMat4("model", game_object->GetTransform().GetModelMatrix());
+	game_object->GetShader()->UniformMat4("view", camera->GetViewMatrix());
+	game_object->GetShader()->UniformMat4("projection", camera->GetProjectionMatrix());
 
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object);
@@ -58,4 +61,12 @@ void Window::DrawGameObject(GameObject* game_object) {
 
 void Window::Present() {
 	SDL_GL_SwapWindow(m_window);
+}
+
+int Window::GetWidth() {
+	return m_width;
+}
+
+int Window::GetHeight() {
+	return m_height;
 }

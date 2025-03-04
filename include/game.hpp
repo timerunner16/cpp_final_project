@@ -11,6 +11,8 @@ public:
 
 	void Process();
 	void Render();
+	
+	Window* GetWindow();
 private:
 	Window* m_window;
 	Workspace* m_workspace;

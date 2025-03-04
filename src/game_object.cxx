@@ -48,10 +48,18 @@ void GameObject::SetShader(Shader* shader) {
 	m_shader = shader;
 }
 
+void GameObject::SetTransform(const Transform& transform) {
+	m_transform = transform;
+}
+
 Mesh* GameObject::GetMesh() {
 	return m_mesh;
 }
 
 Shader* GameObject::GetShader() {
 	return m_shader;
+}
+
+Transform& GameObject::GetTransform() {
+	return m_transform;
 }
