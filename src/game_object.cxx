@@ -5,6 +5,8 @@ extern "C" {
 }
 
 #include "game_object.hpp"
+#include "mesh.hpp"
+#include "shader.hpp"
 
 GameObject::GameObject(std::string script_path) {
 	m_script_path = script_path;
@@ -19,6 +21,8 @@ GameObject::GameObject(std::string script_path) {
 		lua_pcall(L,0,0,0);
 	}
 	lua_close(L);
+
+	m_mesh = new Mesh(std::string(""));
 }
 
 GameObject::~GameObject() {}
@@ -34,4 +38,20 @@ void GameObject::Process() {
 		lua_pcall(L,0,0,0);
 	}
 	lua_close(L);
+}
+
+void GameObject::SetMesh(Mesh* mesh) {
+	m_mesh = mesh;
+}
+
+void GameObject::SetShader(Shader* shader) {
+	m_shader = shader;
+}
+
+Mesh* GameObject::GetMesh() {
+	return m_mesh;
+}
+
+Shader* GameObject::GetShader() {
+	return m_shader;
 }

@@ -1,5 +1,6 @@
 #pragma once
-#include <vector>
+#include <string>
+#include <map>
 #include "game_object.hpp"
 class Game;
 
@@ -8,9 +9,10 @@ public:
 	Workspace(Game* game);
 	~Workspace();
 	
-	void CreateGameObject(GameObject game_object);
+	void CreateGameObject(std::string name, GameObject* game_object);
+	GameObject* GetGameObject(std::string name);
 	void Process();
 private:
 	Game* m_game;
-	std::vector<GameObject> m_game_objects;
+	std::map<std::string, GameObject*> m_game_objects;
 };

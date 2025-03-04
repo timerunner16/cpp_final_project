@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(cpp_final_project)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(
@@ -12,6 +12,8 @@ add_executable(
 	src/window.cxx
 	src/workspace.cxx
 	src/game_object.cxx
+	src/mesh.cxx
+	src/shader.cxx
 )
 target_include_directories(cpp_final_project PRIVATE include)
 

@@ -2,13 +2,19 @@
 #include "game_object.hpp"
 #include "window.hpp"
 #include "workspace.hpp"
+#include "mesh.hpp"
+#include "shader.hpp"
 
 Game::Game() {
 	m_window = new Window(this, 640, 480);
 	m_workspace = new Workspace(this);
 	m_should_shutdown = false;
 
-	m_workspace->CreateGameObject(GameObject{"assets/test.lua"});
+	m_workspace->CreateGameObject(std::string("TestObject"), new GameObject{"assets/test.lua"});
+
+	GameObject* game_object = m_workspace->GetGameObject(std::string("TestObject"));
+	game_object->SetMesh(new Mesh(std::string("assets/test.obj")));
+	game_object->SetShader(new Shader(std::string("assets/basic_vertex.glsl"), std::string("assets/basic_frag.glsl")));
 
 	while (!m_should_shutdown) {
 		Process();
@@ -33,5 +39,6 @@ void Game::Process() {
 
 void Game::Render() {
 	m_window->Clear();
+	m_window->DrawGameObject(m_workspace->GetGameObject(std::string("TestObject")));
 	m_window->Present();
 }

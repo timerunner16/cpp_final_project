@@ -4,6 +4,7 @@
 #include <GL/glu.h>
 
 class Game;
+class GameObject;
 
 class Window {
 public:
@@ -11,6 +12,7 @@ public:
 	~Window();
 
 	void Clear();
+	void DrawGameObject(GameObject* game_object);
 	void Present();
 private:
 	Game* m_game;
