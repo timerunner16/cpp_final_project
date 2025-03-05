@@ -19,6 +19,10 @@ Window::Window(Game* game, int width, int height) {
 	GLenum glewError = glewInit();
 
 	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
+	glEnable(GL_TEXTURE_2D);
+	
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
@@ -33,6 +37,7 @@ Window::~Window() {
 }
 
 void Window::Clear() {
+	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -56,6 +61,8 @@ void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(glm::vec3)+sizeof(glm::vec3)));
 	
+	glBindTexture(GL_TEXTURE_2D, game_object->GetGLTexture()->GetTextureID());
+
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_object);
 
@@ -64,6 +71,8 @@ void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glUseProgram(0);
 }

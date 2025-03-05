@@ -2,20 +2,23 @@
 #include "game_object.hpp"
 #include "window.hpp"
 #include "workspace.hpp"
+#include "resource_manager.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
 
 Game::Game() {
 	m_window = new Window(this, 1920, 1080);
 	m_workspace = new Workspace(this);
+	m_resource_manager = new ResourceManager();
 	m_should_shutdown = false;
 
-	m_workspace->CreateGameObject(std::string("TestObject"), new GameObject{"assets/test.lua"});
-
-	GameObject* game_object = m_workspace->GetGameObject(std::string("TestObject"));
-	game_object->SetTransform(Transform{glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)});
-	game_object->SetMesh(new Mesh(std::string("assets/test.obj")));
-	game_object->SetShader(new Shader(std::string("assets/basic_vertex.glsl"), std::string("assets/basic_frag.glsl")));
+	m_workspace->CreateGameObject(std::string("TestObject"), new GameObject{
+		"assets/test.lua",
+		new Mesh(std::string("assets/test.obj")),
+		new Shader(std::string("assets/basic_vertex.glsl"), std::string("assets/basic_frag.glsl")),
+		m_resource_manager->GetGLTexture(std::string("assets/test.png")),
+		Transform{glm::vec3(0.0f),glm::vec3(0.0f),glm::vec3(1.0f)}
+	});
 
 	while (!m_should_shutdown) {
 		Process();
@@ -25,9 +28,11 @@ Game::Game() {
 
 Game::~Game() {
 	delete m_window;
-	m_window = nullptr;
 	delete m_workspace;
+	delete m_resource_manager;
+	m_window = nullptr;
 	m_workspace = nullptr;
+	m_resource_manager = nullptr;
 }
 
 void Game::Process() {

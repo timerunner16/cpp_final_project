@@ -15,6 +15,7 @@ add_executable(
 	src/mesh.cxx
 	src/shader.cxx
 	src/camera.cxx
+	src/resource_manager.cxx
 )
 target_include_directories(cpp_final_project PRIVATE include)
 
@@ -31,6 +32,11 @@ target_include_directories(cpp_final_project PRIVATE ${LUA_INCLUDE_DIR})
 find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
 target_link_libraries(cpp_final_project PRIVATE SDL2::SDL2)
 target_include_directories(cpp_final_project PRIVATE ${SDL2_INCLUDE_DIRS})
+
+
+find_package(SDL2_image REQUIRED)
+target_link_libraries(cpp_final_project PRIVATE SDL2_image::SDL2_image)
+target_include_directories(cpp_final_project PRIVATE ${SDL2_IMAGE_INCLUDE_DIRS})
 
 
 set(OpenGL_GL_PREFERENCE "GLVND")

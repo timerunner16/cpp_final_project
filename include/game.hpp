@@ -3,6 +3,7 @@
 
 class Window;
 class Workspace;
+class ResourceManager;
 
 class Game {
 public:
@@ -16,6 +17,7 @@ public:
 private:
 	Window* m_window;
 	Workspace* m_workspace;
+	ResourceManager* m_resource_manager;
 
 	bool m_should_shutdown;
 };

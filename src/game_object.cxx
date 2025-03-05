@@ -8,8 +8,15 @@ extern "C" {
 #include "mesh.hpp"
 #include "shader.hpp"
 
-GameObject::GameObject(std::string script_path) {
+
+GameObject::GameObject(std::string script_path, Mesh* mesh, Shader* shader, 
+		std::shared_ptr<GLTexture> gl_texture, const Transform& transform) {
 	m_script_path = script_path;
+
+	m_mesh = mesh;
+	m_shader = shader;
+	m_transform = transform;
+	m_gl_texture = gl_texture;
 
 	lua_State* L;
 	L = luaL_newstate();
@@ -21,8 +28,6 @@ GameObject::GameObject(std::string script_path) {
 		lua_pcall(L,0,0,0);
 	}
 	lua_close(L);
-
-	m_mesh = new Mesh(std::string(""));
 }
 
 GameObject::~GameObject() {}
@@ -40,26 +45,12 @@ void GameObject::Process() {
 	lua_close(L);
 }
 
-void GameObject::SetMesh(Mesh* mesh) {
-	m_mesh = mesh;
-}
+void GameObject::SetMesh(Mesh* mesh) {m_mesh = mesh;}
+void GameObject::SetShader(Shader* shader) {m_shader = shader;}
+void GameObject::SetGLTexture(std::shared_ptr<GLTexture> gl_texture) {m_gl_texture = gl_texture;}
+void GameObject::SetTransform(const Transform& transform) {m_transform = transform;}
 
-void GameObject::SetShader(Shader* shader) {
-	m_shader = shader;
-}
-
-void GameObject::SetTransform(const Transform& transform) {
-	m_transform = transform;
-}
-
-Mesh* GameObject::GetMesh() {
-	return m_mesh;
-}
-
-Shader* GameObject::GetShader() {
-	return m_shader;
-}
-
-Transform& GameObject::GetTransform() {
-	return m_transform;
-}
+Mesh* GameObject::GetMesh() {return m_mesh;}
+Shader* GameObject::GetShader() {return m_shader;}
+std::shared_ptr<GLTexture> GameObject::GetGLTexture() {return m_gl_texture;}
+Transform& GameObject::GetTransform() {return m_transform;}
