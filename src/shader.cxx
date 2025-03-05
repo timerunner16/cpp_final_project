@@ -2,8 +2,38 @@
 #include <fstream>
 #include <sstream>
 
-const GLchar* default_vertex_shader_source = "#version 330 core\nlayout (location=0) in vec3 vertex_position;\nuniform mat4 model;\nuniform mat4 view;\nuniform mat4 projection;\nvoid main() {\ngl_Position = projection * view * model * vec4(vertex_position, 1.0);\n}";
-const GLchar* default_fragment_shader_source = "#version 330 core\nout vec4 fragment;\nvoid main() {\nfragment = vec4(1.0,1.0,1.0,1.0);\n}";
+const GLchar* default_vertex_shader_source = "#version 330 core\n\
+\n\
+layout (location=0) in vec3 i_vertex_position;\n\
+layout (location=1) in vec3 i_vertex_normal;\n\
+layout (location=2) in vec2 i_texture_coord;\n\
+\n\
+out vec2 texture_coord;\n\
+out vec3 normal;\n\
+\n\
+uniform mat4 model;\n\
+uniform mat4 view;\n\
+uniform mat4 projection;\n\
+\n\
+void main() {\n\
+	gl_Position = projection * view * model * vec4(i_vertex_position, 1.0);\n\
+	normal = i_vertex_normal;\n\
+	texture_coord = i_texture_coord;\n\
+}";
+const GLchar* default_fragment_shader_source = "#version 330 core\n\
+\n\
+in vec3 normal;\n\
+in vec2 texture_coord;\n\
+\n\
+out vec4 fragment;\n\
+\n\
+uniform sampler2D texture0;\n\
+\n\
+void main() {\n\
+	float lightval = max(dot(normalize(normal), normalize(vec3(1.0, 1.0, 1.0))),0.0);\n\
+	fragment = texture(texture0, texture_coord);\n\
+	fragment.xyz *= lightval;\n\
+}";
 
 Shader::Shader(std::string vertex_shader_path, std::string fragment_shader_path) {
 	std::string vertex_shader_source;

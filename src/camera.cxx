@@ -1,3 +1,5 @@
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/euler_angles.hpp>
 #include "camera.hpp"
 #include "game.hpp"
 #include "window.hpp"
@@ -18,8 +20,8 @@ float& Camera::GetFOV() {
 
 glm::mat4 Camera::GetViewMatrix() const {
 	glm::mat4 view_matrix = glm::mat4(1.0f);
+	view_matrix *= glm::eulerAngleXYZ(m_transform.rotation.x, m_transform.rotation.y, m_transform.rotation.z);
 	view_matrix = glm::translate(view_matrix, m_transform.position);
-	view_matrix *= glm::mat4_cast(glm::quat(m_transform.rotation));
 	return view_matrix;
 }
 

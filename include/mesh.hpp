@@ -1,11 +1,12 @@
 #pragma once
 #include "GL/glew.h"
+#include <glm/ext.hpp>
 #include <string>
 
 struct vertex {
-	GLfloat x;
-	GLfloat y;
-	GLfloat z;
+	glm::vec3 position;
+	glm::vec3 normal;
+	glm::vec2 uv;
 };
 
 class Mesh {

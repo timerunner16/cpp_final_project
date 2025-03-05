@@ -19,6 +19,8 @@ Window::Window(Game* game, int width, int height) {
 	GLenum glewError = glewInit();
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 
 	m_width = width;
 	m_height = height;
@@ -48,14 +50,21 @@ void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 	game_object->GetShader()->UniformMat4("projection", camera->GetProjectionMatrix());
 
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(glm::vec3)));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(glm::vec3)+sizeof(glm::vec3)));
+	
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), NULL);
-
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_object);
 
 	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_INT, NULL);
 
 	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+
 	glUseProgram(0);
 }
 
