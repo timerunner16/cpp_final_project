@@ -26,7 +26,9 @@ Camera* Workspace::GetCamera() {
 }
 
 void Workspace::Process() {
-	m_camera->GetTransform().position.y = -sin(SDL_GetTicks()/1000.0f)*0.5f;
+	m_camera->GetTransform().position.x = sin(SDL_GetTicks()/1000.0f)*5.0f;
+	m_camera->GetTransform().position.z =-cos(SDL_GetTicks()/1000.0f)*5.0f;
+	m_camera->GetTransform().rotation.y = fmod(SDL_GetTicks()/1000.0f,M_PI*2.0f);
 	for (auto& [key, val] : m_game_objects) {
 		val->Process();
 	}
