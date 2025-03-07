@@ -11,13 +11,21 @@ Game::Game() {
 	m_workspace = new Workspace(this);
 	m_resource_manager = new ResourceManager();
 	m_should_shutdown = false;
-
-	m_workspace->CreateGameObject(std::string("TestObject"), new GameObject{
+	
+	m_workspace->CreateGameObject(std::string("Suzanne"), new GameObject{
 		"assets/test.lua",
-		new Mesh(std::string("assets/test.obj")),
+		new Mesh(std::string("assets/suzanne.obj")),
 		new Shader(std::string("assets/basic_vertex.glsl"), std::string("assets/basic_frag.glsl")),
 		m_resource_manager->GetGLTexture(std::string("assets/test.png")),
-		Transform{glm::vec3(0.0f),glm::vec3(0.0f),glm::vec3(1.0f)}
+		Transform{glm::vec3(-1.5f, 0.0f, 0.0f),glm::vec3(0.0f),glm::vec3(1.0f)}
+	});
+
+	m_workspace->CreateGameObject(std::string("Cube"), new GameObject{
+		"",
+		new Mesh(std::string("assets/cube.obj")),
+		new Shader(std::string("assets/basic_vertex.glsl"), std::string("assets/basic_frag.glsl")),
+		m_resource_manager->GetGLTexture(std::string("assets/test.png")),
+		Transform{glm::vec3(1.5f, 0.0f, 0.0f),glm::vec3(0.0f),glm::vec3(1.0f)}
 	});
 
 	while (!m_should_shutdown) {
@@ -45,7 +53,9 @@ void Game::Process() {
 
 void Game::Render() {
 	m_window->Clear();
-	m_window->DrawGameObject(m_workspace->GetCamera(), m_workspace->GetGameObject(std::string("TestObject")));
+	for (auto game_object_pair : m_workspace->GetGameObjects()) {
+		m_window->DrawGameObject(m_workspace->GetCamera(), game_object_pair.second);
+	}
 	m_window->Present();
 }
 

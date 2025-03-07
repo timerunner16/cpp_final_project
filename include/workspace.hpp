@@ -12,6 +12,7 @@ public:
 	
 	void CreateGameObject(std::string name, GameObject* game_object);
 
+	std::map<std::string, GameObject*> GetGameObjects();
 	GameObject* GetGameObject(std::string name);
 	Camera* GetCamera();
 	

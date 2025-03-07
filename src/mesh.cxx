@@ -119,6 +119,7 @@ Mesh::Mesh(std::string mesh_path) {
 	vertex* vertex_data = new vertex[indices.size()];
 	GLuint* index_data = new GLuint[indices.size()];
 	m_num_indices = indices.size();
+	printf("number of indices in model %s is %i\n", mesh_path.c_str(), m_num_indices);
 
 	for (unsigned int i = 0; i < indices.size(); i++) {
 		auto index = std::next(indices.begin(), i);
@@ -129,16 +130,10 @@ Mesh::Mesh(std::string mesh_path) {
 		vertex_data[i] = vertex{*vertex_position_iter, *vertex_normal_iter, *vertex_texture_coordinate_iter};
 	}
 
-	for (unsigned int i = 0; i < indices.size()/3; i++) {
-		printf("triangle #%i\n", i+1);
-		for (unsigned int j = 0; j < 3; j++) {
-			unsigned int index = 3*i+j;
-			printf("  vertex #%i\n", j+1);
-			printf("    position: (x=%f, y=%f, z=%f)\n", vertex_data[index].position.x, vertex_data[index].position.y, vertex_data[index].position.z);
-			printf("    normal: (x=%f, y=%f, z=%f)\n", vertex_data[index].normal.x, vertex_data[index].normal.y, vertex_data[index].normal.z);
-			printf("    texture coordinate: (u=%f, v=%f)\n", vertex_data[index].uv.x, vertex_data[index].uv.y);
-		}
-	}
+	glGenVertexArrays(1, &m_vertex_array_object);
+	glBindVertexArray(m_vertex_array_object);
+
+	GLuint vertex_buffer_object, index_buffer_object;
 
 	glGenBuffers(1, &m_vertex_buffer_object);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer_object);
@@ -147,18 +142,24 @@ Mesh::Mesh(std::string mesh_path) {
 	glGenBuffers(1, &m_index_buffer_object);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_index_buffer_object);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_num_indices*sizeof(GLuint), index_data, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(glm::vec3)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(glm::vec3)+sizeof(glm::vec3)));
+	glEnableVertexAttribArray(2);
+	
+	glBindVertexArray(0);
 }
 
 Mesh::~Mesh() {
+	glDeleteVertexArrays(1, &m_vertex_array_object);
 	glDeleteBuffers(1, &m_vertex_buffer_object);
 	glDeleteBuffers(1, &m_index_buffer_object);
 }
 
-void Mesh::GetVertexBufferObject(GLuint& vertex_buffer_object) {
-	vertex_buffer_object = m_vertex_buffer_object;
-}
-
-void Mesh::GetIndexBufferObject(GLuint& index_buffer_object, GLuint& num_indices) {
-	index_buffer_object = m_index_buffer_object;
+void Mesh::GetVertexArrayObject(GLuint& vertex_array_object, GLuint& num_indices) {
+	vertex_array_object = m_vertex_array_object;
 	num_indices = m_num_indices;
 }

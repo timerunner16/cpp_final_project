@@ -44,9 +44,11 @@ void Window::Clear() {
 void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 	Mesh* mesh = game_object->GetMesh();
 	Shader* shader = game_object->GetShader();
-	GLuint vertex_buffer_object, index_buffer_object, num_indices;
-	mesh->GetVertexBufferObject(vertex_buffer_object);
-	mesh->GetIndexBufferObject(index_buffer_object,num_indices);
+	GLuint vertex_array_object = 0;
+	GLuint num_indices = 0;
+	mesh->GetVertexArrayObject(vertex_array_object, num_indices);
+
+	glBindVertexArray(vertex_array_object);
 
 	glUseProgram(game_object->GetShader()->GetProgramID());
 
@@ -54,25 +56,9 @@ void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 	game_object->GetShader()->UniformMat4("view", camera->GetViewMatrix());
 	game_object->GetShader()->UniformMat4("projection", camera->GetProjectionMatrix());
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(glm::vec3)));
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(glm::vec3)+sizeof(glm::vec3)));
-	
 	glBindTexture(GL_TEXTURE_2D, game_object->GetGLTexture()->GetTextureID());
 
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_object);
-
-	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_INT, NULL);
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(2);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glDrawArrays(GL_TRIANGLES, 0, num_indices);
 
 	glUseProgram(0);
 }

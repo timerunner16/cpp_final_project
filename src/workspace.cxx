@@ -16,14 +16,14 @@ void Workspace::CreateGameObject(std::string name, GameObject* game_object) {
 	m_game_objects.insert(std::make_pair(name, game_object));
 }
 
+std::map<std::string, GameObject*> Workspace::GetGameObjects() {return m_game_objects;}
+
 GameObject* Workspace::GetGameObject(std::string name) {
 	if (m_game_objects.contains(name)) return m_game_objects[name];
 	else return nullptr;
 }
 
-Camera* Workspace::GetCamera() {
-	return m_camera;
-}
+Camera* Workspace::GetCamera() {return m_camera;}
 
 void Workspace::Process() {
 	m_camera->GetTransform().position.x = sin(SDL_GetTicks()/1000.0f)*5.0f;
