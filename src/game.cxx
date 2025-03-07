@@ -15,23 +15,7 @@ Game::Game() {
 	Mesh* mesh = new Mesh("assets/suzanne.obj");
 	Shader* shader = new Shader("assets/basic_vertex.glsl", "assets/basic_frag.glsl");
 	
-	/*m_workspace->CreateGameObject(std::string("Suzanne"), new GameObject{
-		"assets/test.lua",
-		new Mesh(std::string("assets/suzanne.obj")),
-		new Shader(std::string("assets/basic_vertex.glsl"), std::string("assets/basic_frag.glsl")),
-		m_resource_manager->GetGLTexture(std::string("assets/test.png")),
-		Transform{glm::vec3(-1.5f, 0.0f, 0.0f),glm::vec3(0.0f),glm::vec3(1.0f)}
-	});
-
-	m_workspace->CreateGameObject(std::string("Cube"), new GameObject{
-		"",
-		new Mesh(std::string("assets/cube.obj")),
-		new Shader(std::string("assets/basic_vertex.glsl"), std::string("assets/basic_frag.glsl")),
-		m_resource_manager->GetGLTexture(std::string("assets/test.png")),
-		Transform{glm::vec3(1.5f, 0.0f, 0.0f),glm::vec3(0.0f),glm::vec3(1.0f)}
-	});*/
-
-	for (int i = 0; i < 100; i++) {
+	for (int i = 0; i < 500; i++) {
 		m_workspace->CreateGameObject(std::string("testobj_") + std::to_string(i), new GameObject{
 			"",
 			mesh,
