@@ -119,7 +119,6 @@ Mesh::Mesh(std::string mesh_path) {
 	vertex* vertex_data = new vertex[indices.size()];
 	GLuint* index_data = new GLuint[indices.size()];
 	m_num_indices = indices.size();
-	printf("number of indices in model %s is %i\n", mesh_path.c_str(), m_num_indices);
 
 	for (unsigned int i = 0; i < indices.size(); i++) {
 		auto index = std::next(indices.begin(), i);
