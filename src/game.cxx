@@ -11,8 +11,11 @@ Game::Game() {
 	m_workspace = new Workspace(this);
 	m_resource_manager = new ResourceManager();
 	m_should_shutdown = false;
+
+	Mesh* mesh = new Mesh("assets/suzanne.obj");
+	Shader* shader = new Shader("assets/basic_vertex.glsl", "assets/basic_frag.glsl");
 	
-	m_workspace->CreateGameObject(std::string("Suzanne"), new GameObject{
+	/*m_workspace->CreateGameObject(std::string("Suzanne"), new GameObject{
 		"assets/test.lua",
 		new Mesh(std::string("assets/suzanne.obj")),
 		new Shader(std::string("assets/basic_vertex.glsl"), std::string("assets/basic_frag.glsl")),
@@ -26,7 +29,17 @@ Game::Game() {
 		new Shader(std::string("assets/basic_vertex.glsl"), std::string("assets/basic_frag.glsl")),
 		m_resource_manager->GetGLTexture(std::string("assets/test.png")),
 		Transform{glm::vec3(1.5f, 0.0f, 0.0f),glm::vec3(0.0f),glm::vec3(1.0f)}
-	});
+	});*/
+
+	for (int i = 0; i < 100; i++) {
+		m_workspace->CreateGameObject(std::string("testobj_") + std::to_string(i), new GameObject{
+			"",
+			mesh,
+			shader,
+			m_resource_manager->GetGLTexture("assets/test.png"),
+			Transform{glm::ballRand(10.0f), glm::vec3(glm::linearRand(0.0f,(float)M_PI*2.0f), glm::linearRand(0.0f,(float)M_PI*2.0f), glm::linearRand(0.0f,(float)M_PI*2.0f)), glm::vec3(glm::linearRand(0.1f,1.5f))}
+		});
+	}
 
 	while (!m_should_shutdown) {
 		Process();

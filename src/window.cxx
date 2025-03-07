@@ -3,6 +3,7 @@
 #include "game_object.hpp"
 #include "mesh.hpp"
 #include "shader.hpp"
+#include <glm/common.hpp>
 
 Window::Window(Game* game, int width, int height) {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -52,9 +53,11 @@ void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 
 	glUseProgram(game_object->GetShader()->GetProgramID());
 
-	game_object->GetShader()->UniformMat4("model", game_object->GetTransform().GetModelMatrix());
-	game_object->GetShader()->UniformMat4("view", camera->GetViewMatrix());
-	game_object->GetShader()->UniformMat4("projection", camera->GetProjectionMatrix());
+	glm::mat4 model_matrix = game_object->GetTransform().GetModelMatrix();
+	glm::mat4 view_matrix = camera->GetViewMatrix();
+	game_object->GetShader()->UniformMat4("model_view_matrix", view_matrix*model_matrix);
+	game_object->GetShader()->UniformMat4("normal_matrix", glm::transpose(inverse(model_matrix)));
+	game_object->GetShader()->UniformMat4("projection_matrix", camera->GetProjectionMatrix());
 
 	glBindTexture(GL_TEXTURE_2D, game_object->GetGLTexture()->GetTextureID());
 
