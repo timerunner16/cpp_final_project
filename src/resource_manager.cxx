@@ -1,63 +1,50 @@
-#include "resource_manager.hpp"
+#include <memory>
 #include <utility>
-
-GLTexture::GLTexture(std::string texture_path, bool persistent) {
-	SDL_Surface* surface = IMG_Load(texture_path.c_str());
-	SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA8888, 0);
-	
-	glGenTextures(1, &m_texture_id);
-	glBindTexture(GL_TEXTURE_2D, m_texture_id);
-	glTexImage2D(
-		GL_TEXTURE_2D, 0, 4,
-		surface->w, surface->h,
-		0, GL_RGBA, GL_UNSIGNED_BYTE,
-		surface->pixels
-	);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	SDL_FreeSurface(surface);
-
-	m_persistent = persistent;
-}
-
-void GLTexture::SetPersistent(bool persistent) {m_persistent = persistent;}
-
-GLuint GLTexture::GetTextureID() {return m_texture_id;}
-bool GLTexture::GetPersistent() {return m_persistent;}
+#include <SDL2/SDL_image.h>
+#include "resource_manager.hpp"
+#include "mesh.hpp"
+#include "gltexture.hpp"
 
 ResourceManager::ResourceManager() {
 	IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
-	m_gl_texture_map = std::map<std::string, std::shared_ptr<GLTexture>>();
+	m_resource_map = std::map<std::string, std::shared_ptr<GenericResource>>();
 }
 
 ResourceManager::~ResourceManager() {
-	for (auto it = m_gl_texture_map.begin(); it != m_gl_texture_map.end(); it++) {
-		DeleteGLTexture(it->first);
+	for (auto it = m_resource_map.begin(); it != m_resource_map.end(); it++) {
+		DeleteResource(it->first);
 	}
 }
 
-std::shared_ptr<GLTexture> ResourceManager::GetGLTexture(std::string texture_path) {
-	if (m_gl_texture_map.contains(texture_path)) return m_gl_texture_map[texture_path];
+template <class T>
+typename std::enable_if_t<std::constructible_from<T, std::string> && std::is_base_of_v<GenericResource, T>, std::shared_ptr<T>> ResourceManager::GetResource(std::string file_path) {
+	if (m_resource_map.contains(file_path)) {
+		std::shared_ptr<GenericResource> cached_resource = m_resource_map[file_path];
+		if (cached_resource->GetType() == std::string(typeid(T).name())) return std::static_pointer_cast<T, GenericResource>(m_resource_map[file_path]);
+		else {
+			printf("Tried to interpret loaded asset %s with typeid %s as typeid %s.\n", file_path.c_str(), cached_resource->GetType().c_str(), typeid(T).name());
+			return nullptr;
+		}
+	}
 	
-	GLTexture* gl_texture = new GLTexture{texture_path, false};
-	m_gl_texture_map.emplace(std::make_pair(texture_path, gl_texture));
-	return m_gl_texture_map[texture_path];
+	T* resource = new T{file_path};
+	m_resource_map.emplace(std::make_pair(file_path, resource));
+	return std::static_pointer_cast<T, GenericResource>(m_resource_map[file_path]);
 }
 
-void ResourceManager::ClearUnusedGLTextures() {
-	for (auto it = m_gl_texture_map.begin(); it != m_gl_texture_map.end(); it++) {
+template std::shared_ptr<GLTexture> ResourceManager::GetResource<GLTexture>(std::string);
+template std::shared_ptr<Mesh> ResourceManager::GetResource<Mesh>(std::string);
+
+void ResourceManager::ClearUnusedResources() {
+	for (auto it = m_resource_map.begin(); it != m_resource_map.end(); it++) {
 		if (it->second.unique() && !it->second->GetPersistent()) {
-			DeleteGLTexture(it->first);
+			DeleteResource(it->first);
 		}
 	}
 }
 
-void ResourceManager::DeleteGLTexture(std::string texture_path) {
-	if (!m_gl_texture_map.contains(texture_path)) return;
-	
-	GLuint texture_id = m_gl_texture_map[texture_path]->GetTextureID();
-	glDeleteTextures(1, &texture_id);
-	m_gl_texture_map.erase(texture_path);
+void ResourceManager::DeleteResource(std::string texture_path) {
+	if (!m_resource_map.contains(texture_path)) return;
+
+	m_resource_map.erase(texture_path);
 }

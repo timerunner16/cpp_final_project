@@ -9,7 +9,7 @@ extern "C" {
 #include "shader.hpp"
 
 
-GameObject::GameObject(std::string script_path, Mesh* mesh, Shader* shader, 
+GameObject::GameObject(std::string script_path, std::shared_ptr<Mesh> mesh, Shader* shader, 
 		std::shared_ptr<GLTexture> gl_texture, const Transform& transform) {
 	m_script_path = script_path;
 
@@ -45,12 +45,12 @@ void GameObject::Process() {
 	lua_close(L);
 }
 
-void GameObject::SetMesh(Mesh* mesh) {m_mesh = mesh;}
+void GameObject::SetMesh(std::shared_ptr<Mesh> mesh) {m_mesh = mesh;}
 void GameObject::SetShader(Shader* shader) {m_shader = shader;}
 void GameObject::SetGLTexture(std::shared_ptr<GLTexture> gl_texture) {m_gl_texture = gl_texture;}
 void GameObject::SetTransform(const Transform& transform) {m_transform = transform;}
 
-Mesh* GameObject::GetMesh() {return m_mesh;}
+std::shared_ptr<Mesh> GameObject::GetMesh() {return m_mesh;}
 Shader* GameObject::GetShader() {return m_shader;}
 std::shared_ptr<GLTexture> GameObject::GetGLTexture() {return m_gl_texture;}
 Transform& GameObject::GetTransform() {return m_transform;}

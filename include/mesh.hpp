@@ -2,6 +2,7 @@
 #include "GL/glew.h"
 #include <glm/ext.hpp>
 #include <string>
+#include "resource_manager.hpp"
 
 struct vertex {
 	glm::vec3 position;
@@ -9,10 +10,11 @@ struct vertex {
 	glm::vec2 uv;
 };
 
-class Mesh {
+class Mesh : public GenericResource {
 public:
 	Mesh(std::string path);
-	~Mesh();
+
+	void Cleanup();
 
 	void GetVertexArrayObject(GLuint& vertex_array_object, GLuint& num_indices);
 private:

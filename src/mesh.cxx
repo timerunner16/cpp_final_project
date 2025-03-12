@@ -2,8 +2,8 @@
 #include <iterator>
 #include <list>
 #include <vector>
-#include "mesh.hpp"
 #include <glm/ext.hpp>
+#include "mesh.hpp"
 
 enum value_types {
 	UNDEFINED,
@@ -34,6 +34,8 @@ std::vector<std::string> split_string(std::string input, std::string delimiter) 
 }
 
 Mesh::Mesh(std::string mesh_path) {
+	m_type_str = typeid(Mesh).name();
+
 	std::list<glm::vec3> vertex_positions = std::list<glm::vec3>();
 	std::list<glm::vec3> vertex_normals = std::list<glm::vec3>();
 	std::list<glm::vec2> vertex_texture_coordinates = std::list<glm::vec2>();
@@ -152,7 +154,7 @@ Mesh::Mesh(std::string mesh_path) {
 	glBindVertexArray(0);
 }
 
-Mesh::~Mesh() {
+void Mesh::Cleanup() {
 	glDeleteVertexArrays(1, &m_vertex_array_object);
 	glDeleteBuffers(1, &m_vertex_buffer_object);
 	glDeleteBuffers(1, &m_index_buffer_object);

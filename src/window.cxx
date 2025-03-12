@@ -43,7 +43,7 @@ void Window::Clear() {
 }
 
 void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
-	Mesh* mesh = game_object->GetMesh();
+	std::shared_ptr<Mesh> mesh = game_object->GetMesh();
 	Shader* shader = game_object->GetShader();
 	GLuint vertex_array_object = 0;
 	GLuint num_indices = 0;

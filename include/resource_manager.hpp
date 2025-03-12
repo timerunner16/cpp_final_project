@@ -1,22 +1,22 @@
 #pragma once
-#include <GL/glew.h>
-#include <GL/glu.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 #include <string>
 #include <map>
 #include <memory>
+#include <type_traits>
 
-class GLTexture {
+class GenericResource {
 public:
-	GLTexture(std::string texture_path, bool persistent=false);
+	~GenericResource() {Cleanup();};
+
+	virtual void Cleanup() {}
 
 	void SetPersistent(bool persistent);
 
-	GLuint GetTextureID();
-	bool GetPersistent();
+	std::string GetType() {return m_type_str;}
+	bool GetPersistent() {return m_persistent;}
+protected:
+	std::string m_type_str;
 private:
-	GLuint m_texture_id;
 	bool m_persistent;
 };
 
@@ -25,11 +25,12 @@ public:
 	ResourceManager();
 	~ResourceManager();
 
-	void ClearUnusedGLTextures();
+	void ClearUnusedResources();
 
-	std::shared_ptr<GLTexture> GetGLTexture(std::string texture_path);
+	template <class T>
+	typename std::enable_if_t<std::constructible_from<T, std::string> && std::is_base_of_v<GenericResource, T>, std::shared_ptr<T>> GetResource(std::string file_path);
 private:
-	void DeleteGLTexture(std::string texture_path);
+	void DeleteResource(std::string file_path);
 
-	std::map<std::string, std::shared_ptr<GLTexture>> m_gl_texture_map;
+	std::map<std::string, std::shared_ptr<GenericResource>> m_resource_map;
 };

@@ -11,11 +11,12 @@ add_executable(
 	src/game.cxx
 	src/window.cxx
 	src/workspace.cxx
+	src/resource_manager.cxx
 	src/game_object.cxx
 	src/mesh.cxx
 	src/shader.cxx
 	src/camera.cxx
-	src/resource_manager.cxx
+	src/gltexture.cxx
 )
 target_include_directories(cpp_final_project PRIVATE include)
 
