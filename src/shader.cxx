@@ -80,7 +80,7 @@ Shader::Shader(std::string vertex_shader_path, std::string fragment_shader_path)
 	glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &vertex_shader_compiled);
 	if (vertex_shader_compiled != GL_TRUE) {
 		char info_log[512];
-		glGetProgramInfoLog(m_program_id, 512, NULL, info_log);
+		glGetShaderInfoLog(vertex_shader, 512, NULL, info_log);
 		printf("Unable to compile vertex shader!\n%s", info_log);
 	} else glAttachShader(m_program_id, vertex_shader);
 
@@ -92,7 +92,7 @@ Shader::Shader(std::string vertex_shader_path, std::string fragment_shader_path)
 	glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &fragment_shader_compiled);
 	if (fragment_shader_compiled != GL_TRUE) {
 		char info_log[512];
-		glGetProgramInfoLog(m_program_id, 512, NULL, info_log);
+		glGetShaderInfoLog(fragment_shader, 512, NULL, info_log);
 		printf("Unable to compile fragment shader!\n%s", info_log);
 	} else glAttachShader(m_program_id, fragment_shader);
 
@@ -100,7 +100,11 @@ Shader::Shader(std::string vertex_shader_path, std::string fragment_shader_path)
 
 	GLint program_linked = GL_FALSE;
 	glGetProgramiv(m_program_id, GL_LINK_STATUS, &program_linked);
-	if (program_linked != GL_TRUE) printf("Unable to link program!\n");
+	if (program_linked != GL_TRUE) {
+		char info_log[512];
+		glGetProgramInfoLog(m_program_id, 512, NULL, info_log);
+		printf("Unable to link program!\n%s", info_log);
+	}
 
 	glDeleteShader(vertex_shader);
 	glDeleteShader(fragment_shader);

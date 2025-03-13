@@ -14,15 +14,13 @@ Game::Game() {
 
 	Shader* shader = new Shader("assets/basic_vertex.glsl", "assets/basic_frag.glsl");
 	
-	for (int i = 0; i < 500; i++) {
-		m_workspace->CreateGameObject(std::string("testobj_") + std::to_string(i), new GameObject{
-			"",
-			m_resource_manager->GetResource<Mesh>("assets/suzanne.obj"),
-			shader,
-			m_resource_manager->GetResource<GLTexture>("assets/test.png"),
-			Transform{glm::ballRand(10.0f), glm::vec3(glm::linearRand(0.0f,(float)M_PI*2.0f), glm::linearRand(0.0f,(float)M_PI*2.0f), glm::linearRand(0.0f,(float)M_PI*2.0f)), glm::vec3(glm::linearRand(0.1f,1.5f))}
-		});
-	}
+	m_workspace->CreateGameObject(std::string("testobj"), new GameObject{
+		"",
+		m_resource_manager->GetResource<Mesh>("assets/suzanne.obj"),
+		shader,
+		m_resource_manager->GetResource<GLTexture>("assets/test.png"),
+		Transform{glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f)},
+	});
 
 	while (!m_should_shutdown) {
 		Process();
