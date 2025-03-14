@@ -4,6 +4,7 @@
 #include "resource_manager.hpp"
 #include "mesh.hpp"
 #include "gltexture.hpp"
+#include "shader.hpp"
 
 ResourceManager::ResourceManager() {
 	IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
@@ -34,6 +35,7 @@ typename std::enable_if_t<std::constructible_from<T, std::string> && std::is_bas
 
 template std::shared_ptr<GLTexture> ResourceManager::GetResource<GLTexture>(std::string);
 template std::shared_ptr<Mesh> ResourceManager::GetResource<Mesh>(std::string);
+template std::shared_ptr<Shader> ResourceManager::GetResource<Shader>(std::string);
 
 void ResourceManager::ClearUnusedResources() {
 	for (auto it = m_resource_map.begin(); it != m_resource_map.end(); it++) {

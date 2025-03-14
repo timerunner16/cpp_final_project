@@ -3,11 +3,13 @@
 #include <GL/glu.h>
 #include <glm/ext.hpp>
 #include <string>
+#include "resource_manager.hpp"
 
-class Shader {
+class Shader : public GenericResource {
 public:
-	Shader(std::string vertex_shader_path, std::string fragment_shader_path);
-	~Shader();
+	Shader(std::string shader_path);
+	
+	void Cleanup();
 
 	void UniformBool(std::string name, bool value);
 	void UniformInt(std::string name, int value);
@@ -16,6 +18,9 @@ public:
 	void UniformVec3(std::string name, glm::vec3 value);
 	void UniformVec4(std::string name, glm::vec4 value);
 	void UniformMat4(std::string name, glm::mat4 value);
+	void UniformIVec2(std::string name, glm::ivec2 value);
+	void UniformIVec3(std::string name, glm::ivec3 value);
+	void UniformIVec4(std::string name, glm::ivec4 value);
 
 	GLuint GetProgramID();
 private:

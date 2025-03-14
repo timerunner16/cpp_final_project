@@ -1,8 +1,9 @@
 #include "shader.hpp"
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
-const GLchar* default_vertex_shader_source = "#version 330 core\n\
+std::string default_shader_source = "#if VERTEX_SHADER\n\
 \n\
 layout (location=0) in vec3 i_vertex_position;\n\
 layout (location=1) in vec3 i_vertex_normal;\n\
@@ -19,8 +20,10 @@ void main() {\n\
 	gl_Position = projection * view * model * vec4(i_vertex_position, 1.0);\n\
 	normal = i_vertex_normal;\n\
 	texture_coord = i_texture_coord;\n\
-}";
-const GLchar* default_fragment_shader_source = "#version 330 core\n\
+}\n\
+#endif\n\
+\n\
+#ifdef FRAGMENT_SHADER\n\
 \n\
 in vec3 normal;\n\
 in vec2 texture_coord;\n\
@@ -33,47 +36,54 @@ void main() {\n\
 	float lightval = max(dot(normalize(normal), normalize(vec3(1.0, 1.0, 1.0))),0.0);\n\
 	fragment = texture(texture0, texture_coord);\n\
 	fragment.xyz *= lightval;\n\
-}";
+}\n\
+#endif";
 
-Shader::Shader(std::string vertex_shader_path, std::string fragment_shader_path) {
-	std::string vertex_shader_source;
-	std::string fragment_shader_source;
+std::string vertex_defines = "#version 330 core\n\n#define VERTEX_SHADER\n";
+std::string fragment_defines = "#version 330 core\n\n#define FRAGMENT_SHADER\n";
 
-	std::ifstream vertex_shader_source_file;
-	std::ifstream fragment_shader_source_file;
+std::string default_combined_vertex_shader_source = (vertex_defines + default_shader_source);
+std::string default_combined_fragment_shader_source = (fragment_defines + default_shader_source);
 
-	vertex_shader_source_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-	fragment_shader_source_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+Shader::Shader(std::string shader_path) {
+	m_type_str = typeid(Shader).name();
+
+	std::string shader_source;
+
+	std::ifstream shader_source_file;
+
+	shader_source_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	try {
-		vertex_shader_source_file.open(vertex_shader_path);
-		fragment_shader_source_file.open(fragment_shader_path);
+		shader_source_file.open(shader_path);
 
-		std::stringstream vertex_shader_source_stream, fragment_shader_source_stream;
+		std::stringstream shader_source_stream;
 
-		vertex_shader_source_stream << vertex_shader_source_file.rdbuf();
-		fragment_shader_source_stream << fragment_shader_source_file.rdbuf();
+		shader_source_stream << shader_source_file.rdbuf();
 
-		vertex_shader_source_file.close();
-		fragment_shader_source_file.close();
+		shader_source_file.close();
 
-		vertex_shader_source = vertex_shader_source_stream.str();
-		fragment_shader_source = fragment_shader_source_stream.str();
+		shader_source = shader_source_stream.str();
 	} catch (std::ifstream::failure exception) {
-		printf("Unable to read shader files!\n");
+		printf("Unable to read shader file!\n");
 	}
 
-	const GLchar* vertex_shader_source_char;
-	if (!vertex_shader_source.empty()) vertex_shader_source_char = vertex_shader_source.c_str();
-	else vertex_shader_source_char = default_vertex_shader_source;
+	std::string combined_vertex_shader_source = (vertex_defines + shader_source).c_str();
+	const GLchar* vertex_shader_source;
+	if (!shader_source.empty()) vertex_shader_source = combined_vertex_shader_source.c_str();
+	else vertex_shader_source = default_combined_vertex_shader_source.c_str();
 
-	const GLchar* fragment_shader_source_char;
-	if (!fragment_shader_source.empty()) fragment_shader_source_char = fragment_shader_source.c_str();
-	else fragment_shader_source_char = default_fragment_shader_source;
+	std::string combined_fragment_shader_source = (fragment_defines + shader_source).c_str();
+	const GLchar* fragment_shader_source;
+	if (!shader_source.empty()) fragment_shader_source = combined_fragment_shader_source.c_str();
+	else fragment_shader_source = default_combined_fragment_shader_source.c_str();
+
+	printf("vertex shader:\n%s\n", vertex_shader_source);
+	printf("fragment shader:\n%s\n", fragment_shader_source);
 
 	m_program_id = glCreateProgram();
 
 	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertex_shader, 1, &vertex_shader_source_char, NULL);
+	glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
 	glCompileShader(vertex_shader);
 
 	GLint vertex_shader_compiled = GL_FALSE;
@@ -85,7 +95,7 @@ Shader::Shader(std::string vertex_shader_path, std::string fragment_shader_path)
 	} else glAttachShader(m_program_id, vertex_shader);
 
 	GLint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragment_shader, 1, &fragment_shader_source_char, NULL);
+	glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
 	glCompileShader(fragment_shader);
 
 	GLint fragment_shader_compiled = GL_FALSE;
@@ -110,7 +120,7 @@ Shader::Shader(std::string vertex_shader_path, std::string fragment_shader_path)
 	glDeleteShader(fragment_shader);
 }
 
-Shader::~Shader() {
+void Shader::Cleanup() {
 	glDeleteProgram(m_program_id);
 }
 
@@ -129,8 +139,20 @@ void Shader::UniformVec2(std::string name, glm::vec2 value) {
 void Shader::UniformVec3(std::string name, glm::vec3 value) {
 	glUniform3f(glGetUniformLocation(m_program_id, name.c_str()), value.x, value.y, value.z);
 }
+void Shader::UniformVec4(std::string name, glm::vec4 value) {
+	glUniform4f(glGetUniformLocation(m_program_id, name.c_str()), value.x, value.y, value.z, value.w);
+}
 void Shader::UniformMat4(std::string name, glm::mat4 value) {
 	glUniformMatrix4fv(glGetUniformLocation(m_program_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+}
+void Shader::UniformIVec2(std::string name, glm::ivec2 value) {
+	glUniform2i(glGetUniformLocation(m_program_id, name.c_str()), value.x, value.y);
+}
+void Shader::UniformIVec3(std::string name, glm::ivec3 value) {
+	glUniform3i(glGetUniformLocation(m_program_id, name.c_str()), value.x, value.y, value.z);
+}
+void Shader::UniformIVec4(std::string name, glm::ivec4 value) {
+	glUniform4i(glGetUniformLocation(m_program_id, name.c_str()), value.x, value.y, value.z, value.w);
 }
 
 GLuint Shader::GetProgramID() {

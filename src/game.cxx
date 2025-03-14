@@ -7,17 +7,17 @@
 #include "shader.hpp"
 
 Game::Game() {
-	m_window = new Window(this, 1920, 1080);
+	m_window = new Window(this, 1920, 1440, 6);
 	m_workspace = new Workspace(this);
 	m_resource_manager = new ResourceManager();
 	m_should_shutdown = false;
 
-	Shader* shader = new Shader("assets/basic_vertex.glsl", "assets/basic_frag.glsl");
+	m_pp_shader = new Shader("assets/pp_quantize_dither.glsl");
 	
 	m_workspace->CreateGameObject(std::string("testobj"), new GameObject{
 		"",
 		m_resource_manager->GetResource<Mesh>("assets/suzanne.obj"),
-		shader,
+		m_resource_manager->GetResource<Shader>("assets/basic.glsl"),
 		m_resource_manager->GetResource<GLTexture>("assets/test.png"),
 		Transform{glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f)},
 	});
@@ -50,7 +50,7 @@ void Game::Render() {
 	for (auto game_object_pair : m_workspace->GetGameObjects()) {
 		m_window->DrawGameObject(m_workspace->GetCamera(), game_object_pair.second);
 	}
-	m_window->Present();
+	m_window->Present(m_pp_shader);
 }
 
 Window* Game::GetWindow() {
