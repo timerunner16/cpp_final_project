@@ -1,9 +1,9 @@
+#include <glm/common.hpp>
 #include "window.hpp"
 #include "game.hpp"
 #include "game_object.hpp"
 #include "mesh.hpp"
-#include "shader.hpp"
-#include <glm/common.hpp>
+#include "material.hpp"
 
 Window::Window(Game* game, int width, int height, int downscale) {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -93,35 +93,38 @@ void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 	glViewport(0,0,m_width/m_downscale,m_height/m_downscale);
 	
 	std::shared_ptr<Mesh> mesh = game_object->GetMesh();
-	std::shared_ptr<Shader> shader = game_object->GetShader();
 	GLuint vertex_array_object = 0;
 	GLuint num_indices = 0;
 	mesh->GetVertexArrayObject(vertex_array_object, num_indices);
 
 	glBindVertexArray(vertex_array_object);
 
-	glUseProgram(game_object->GetShader()->GetProgramID());
-
 	glm::mat4 model_matrix = game_object->GetTransform().GetModelMatrix();
 	glm::mat4 view_matrix = camera->GetViewMatrix();
-	game_object->GetShader()->UniformMat4("model_view_matrix", view_matrix*model_matrix);
-	game_object->GetShader()->UniformMat4("normal_matrix", glm::transpose(inverse(model_matrix)));
-	game_object->GetShader()->UniformMat4("projection_matrix", camera->GetProjectionMatrix());
+	glm::mat4 model_view_matrix = model_matrix * view_matrix;
+	glm::mat4 normal_matrix = glm::transpose(glm::inverse(model_matrix));
+	glm::mat4 projection_matrix = camera->GetProjectionMatrix();
 
-	glBindTexture(GL_TEXTURE_2D, game_object->GetGLTexture()->GetTextureID());
+	Uniform u_model_view_matrix = Uniform{"model_view_matrix", MAT4, &model_view_matrix};
+	Uniform u_normal_matrix = Uniform{"normal_matrix", MAT4, &normal_matrix};
+	Uniform u_projection_matrix = Uniform{"projection_matrix", MAT4, &projection_matrix};
+	
+	game_object->GetMaterial()->SetUniform(u_model_view_matrix);
+	game_object->GetMaterial()->SetUniform(u_normal_matrix);
+	game_object->GetMaterial()->SetUniform(u_projection_matrix);
+
+	game_object->GetMaterial()->Bind(m_game);
 
 	glDrawArrays(GL_TRIANGLES, 0, num_indices);
-
-	glUseProgram(0);
 }
 
-void Window::Present(Shader* post_process) {
+void Window::Present(Material* pp_material) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0,0,m_width,m_height);
 	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	if (post_process == NULL) {
+	if (pp_material == NULL) {
 		glBlitNamedFramebuffer(m_framebuffer, 0,
 			0, 0, m_width/m_downscale, m_height/m_downscale,
 			0, 0, m_width, m_height,
@@ -131,10 +134,7 @@ void Window::Present(Shader* post_process) {
 	} else {
 		glBindVertexArray(m_pp_vao);
 		
-		glUseProgram(post_process->GetProgramID());
-		
-		post_process->UniformIVec2("window_resolution", glm::ivec2(m_width, m_height));
-		post_process->UniformInt("window_downscale", m_downscale);
+		pp_material->Bind(m_game);
 		
 		glDisable(GL_DEPTH_TEST);
 		glBindTexture(GL_TEXTURE_2D, m_color);
@@ -149,10 +149,6 @@ void Window::Present(Shader* post_process) {
 	SDL_GL_SwapWindow(m_window);
 }
 
-int Window::GetWidth() {
-	return m_width;
-}
-
-int Window::GetHeight() {
-	return m_height;
-}
+int Window::GetWidth() {return m_width;}
+int Window::GetHeight() {return m_height;}
+int Window::GetDownscale() {return m_downscale;}

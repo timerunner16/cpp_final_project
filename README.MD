@@ -34,6 +34,7 @@ The `Renderer` class will handle:
 
 The `Resource Manager` class will handle:
 - loading in assets from storage
+- accessing assets without unnecessary duplicate loading
 - unloading assets from storage when no references are left
 
 The `Workspace` class will handle:
@@ -44,7 +45,7 @@ Game data will be stored through several different classes that represent differ
 
 The `GameObject` class will include:
 - a reference to a `Mesh`
-- a reference to a `Texture`
+- a reference to a `Material`
 - a `Transform`
 - a reference to a lua script with:
 	- an init function (optional)
@@ -57,11 +58,18 @@ and will include:
 - an FOV
 
 The `Mesh` class will include:
-- a reference to a Vertex Buffer Object
-- a reference to an Index Buffer Object
+- a reference to a Vertex Array Object
 
-The `Texture` class will include:
+The `GLTexture` class will include:
 - a reference to a Texture Buffer
+
+The `Material` class will handle:
+- setting of `Uniform`s (global and material)
+- getting of `Uniform`s
+and will include:
+- a reference to a `GLTexture`
+- a reference to a `Shader`
+- a list of `Uniform`s
 
 The `Transform` class will handle:
 - constructing a model matrix from its values
@@ -72,9 +80,14 @@ and will include:
 
 The `Shader` class will handle:
 - generating Programs from vertex and fragment shaders
-- setting shader uniforms
+- setting shader `Uniform`s
 and will include:
 - a reference to its Program
+
+The `Uniform` class will include:
+- a name
+- a data type (INT, VEC3, etc.)
+- data matching the data type
 
 ## Build Process
 This game was designed and programmed on Linux (specifically Ubuntu 24.04), and as such I only have build instructions for Linux.

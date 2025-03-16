@@ -17,6 +17,7 @@ add_executable(
 	src/shader.cxx
 	src/camera.cxx
 	src/gltexture.cxx
+	src/material.cxx
 )
 target_include_directories(cpp_final_project PRIVATE include)
 

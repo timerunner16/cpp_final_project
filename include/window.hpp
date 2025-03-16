@@ -6,7 +6,7 @@
 
 class Game;
 class GameObject;
-class Shader;
+class Material;
 
 class Window {
 public:
@@ -15,10 +15,11 @@ public:
 
 	void Clear();
 	void DrawGameObject(Camera* camera, GameObject* game_object);
-	void Present(Shader* post_process);
+	void Present(Material* pp_material);
 
 	int GetWidth();
 	int GetHeight();
+	int GetDownscale();
 private:
 	Game* m_game;
 	SDL_Window* m_window;

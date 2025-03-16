@@ -77,9 +77,6 @@ Shader::Shader(std::string shader_path) {
 	if (!shader_source.empty()) fragment_shader_source = combined_fragment_shader_source.c_str();
 	else fragment_shader_source = default_combined_fragment_shader_source.c_str();
 
-	printf("vertex shader:\n%s\n", vertex_shader_source);
-	printf("fragment shader:\n%s\n", fragment_shader_source);
-
 	m_program_id = glCreateProgram();
 
 	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);

@@ -10,8 +10,12 @@ uniform mat4 model_view_matrix;
 uniform mat4 normal_matrix;
 uniform mat4 projection_matrix;
 
+uniform ivec2 window_resolution;
+uniform int window_downscale;
+uniform int snap_scale = 4;
+
 void main() {
-	vec2 snapsize = vec2(1920,1080)/16;
+	vec2 snapsize = vec2(window_resolution/window_downscale/snap_scale);
 	vec4 position = projection_matrix * model_view_matrix * vec4(i_vertex_position, 1.0);
 	vec3 ndc = position.xyz/position.w;
 	ndc.xy = floor(ndc.xy * snapsize)/snapsize;

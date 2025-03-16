@@ -1,6 +1,5 @@
 #include <fstream>
 #include <iterator>
-#include <list>
 #include <vector>
 #include <glm/ext.hpp>
 #include "mesh.hpp"
@@ -36,10 +35,10 @@ std::vector<std::string> split_string(std::string input, std::string delimiter) 
 Mesh::Mesh(std::string mesh_path) {
 	m_type_str = typeid(Mesh).name();
 
-	std::list<glm::vec3> vertex_positions = std::list<glm::vec3>();
-	std::list<glm::vec3> vertex_normals = std::list<glm::vec3>();
-	std::list<glm::vec2> vertex_texture_coordinates = std::list<glm::vec2>();
-	std::list<index_group> indices = std::list<index_group>();
+	std::vector<glm::vec3> vertex_positions = std::vector<glm::vec3>();
+	std::vector<glm::vec3> vertex_normals = std::vector<glm::vec3>();
+	std::vector<glm::vec2> vertex_texture_coordinates = std::vector<glm::vec2>();
+	std::vector<index_group> indices = std::vector<index_group>();
 
 	std::ifstream mesh_source_stream(mesh_path.c_str());
 	std::string line;

@@ -3,7 +3,8 @@
 #include "window.hpp"
 #include "workspace.hpp"
 #include "resource_manager.hpp"
-#include "mesh.hpp"
+#include "material.hpp"
+#include "gltexture.hpp"
 #include "shader.hpp"
 
 Game::Game() {
@@ -12,15 +13,19 @@ Game::Game() {
 	m_resource_manager = new ResourceManager();
 	m_should_shutdown = false;
 
-	m_pp_shader = new Shader("assets/pp_quantize_dither.glsl");
-	
-	m_workspace->CreateGameObject(std::string("testobj"), new GameObject{
+	m_pp_material = new Material{std::make_shared<Shader>("assets/pp_quantize_dither.glsl"), m_resource_manager->GetResource<GLTexture>("assets/test.png")};
+
+	m_workspace->CreateGameObject("testobj", new GameObject{
 		"",
 		m_resource_manager->GetResource<Mesh>("assets/suzanne.obj"),
-		m_resource_manager->GetResource<Shader>("assets/basic.glsl"),
-		m_resource_manager->GetResource<GLTexture>("assets/test.png"),
+		std::make_shared<Material>(m_resource_manager->GetResource<Shader>("assets/basic.glsl"), m_resource_manager->GetResource<GLTexture>("assets/test.png")),
 		Transform{glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f)},
 	});
+
+	m_workspace->GetGameObject("testobj")->GetMaterial()->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
+
+	m_global_uniforms["window_resolution"] = Uniform{"window_resolution", IVEC2, (void*)new glm::ivec2{m_window->GetWidth(), m_window->GetHeight()}};
+	m_global_uniforms["window_downscale"] = Uniform{"window_downscale", INT, (void *)new int{m_window->GetDownscale()}};
 
 	while (!m_should_shutdown) {
 		Process();
@@ -50,9 +55,13 @@ void Game::Render() {
 	for (auto game_object_pair : m_workspace->GetGameObjects()) {
 		m_window->DrawGameObject(m_workspace->GetCamera(), game_object_pair.second);
 	}
-	m_window->Present(m_pp_shader);
+	m_window->Present(m_pp_material);
 }
 
 Window* Game::GetWindow() {
 	return m_window;
+}
+
+std::map<std::string, Uniform>* Game::GetGlobalUniforms() {
+	return &m_global_uniforms;
 }

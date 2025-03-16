@@ -18,7 +18,7 @@ uniform sampler2D texture0;
 uniform ivec2 window_resolution;
 uniform int window_downscale;
 
-const vec3 PALETTE_SIZE = vec3(pow(2,3),pow(2,3),pow(2,2));//vec3(pow(2,5), pow(2,6), pow(2,5));
+const vec3 PALETTE_SIZE = vec3(pow(2,5), pow(2,6), pow(2,5));
 
 const int DITHER[16] = int[16](0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5);
 
