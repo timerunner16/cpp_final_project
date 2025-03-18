@@ -16,7 +16,7 @@ Game::Game() {
 	m_pp_material = new Material{std::make_shared<Shader>("assets/pp_quantize_dither.glsl"), m_resource_manager->GetResource<GLTexture>("assets/test.png")};
 
 	m_workspace->CreateGameObject("testobj", new GameObject{
-		"",
+		"assets/test.lua",
 		m_resource_manager->GetResource<Mesh>("assets/suzanne.obj"),
 		std::make_shared<Material>(m_resource_manager->GetResource<Shader>("assets/basic.glsl"), m_resource_manager->GetResource<GLTexture>("assets/test.png")),
 		Transform{glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f)},

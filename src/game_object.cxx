@@ -1,9 +1,7 @@
 extern "C" {
-	#include "lua.h"
 	#include "lualib.h"
 	#include "lauxlib.h"
 }
-
 #include "game_object.hpp"
 
 GameObject::GameObject(std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material, const Transform& transform) {
@@ -13,31 +11,26 @@ GameObject::GameObject(std::string script_path, std::shared_ptr<Mesh> mesh, std:
 	m_material = material;
 	m_transform = transform;
 
-	lua_State* L;
-	L = luaL_newstate();
-	luaL_openlibs(L);
-	luaL_loadfile(L, m_script_path.c_str());
-	lua_pcall(L,0,0,0);
-	lua_getglobal(L, "init");
-	if (lua_isfunction(L,-1)) {
-		lua_pcall(L,0,0,0);
+	m_lua_state = luaL_newstate();
+	luaL_openlibs(m_lua_state);
+	luaL_dofile(m_lua_state, m_script_path.c_str());
+	lua_settop(m_lua_state, 0);
+	lua_getglobal(m_lua_state, "init");
+	if (lua_isfunction(m_lua_state,-1)) {
+		lua_call(m_lua_state,0,0);
 	}
-	lua_close(L);
 }
 
-GameObject::~GameObject() {}
+GameObject::~GameObject() {
+	lua_close(m_lua_state);
+	m_lua_state = nullptr;
+}
 
 void GameObject::Process() {
-	lua_State* L;
-	L = luaL_newstate();
-	luaL_openlibs(L);
-	luaL_loadfile(L, m_script_path.c_str());
-	lua_pcall(L,0,0,0);
-	lua_getglobal(L, "process");
-	if (lua_isfunction(L, -1)) {
-		lua_pcall(L,0,0,0);
+	lua_getglobal(m_lua_state, "process");
+	if (lua_isfunction(m_lua_state,-1)) {
+		lua_call(m_lua_state,0,0);
 	}
-	lua_close(L);
 }
 
 void GameObject::SetMesh(std::shared_ptr<Mesh> mesh) {m_mesh = mesh;}
