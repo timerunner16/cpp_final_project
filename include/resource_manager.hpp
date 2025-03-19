@@ -30,7 +30,5 @@ public:
 	template <class T>
 	typename std::enable_if_t<std::constructible_from<T, std::string> && std::is_base_of_v<GenericResource, T>, std::shared_ptr<T>> GetResource(std::string file_path);
 private:
-	void DeleteResource(std::string file_path);
-
 	std::map<std::string, std::shared_ptr<GenericResource>> m_resource_map;
 };

@@ -12,9 +12,7 @@ ResourceManager::ResourceManager() {
 }
 
 ResourceManager::~ResourceManager() {
-	for (auto it = m_resource_map.begin(); it != m_resource_map.end(); it++) {
-		DeleteResource(it->first);
-	}
+	m_resource_map.clear();
 }
 
 template <class T>
@@ -38,15 +36,8 @@ template std::shared_ptr<Mesh> ResourceManager::GetResource<Mesh>(std::string);
 template std::shared_ptr<Shader> ResourceManager::GetResource<Shader>(std::string);
 
 void ResourceManager::ClearUnusedResources() {
-	for (auto it = m_resource_map.begin(); it != m_resource_map.end(); it++) {
-		if (it->second.unique() && !it->second->GetPersistent()) {
-			DeleteResource(it->first);
-		}
-	}
-}
-
-void ResourceManager::DeleteResource(std::string texture_path) {
-	if (!m_resource_map.contains(texture_path)) return;
-
-	m_resource_map.erase(texture_path);
+	std::erase_if(m_resource_map, [](const auto& item){
+		auto const& [key, val] = item;
+		return (val.unique() && !val->GetPersistent());
+	});
 }
