@@ -10,12 +10,13 @@ class Material;
 
 class Window {
 public:
-	Window(Game* game, int width = 640, int height = 480, int downscale = 2);
+	Window(Game* game, int width = 640, int height = 480, int downscale = 2, bool resizable = false);
 	~Window();
 
 	void Clear();
 	void DrawGameObject(Camera* camera, GameObject* game_object);
 	void Present(Material* pp_material);
+	void Resize(int width, int height, int downscale);
 
 	int GetWidth();
 	int GetHeight();

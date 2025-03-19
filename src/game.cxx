@@ -8,7 +8,7 @@
 #include "shader.hpp"
 
 Game::Game() {
-	m_window = new Window(this, 1920, 1440, 6);
+	m_window = new Window(this, 1920, 1440, 6, true);
 	m_workspace = new Workspace(this);
 	m_resource_manager = new ResourceManager();
 	m_should_shutdown = false;
@@ -45,7 +45,19 @@ Game::~Game() {
 void Game::Process() {
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
-		if (event.type == SDL_QUIT) m_should_shutdown = true;
+		switch (event.type) {
+			case (SDL_QUIT): {
+				m_should_shutdown = true;
+				break;
+			}
+			case (SDL_WINDOWEVENT): {
+				if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+					printf("resizing\n");
+					m_window->Resize(event.window.data1, event.window.data2, m_window->GetDownscale());
+				}
+				break;
+			}
+		}
 	}
 	m_workspace->Process();
 }

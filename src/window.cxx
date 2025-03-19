@@ -5,7 +5,7 @@
 #include "mesh.hpp"
 #include "material.hpp"
 
-Window::Window(Game* game, int width, int height, int downscale) {
+Window::Window(Game* game, int width, int height, int downscale, bool resizable) {
 	SDL_Init(SDL_INIT_VIDEO);
 	
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -14,6 +14,7 @@ Window::Window(Game* game, int width, int height, int downscale) {
 
 	m_game = game;
 	m_window = SDL_CreateWindow("Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	SDL_SetWindowResizable(m_window, resizable ? SDL_TRUE : SDL_FALSE);
 
 	m_context = SDL_GL_CreateContext(m_window);
 	glewExperimental = true;
@@ -29,7 +30,7 @@ Window::Window(Game* game, int width, int height, int downscale) {
 
 	glGenFramebuffers(1, &m_framebuffer);
 	glGenTextures(1, &m_color);
-	glGenRenderbuffers(1, &m_depth);
+	glGenTextures(1, &m_depth);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 	glBindTexture(GL_TEXTURE_2D, m_color);
@@ -42,9 +43,15 @@ Window::Window(Game* game, int width, int height, int downscale) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_color, 0);
 
-	glBindRenderbuffer(GL_RENDERBUFFER, m_depth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width/downscale, height/downscale);
-	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_depth);
+	glBindTexture(GL_TEXTURE_2D, m_depth);
+	glTexImage2D(
+			GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+			width/downscale, height/downscale,
+			0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL
+	);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depth, 0);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glViewport(0,0, width/downscale, height/downscale);
@@ -147,6 +154,45 @@ void Window::Present(Material* pp_material) {
 		glUseProgram(0);
 	}
 	SDL_GL_SwapWindow(m_window);
+}
+
+void Window::Resize(int width, int height, int downscale) {
+	m_width = width;
+	m_height = height;
+	m_downscale = downscale;
+	printf("width:%d,height:%d,downscale:%d\n",m_width,m_height,m_downscale);
+	
+	glDeleteFramebuffers(1, &m_framebuffer);
+	glDeleteTextures(1, &m_color);
+	glDeleteTextures(1, &m_depth);
+
+	glGenFramebuffers(1, &m_framebuffer);
+	glGenTextures(1, &m_color);
+	glGenTextures(1, &m_depth);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
+	glBindTexture(GL_TEXTURE_2D, m_color);
+	glTexImage2D(
+		GL_TEXTURE_2D, 0, GL_RGBA,
+		width/downscale, height/downscale,
+		0, GL_RGBA, GL_UNSIGNED_BYTE, NULL
+	);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_color, 0);
+
+	glBindTexture(GL_TEXTURE_2D, m_depth);
+	glTexImage2D(
+			GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+			width/downscale, height/downscale,
+			0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL
+	);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depth, 0);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glViewport(0,0, width/downscale, height/downscale);
 }
 
 int Window::GetWidth() {return m_width;}
