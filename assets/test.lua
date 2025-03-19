@@ -1,7 +1,10 @@
+x = 0
+
 function init()
 	print("Initialized...")
 end
 
 function process()
-	print("Testing, testing!")
+	x = x + 1
+	print("X = " .. tostring(x))
 end
