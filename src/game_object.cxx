@@ -1,7 +1,3 @@
-extern "C" {
-	#include "lualib.h"
-	#include "lauxlib.h"
-}
 #include "game_object.hpp"
 
 GameObject::GameObject(std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material, const Transform& transform) {
@@ -10,27 +6,19 @@ GameObject::GameObject(std::string script_path, std::shared_ptr<Mesh> mesh, std:
 	m_mesh = mesh;
 	m_material = material;
 	m_transform = transform;
+	
+	m_lua_state = sol::state();
+	m_lua_state.open_libraries(sol::lib::base);
 
-	m_lua_state = luaL_newstate();
-	luaL_openlibs(m_lua_state);
-	luaL_dofile(m_lua_state, m_script_path.c_str());
-	lua_settop(m_lua_state, 0);
-	lua_getglobal(m_lua_state, "init");
-	if (lua_isfunction(m_lua_state,-1)) {
-		lua_call(m_lua_state,0,0);
-	}
+	m_lua_state.script_file(script_path, sol::load_mode::text);
+
+	m_lua_state["init"]();
 }
 
-GameObject::~GameObject() {
-	lua_close(m_lua_state);
-	m_lua_state = nullptr;
-}
+GameObject::~GameObject() {}
 
 void GameObject::Process() {
-	lua_getglobal(m_lua_state, "process");
-	if (lua_isfunction(m_lua_state,-1)) {
-		lua_call(m_lua_state,0,0);
-	}
+	m_lua_state["process"]();
 }
 
 void GameObject::SetMesh(std::shared_ptr<Mesh> mesh) {m_mesh = mesh;}

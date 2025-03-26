@@ -1,8 +1,6 @@
 #pragma once
-extern "C" {
-	#include "lua.h"
-}
-
+#define SOL_ALL_SAFETIES_ON 1
+#include <sol/sol.hpp>
 #include <memory>
 #include <string>
 #include "transform.hpp"
@@ -29,5 +27,5 @@ private:
 	std::shared_ptr<Material> m_material;
 	Transform m_transform;
 
-	lua_State* m_lua_state;
+	sol::state m_lua_state;
 };

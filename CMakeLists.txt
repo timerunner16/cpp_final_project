@@ -52,6 +52,10 @@ target_link_libraries(cpp_final_project PRIVATE GLEW::GLEW)
 target_include_directories(cpp_final_project PRIVATE ${GLEW_INCLUDE_DIRECTORIES})
 
 
+add_subdirectory(third_party)
+target_link_libraries(cpp_final_project PRIVATE sol2::sol2)
+
+
 add_custom_target(
 	copy_assets
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
