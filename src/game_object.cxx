@@ -1,5 +1,7 @@
 #include "game_object.hpp"
 #include "vec3.hpp"
+#include "game.hpp"
+#include "workspace.hpp"
 
 struct game_object_data {
 public:
@@ -20,8 +22,8 @@ public:
 	Transform& get_transform() {return transform;}
 };
 
-GameObject::GameObject(std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material, const Transform& transform) {
-	m_script_path = script_path;
+GameObject::GameObject(Game* game, std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material, const Transform& transform) {
+	m_game = game;
 
 	m_mesh = mesh;
 	m_material = material;
@@ -51,6 +53,8 @@ GameObject::GameObject(std::string script_path, std::shared_ptr<Mesh> mesh, std:
 
 	game_object_data_type["transform"] = sol::property(&GameObject::GetTransform, &GameObject::SetTransform);
 
+	m_lua_state.set_function("GetGameObject", &Workspace::GetGameObject, m_game->GetWorkspace());
+
 	m_lua_state["_GameObject"] = this;
 
 	m_lua_state["init"]();
@@ -61,8 +65,6 @@ GameObject::~GameObject() {}
 
 void GameObject::Process(float delta) {
 	m_lua_process(delta);
-	/*game_object_data result = m_lua_state["_GameObject"];
-	m_transform = result.transform;*/
 }
 
 void GameObject::SetMesh(std::shared_ptr<Mesh> mesh) {m_mesh = mesh;}

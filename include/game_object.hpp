@@ -7,9 +7,11 @@
 #include "mesh.hpp"
 #include "material.hpp"
 
+class Game;
+
 class GameObject {
 public:
-	GameObject(std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material, const Transform& transform);
+	GameObject(Game* game, std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material, const Transform& transform);
 	~GameObject();
 
 	void Process(float delta);
@@ -22,7 +24,8 @@ public:
 	std::shared_ptr<Material> GetMaterial();
 	Transform& GetTransform();
 private:
-	std::string m_script_path;
+	Game* m_game;
+
 	std::shared_ptr<Mesh> m_mesh;
 	std::shared_ptr<Material> m_material;
 	Transform m_transform;

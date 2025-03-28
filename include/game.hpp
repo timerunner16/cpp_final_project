@@ -19,6 +19,8 @@ public:
 	float GetDelta();
 	
 	Window* GetWindow();
+	Workspace* GetWorkspace();
+	ResourceManager* GetResourceManager();
 	std::map<std::string, Uniform>* GetGlobalUniforms();
 private:
 	Window* m_window;

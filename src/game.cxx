@@ -16,14 +16,24 @@ Game::Game() {
 
 	m_pp_material = new Material{std::make_shared<Shader>("assets/pp_quantize_dither.glsl"), m_resource_manager->GetResource<GLTexture>("assets/test.png")};
 
-	m_workspace->CreateGameObject("testobj", new GameObject{
-		"assets/test.lua",
+	m_workspace->CreateGameObject("signal_test", new GameObject{
+		this,
+		"assets/signal_test.lua",
+		m_resource_manager->GetResource<Mesh>("assets/cube.obj"),
+		std::make_shared<Material>(m_resource_manager->GetResource<Shader>("assets/basic.glsl"), m_resource_manager->GetResource<GLTexture>("assets/test.png")),
+		Transform{vec3(-2.0f,0.0f,0.0f), vec3(0.0f), vec3(0.5f)},
+	});
+
+	m_workspace->CreateGameObject("suzanne", new GameObject{
+		this,
+		"assets/suzanne.lua",
 		m_resource_manager->GetResource<Mesh>("assets/suzanne.obj"),
 		std::make_shared<Material>(m_resource_manager->GetResource<Shader>("assets/basic.glsl"), m_resource_manager->GetResource<GLTexture>("assets/test.png")),
 		Transform{vec3(0.0f), vec3(0.0f), vec3(1.0f)},
 	});
-
-	m_workspace->GetGameObject("testobj")->GetMaterial()->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
+	
+	m_workspace->GetGameObject("signal_test")->GetMaterial()->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
+	m_workspace->GetGameObject("suzanne")->GetMaterial()->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
 
 	m_global_uniforms["window_resolution"] = Uniform{"window_resolution", IVEC2, (void*)new glm::ivec2{m_window->GetWidth(), m_window->GetHeight()}};
 	m_global_uniforms["window_downscale"] = Uniform{"window_downscale", INT, (void *)new int{m_window->GetDownscale()}};
@@ -84,9 +94,9 @@ float Game::GetDelta() {
 	return m_delta;
 }
 
-Window* Game::GetWindow() {
-	return m_window;
-}
+Window* Game::GetWindow() {return m_window;}
+Workspace* Game::GetWorkspace() {return m_workspace;}
+ResourceManager* Game::GetResourceManager() {return m_resource_manager;}
 
 std::map<std::string, Uniform>* Game::GetGlobalUniforms() {
 	return &m_global_uniforms;
