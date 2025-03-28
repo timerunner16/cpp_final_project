@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include <chrono>
 #include "material.hpp"
 
 class Window;
@@ -14,6 +15,8 @@ public:
 
 	void Process();
 	void Render();
+
+	float GetDelta();
 	
 	Window* GetWindow();
 	std::map<std::string, Uniform>* GetGlobalUniforms();
@@ -26,4 +29,8 @@ private:
 	std::map<std::string, Uniform> m_global_uniforms;
 
 	bool m_should_shutdown;
+
+	float m_delta;
+	std::chrono::high_resolution_clock::time_point m_tp_a;
+	std::chrono::high_resolution_clock::time_point m_tp_b;
 };

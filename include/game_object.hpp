@@ -12,7 +12,7 @@ public:
 	GameObject(std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material, const Transform& transform);
 	~GameObject();
 
-	void Process();
+	void Process(float delta);
 
 	void SetMesh(std::shared_ptr<Mesh> mesh);
 	void SetMaterial(std::shared_ptr<Material> material);
@@ -28,4 +28,5 @@ private:
 	Transform m_transform;
 
 	sol::state m_lua_state;
+	sol::function m_lua_process;
 };

@@ -1,10 +1,12 @@
-x = 0
+local timer = 0.0
 
 function init()
 	print("Initialized...")
 end
 
-function process()
-	x = x + 1
-	print("X = " .. tostring(x))
+function process(delta)
+	timer = timer + delta
+	_GameObject.transform.scale.x = math.abs(math.sin(timer))
+	_GameObject.transform.rotation.x = timer
+	_GameObject.transform.position.y = math.sin(timer)
 end

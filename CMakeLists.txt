@@ -18,6 +18,7 @@ add_executable(
 	src/camera.cxx
 	src/gltexture.cxx
 	src/material.cxx
+	src/transform.cxx
 )
 target_include_directories(cpp_final_project PRIVATE include)
 

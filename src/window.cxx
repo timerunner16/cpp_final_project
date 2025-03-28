@@ -108,7 +108,7 @@ void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 
 	glm::mat4 model_matrix = game_object->GetTransform().GetModelMatrix();
 	glm::mat4 view_matrix = camera->GetViewMatrix();
-	glm::mat4 model_view_matrix = model_matrix * view_matrix;
+	glm::mat4 model_view_matrix = view_matrix * model_matrix;
 	glm::mat4 normal_matrix = glm::transpose(glm::inverse(model_matrix));
 	glm::mat4 projection_matrix = camera->GetProjectionMatrix();
 

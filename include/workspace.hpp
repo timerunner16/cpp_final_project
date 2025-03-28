@@ -16,7 +16,7 @@ public:
 	GameObject* GetGameObject(std::string name);
 	Camera* GetCamera();
 	
-	void Process();
+	void Process(float delta);
 private:
 	Game* m_game;
 	std::map<std::string, GameObject*> m_game_objects;

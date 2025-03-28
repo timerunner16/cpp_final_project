@@ -1,17 +1,23 @@
 #pragma once
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/euler_angles.hpp>
 #include <glm/ext.hpp>
+#include "vec3.hpp"
 
 class Transform {
 public:
-	glm::vec3 position;
-	glm::vec3 rotation;
-	glm::vec3 scale;
+	vec3 position;
+	vec3 rotation;
+	vec3 scale;
 
-	glm::mat4 GetModelMatrix() {
-		glm::mat4 model_matrix = glm::mat4(1.0f);
-		model_matrix = glm::translate(model_matrix, position);
-		model_matrix *= glm::mat4_cast(glm::quat(rotation));
-		model_matrix = glm::scale(model_matrix, scale);
-		return model_matrix;
-	}
+	void set_position(vec3 position);
+	void set_rotation(vec3 rotation);
+	void set_scale(vec3 scale);
+
+	vec3& get_position();
+	vec3& get_rotation();
+	vec3& get_scale();
+
+	glm::mat4 GetModelMatrix();
+	vec3 GetLookVector();
 };
