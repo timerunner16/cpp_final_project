@@ -13,15 +13,23 @@ Workspace::~Workspace() {
 	m_game = nullptr;
 }
 
-void Workspace::CreateGameObject(std::string name, GameObject* game_object) {
+GameObject* Workspace::CreateGameObject(std::string name, GameObject* parent,
+		std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
+		const Transform& transform) {
+	GameObject* game_object = new GameObject(
+		m_game, name, parent,
+		script_path, mesh, material,
+		transform
+	);
 	m_game_objects.insert(std::make_pair(name, game_object));
+	return m_game_objects[name];
 }
 
 std::map<std::string, GameObject*> Workspace::GetGameObjects() {return m_game_objects;}
 
 GameObject* Workspace::GetGameObject(std::string name) {
 	if (m_game_objects.contains(name)) return m_game_objects[name];
-	else return nullptr;
+	return nullptr;
 }
 
 Camera* Workspace::GetCamera() {return m_camera;}

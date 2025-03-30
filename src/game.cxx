@@ -16,21 +16,24 @@ Game::Game() {
 
 	m_pp_material = new Material{std::make_shared<Shader>("assets/pp_quantize_dither.glsl"), m_resource_manager->GetResource<GLTexture>("assets/test.png")};
 
-	m_workspace->CreateGameObject("signal_test", new GameObject{
-		this,
-		"assets/signal_test.lua",
-		m_resource_manager->GetResource<Mesh>("assets/cube.obj"),
-		std::make_shared<Material>(m_resource_manager->GetResource<Shader>("assets/basic.glsl"), m_resource_manager->GetResource<GLTexture>("assets/test.png")),
-		Transform{vec3(-2.0f,0.0f,0.0f), vec3(0.0f), vec3(0.5f)},
-	});
+	std::shared_ptr<Material> testmat = std::make_shared<Material>(m_resource_manager->GetResource<Shader>("assets/basic.glsl"), m_resource_manager->GetResource<GLTexture>("assets/test.png"));
+	GameObject* root = m_workspace->CreateGameObject(
+		"root", nullptr,
+		"", nullptr, nullptr,
+		Transform()
+	);
 
-	m_workspace->CreateGameObject("suzanne", new GameObject{
-		this,
-		"assets/suzanne.lua",
-		m_resource_manager->GetResource<Mesh>("assets/suzanne.obj"),
-		std::make_shared<Material>(m_resource_manager->GetResource<Shader>("assets/basic.glsl"), m_resource_manager->GetResource<GLTexture>("assets/test.png")),
-		Transform{vec3(0.0f), vec3(0.0f), vec3(1.0f)},
-	});
+	m_workspace->CreateGameObject(
+		"signal_test", m_workspace->GetGameObject("root"),
+		"assets/signal_test.lua", m_resource_manager->GetResource<Mesh>("assets/cube.obj"), testmat,
+		Transform{vec3(-2.0f,0.0f,0.0f), vec3(0.0f), vec3(0.5f)}
+	);
+
+	m_workspace->CreateGameObject(
+		"suzanne", root,
+		"assets/suzanne.lua", m_resource_manager->GetResource<Mesh>("assets/suzanne.obj"), testmat,
+		Transform{vec3(0.0f), vec3(0.0f), vec3(1.0f)}
+	);
 	
 	m_workspace->GetGameObject("signal_test")->GetMaterial()->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
 	m_workspace->GetGameObject("suzanne")->GetMaterial()->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
@@ -70,7 +73,6 @@ void Game::Process() {
 			}
 			case (SDL_WINDOWEVENT): {
 				if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-					printf("resizing\n");
 					m_window->Resize(event.window.data1, event.window.data2, m_window->GetDownscale());
 				}
 				break;
@@ -84,8 +86,10 @@ void Game::Process() {
 
 void Game::Render() {
 	m_window->Clear();
-	for (auto game_object_pair : m_workspace->GetGameObjects()) {
-		m_window->DrawGameObject(m_workspace->GetCamera(), game_object_pair.second);
+	for (auto [key, val] : m_workspace->GetGameObjects()) {
+		if (val->GetMesh() == nullptr) continue;
+		if (val->GetMaterial() == nullptr) {printf("Can't render a mesh without a material!\n"); continue;}
+		m_window->DrawGameObject(m_workspace->GetCamera(), val);
 	}
 	m_window->Present(m_pp_material);
 }

@@ -160,7 +160,6 @@ void Window::Resize(int width, int height, int downscale) {
 	m_width = width;
 	m_height = height;
 	m_downscale = downscale;
-	printf("width:%d,height:%d,downscale:%d\n",m_width,m_height,m_downscale);
 	
 	glDeleteFramebuffers(1, &m_framebuffer);
 	glDeleteTextures(1, &m_color);

@@ -10,7 +10,9 @@ public:
 	Workspace(Game* game);
 	~Workspace();
 	
-	void CreateGameObject(std::string name, GameObject* game_object);
+	GameObject* CreateGameObject(std::string name, GameObject* parent,
+		std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
+		const Transform& transform);
 
 	std::map<std::string, GameObject*> GetGameObjects();
 	GameObject* GetGameObject(std::string name);
