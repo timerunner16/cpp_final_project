@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include <GL/glew.h>
 #include <GL/glu.h>
+#include <memory>
 #include "camera.hpp"
 
 class Game;
@@ -15,7 +16,7 @@ public:
 
 	void Clear();
 	void DrawGameObject(Camera* camera, GameObject* game_object);
-	void Present(Material* pp_material);
+	void Present(std::shared_ptr<Material> pp_material);
 	void Resize(int width, int height, int downscale);
 
 	int GetWidth();

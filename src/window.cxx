@@ -139,7 +139,7 @@ void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 	glDrawArrays(GL_TRIANGLES, 0, num_indices);
 }
 
-void Window::Present(Material* pp_material) {
+void Window::Present(std::shared_ptr<Material> pp_material) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0,0,m_width,m_height);
 	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);

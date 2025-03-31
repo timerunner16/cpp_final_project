@@ -1,15 +1,26 @@
 #include <GL/glew.h>
 #include <GL/glu.h>
+#include <fstream>
 #include "material.hpp"
 #include "shader.hpp"
 #include "gltexture.hpp"
 #include "game.hpp"
 
-Material::Material(std::shared_ptr<Shader> shader, std::shared_ptr<GLTexture> texture) {
-	m_shader = shader;
-	m_texture = texture;
-	
+Material::Material(Game* game, std::string file_path) {
+	std::ifstream infile(file_path);
 	m_uniforms = std::map<std::string, Uniform>();
+	m_shader = nullptr;
+	m_texture = nullptr;
+	std::string line;
+	while (std::getline(infile, line)) {
+		std::string identifier = line.substr(0,line.find(" "));
+		std::string path = line.substr(line.find(" ")+1,line.size());
+		if (identifier == "shader") {
+			m_shader = game->GetResourceManager()->GetResource<Shader>(path);
+		} else if (identifier == "texture") {
+			m_texture = game->GetResourceManager()->GetResource<GLTexture>(path);
+		}
+	}
 }
 
 void Material::Cleanup() {}

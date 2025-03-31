@@ -28,7 +28,7 @@ struct Uniform {
 
 class Material : public GenericResource {
 public:
-	Material(std::shared_ptr<Shader> shader, std::shared_ptr<GLTexture> texture);
+	Material(Game* game, std::string file_path);
 
 	void Cleanup();
 

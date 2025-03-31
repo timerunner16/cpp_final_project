@@ -4,25 +4,17 @@
 #include "workspace.hpp"
 #include "resource_manager.hpp"
 #include "material.hpp"
-#include "gltexture.hpp"
-#include "shader.hpp"
 #include "vec3.hpp"
 
 Game::Game() {
 	m_window = new Window(this, 960, 720, 3, true);
 	m_workspace = new Workspace(this);
-	m_resource_manager = new ResourceManager();
+	m_resource_manager = new ResourceManager(this);
 	m_should_shutdown = false;
 
-	m_pp_material = new Material{
-		m_resource_manager->GetResource<Shader>("assets/pp_quantize_dither.glsl"),
-		m_resource_manager->GetResource<GLTexture>("assets/test.png")
-	};
+	m_pp_material = m_resource_manager->GetResource<Material>("assets/postprocess.mat");
 
-	std::shared_ptr<Material> testmat = std::make_shared<Material>(
-		m_resource_manager->GetResource<Shader>("assets/basic.glsl"),
-		m_resource_manager->GetResource<GLTexture>("assets/test.png")
-	);
+	std::shared_ptr<Material> testmat = m_resource_manager->GetResource<Material>("assets/test.mat");
 	GameObject* root = m_workspace->CreateGameObject(
 		"root", nullptr,
 		"", nullptr, nullptr,
