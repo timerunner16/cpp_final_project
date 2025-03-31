@@ -27,7 +27,7 @@ find_package(glm CONFIG REQUIRED)
 target_link_libraries(cpp_final_project PRIVATE glm::glm)
 
 
-find_package(Lua 5.3 EXACT REQUIRED)
+find_package(Lua 5.4 EXACT REQUIRED)
 target_link_libraries(cpp_final_project PRIVATE ${LUA_LIBRARIES})
 target_include_directories(cpp_final_project PRIVATE ${LUA_INCLUDE_DIR})
 
