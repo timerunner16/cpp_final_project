@@ -23,10 +23,6 @@ add_executable(
 target_include_directories(cpp_final_project PRIVATE include)
 
 
-find_package(glm CONFIG REQUIRED)
-target_link_libraries(cpp_final_project PRIVATE glm::glm)
-
-
 find_package(Lua 5.4 EXACT REQUIRED)
 target_link_libraries(cpp_final_project PRIVATE ${LUA_LIBRARIES})
 target_include_directories(cpp_final_project PRIVATE ${LUA_INCLUDE_DIR})
@@ -55,6 +51,7 @@ target_include_directories(cpp_final_project PRIVATE ${GLEW_INCLUDE_DIRECTORIES}
 
 add_subdirectory(third_party)
 target_link_libraries(cpp_final_project PRIVATE sol2::sol2)
+target_link_libraries(cpp_final_project PRIVATE glm::glm)
 
 
 add_custom_target(
