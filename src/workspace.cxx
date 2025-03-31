@@ -21,8 +21,8 @@ GameObject* Workspace::CreateGameObject(std::string name, GameObject* parent,
 		script_path, mesh, material,
 		transform
 	);
-	m_game_objects.insert(std::make_pair(name, game_object));
-	return m_game_objects[name];
+	if (parent == nullptr) m_game_objects.insert(std::make_pair(name, game_object));
+	return game_object;
 }
 
 std::map<std::string, GameObject*> Workspace::GetGameObjects() {return m_game_objects;}

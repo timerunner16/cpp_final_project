@@ -14,29 +14,35 @@ Game::Game() {
 	m_resource_manager = new ResourceManager();
 	m_should_shutdown = false;
 
-	m_pp_material = new Material{std::make_shared<Shader>("assets/pp_quantize_dither.glsl"), m_resource_manager->GetResource<GLTexture>("assets/test.png")};
+	m_pp_material = new Material{
+		m_resource_manager->GetResource<Shader>("assets/pp_quantize_dither.glsl"),
+		m_resource_manager->GetResource<GLTexture>("assets/test.png")
+	};
 
-	std::shared_ptr<Material> testmat = std::make_shared<Material>(m_resource_manager->GetResource<Shader>("assets/basic.glsl"), m_resource_manager->GetResource<GLTexture>("assets/test.png"));
+	std::shared_ptr<Material> testmat = std::make_shared<Material>(
+		m_resource_manager->GetResource<Shader>("assets/basic.glsl"),
+		m_resource_manager->GetResource<GLTexture>("assets/test.png")
+	);
 	GameObject* root = m_workspace->CreateGameObject(
 		"root", nullptr,
 		"", nullptr, nullptr,
 		Transform()
 	);
 
-	m_workspace->CreateGameObject(
-		"signal_test", m_workspace->GetGameObject("root"),
-		"assets/signal_test.lua", m_resource_manager->GetResource<Mesh>("assets/cube.obj"), testmat,
-		Transform{vec3(-2.0f,0.0f,0.0f), vec3(0.0f), vec3(0.5f)}
-	);
-
-	m_workspace->CreateGameObject(
+	GameObject* suzanne = m_workspace->CreateGameObject(
 		"suzanne", root,
 		"assets/suzanne.lua", m_resource_manager->GetResource<Mesh>("assets/suzanne.obj"), testmat,
 		Transform{vec3(0.0f), vec3(0.0f), vec3(1.0f)}
 	);
 	
-	m_workspace->GetGameObject("signal_test")->GetMaterial()->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
-	m_workspace->GetGameObject("suzanne")->GetMaterial()->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
+	GameObject* signal_test = m_workspace->CreateGameObject(
+		"signal_test", suzanne,
+		"assets/signal_test.lua", m_resource_manager->GetResource<Mesh>("assets/cube.obj"), testmat,
+		Transform{vec3(1.0f,1.0f,0.0f), vec3(0.0f), vec3(0.5f)}
+	);
+
+	suzanne->GetMaterial()->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
+	signal_test->GetMaterial()->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
 
 	m_global_uniforms["window_resolution"] = Uniform{"window_resolution", IVEC2, (void*)new glm::ivec2{m_window->GetWidth(), m_window->GetHeight()}};
 	m_global_uniforms["window_downscale"] = Uniform{"window_downscale", INT, (void *)new int{m_window->GetDownscale()}};
@@ -87,8 +93,6 @@ void Game::Process() {
 void Game::Render() {
 	m_window->Clear();
 	for (auto [key, val] : m_workspace->GetGameObjects()) {
-		if (val->GetMesh() == nullptr) continue;
-		if (val->GetMaterial() == nullptr) {printf("Can't render a mesh without a material!\n"); continue;}
 		m_window->DrawGameObject(m_workspace->GetCamera(), val);
 	}
 	m_window->Present(m_pp_material);

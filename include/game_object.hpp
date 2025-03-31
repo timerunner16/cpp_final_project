@@ -30,6 +30,7 @@ public:
 
 	GameObject* GetParent();
 	GameObject* GetChild(std::string name);
+	std::map<std::string, GameObject*> GetChildren();
 
 	void SetParent(GameObject*);
 

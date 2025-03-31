@@ -96,6 +96,14 @@ void Window::Clear() {
 }
 
 void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
+	if (game_object == nullptr || camera == nullptr) return;
+	for (auto& [key, val] : game_object->GetChildren()) {
+		DrawGameObject(camera, val);
+	}
+	
+	if (game_object->GetMesh() == nullptr) return;
+	if (game_object->GetMaterial() == nullptr) {printf("Can't render a mesh without a material!\n"); return;}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 	glViewport(0,0,m_width/m_downscale,m_height/m_downscale);
 	
@@ -107,6 +115,12 @@ void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 	glBindVertexArray(vertex_array_object);
 
 	glm::mat4 model_matrix = game_object->GetTransform().GetModelMatrix();
+	GameObject* parent = game_object->GetParent();
+	while (parent != nullptr) {
+		glm::mat4 parent_matrix = parent->GetTransform().GetModelMatrix();
+		model_matrix = parent_matrix * model_matrix;
+		parent = parent->GetParent();
+	}
 	glm::mat4 view_matrix = camera->GetViewMatrix();
 	glm::mat4 model_view_matrix = view_matrix * model_matrix;
 	glm::mat4 normal_matrix = glm::transpose(glm::inverse(model_matrix));

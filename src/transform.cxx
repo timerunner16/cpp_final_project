@@ -1,11 +1,22 @@
 #include "transform.hpp"
 
+Transform::Transform() {
+	position = vec3(0.0f);
+	rotation = vec3(0.0f);
+	scale = vec3(1.0f);
+}
+
+Transform::Transform(vec3 position, vec3 rotation, vec3 scale) {
+	this->position = position;
+	this->rotation = rotation;
+	this->scale = scale;
+}
+
 glm::mat4 Transform::GetModelMatrix() {
-	glm::mat4 model_matrix = glm::mat4(1.0f);
-	model_matrix = glm::translate(model_matrix, position);
-	model_matrix = glm::scale(model_matrix, scale);
-	model_matrix *= glm::eulerAngleYXZ(rotation.y, rotation.x, rotation.z);
-	return model_matrix;
+	glm::mat4 translation_mat = glm::translate(glm::mat4(1.0f), position);
+	glm::mat4 rotation_mat = glm::eulerAngleYXZ(rotation.y, rotation.x, rotation.z);
+	glm::mat4 scale_mat = glm::scale(glm::mat4(1.0f), scale);
+	return translation_mat * rotation_mat * scale_mat;
 }
 
 vec3 Transform::GetLookVector() {

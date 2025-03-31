@@ -64,13 +64,15 @@ GameObject::~GameObject() {
 }
 
 void GameObject::Process(float delta) {
-	if (!m_lua_loaded) return;
-	
-	sol::protected_function_result result = m_lua_process(delta);
-	if (!result.valid()) {
-		sol::error error = result;
-		printf("[LUA_ERROR]: %s\n", error.what());
+	if (m_lua_loaded) {
+		sol::protected_function_result result = m_lua_process(delta);
+		if (!result.valid()) {
+			sol::error error = result;
+			printf("[LUA_ERROR]: %s\n", error.what());
+		}
 	}
+
+	for (auto& [key, val] : m_children) {val->Process(delta);}
 }
 
 void GameObject::SetMesh(std::shared_ptr<Mesh> mesh) {m_mesh = mesh;}
@@ -87,6 +89,7 @@ GameObject* GameObject::GetChild(std::string name) {
 	if (m_children.contains(name)) return m_children[name];
 	return nullptr;
 }
+std::map<std::string, GameObject*> GameObject::GetChildren() {return m_children;}
 
 void GameObject::SetParent(GameObject* parent) {
 	if (m_parent != nullptr) {
