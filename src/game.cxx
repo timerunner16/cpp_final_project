@@ -14,27 +14,34 @@ Game::Game() {
 
 	m_pp_material = m_resource_manager->GetResource<Material>("assets/postprocess.mat");
 
-	std::shared_ptr<Material> testmat = m_resource_manager->GetResource<Material>("assets/test.mat");
 	GameObject* root = m_workspace->CreateGameObject(
 		"root", nullptr,
 		"", nullptr, nullptr,
 		Transform()
 	);
+	
+	GameObject* observer = m_workspace->CreateGameObject(
+		"observer", root,
+		"assets/observer.lua", nullptr, nullptr,
+		Transform{}
+	);
 
 	GameObject* suzanne = m_workspace->CreateGameObject(
 		"suzanne", root,
-		"assets/suzanne.lua", m_resource_manager->GetResource<Mesh>("assets/suzanne.obj"), testmat,
+		"assets/suzanne.lua", m_resource_manager->GetResource<Mesh>("assets/suzanne.obj"), m_resource_manager->GetResource<Material>("assets/test.mat"),
 		Transform{vec3(0.0f), vec3(0.0f), vec3(1.0f)}
 	);
-	
-	GameObject* signal_test = m_workspace->CreateGameObject(
-		"signal_test", suzanne,
-		"assets/signal_test.lua", m_resource_manager->GetResource<Mesh>("assets/cube.obj"), testmat,
-		Transform{vec3(1.0f,1.0f,0.0f), vec3(0.0f), vec3(0.5f)}
-	);
+
+	for (int i = 0; i < 10; i++) {
+		GameObject* signal_test = m_workspace->CreateGameObject(
+			"child_" + std::to_string(i), suzanne,
+			"assets/child.lua", m_resource_manager->GetResource<Mesh>("assets/cube.obj"), m_resource_manager->GetResource<Material>("assets/test.mat"),
+			Transform{vec3(glm::linearRand(-3.0f,3.0f), glm::linearRand(-3.0f,3.0f), 0.0f), vec3(0.0f), vec3(0.5f)}
+		);
+	}
 
 	suzanne->GetMaterial()->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
-	signal_test->GetMaterial()->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
+	m_resource_manager->GetResource<Material>("assets/test.mat")->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
 
 	m_global_uniforms["window_resolution"] = Uniform{"window_resolution", IVEC2, (void*)new glm::ivec2{m_window->GetWidth(), m_window->GetHeight()}};
 	m_global_uniforms["window_downscale"] = Uniform{"window_downscale", INT, (void *)new int{m_window->GetDownscale()}};

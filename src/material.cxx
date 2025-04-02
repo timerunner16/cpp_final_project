@@ -7,6 +7,8 @@
 #include "game.hpp"
 
 Material::Material(Game* game, std::string file_path) {
+	m_type_str = typeid(Material).name();
+
 	std::ifstream infile(file_path);
 	m_uniforms = std::map<std::string, Uniform>();
 	m_shader = nullptr;

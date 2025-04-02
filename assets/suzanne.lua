@@ -1,17 +1,12 @@
 local timer = 0.0
-local prefix = "suzanne.lua: "
 
 function init()
-	print("hi ima suzanne")
+	print("hi my name is " .. Engine.CurrentGameObject:GetName())
 end
 
 function process(delta)
 	timer = timer + delta
-	_GameObject.transform.position.y = math.sin(timer)
-	_GameObject.transform.rotation.z = timer
-	if (_GameObject.transform.position.y < 0) then
-		print(prefix .. "im GOING DOWN!!!!!!!!!!!")
-	else
-		print(prefix .. "im GOING UP!!!!!!!!!!!!!")
-	end
+	local self = Engine.CurrentGameObject;
+	self.transform.position.y = math.sin(timer)
+	self.transform.rotation.z = timer
 end

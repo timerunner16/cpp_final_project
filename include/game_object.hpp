@@ -31,6 +31,7 @@ public:
 	GameObject* GetParent();
 	GameObject* GetChild(std::string name);
 	std::map<std::string, GameObject*> GetChildren();
+	sol::as_table_t<std::map<std::string, GameObject*>> GetChildren_Lua();
 
 	void SetParent(GameObject*);
 

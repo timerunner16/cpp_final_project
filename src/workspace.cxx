@@ -26,6 +26,9 @@ GameObject* Workspace::CreateGameObject(std::string name, GameObject* parent,
 }
 
 std::map<std::string, GameObject*> Workspace::GetGameObjects() {return m_game_objects;}
+sol::as_table_t<std::map<std::string, GameObject*>> Workspace::GetGameObjects_Lua() {
+	return (sol::as_table_t<std::map<std::string, GameObject*>>)(m_game_objects);
+}
 
 GameObject* Workspace::GetGameObject(std::string name) {
 	if (m_game_objects.contains(name)) return m_game_objects[name];

@@ -19,6 +19,7 @@ add_executable(
 	src/gltexture.cxx
 	src/material.cxx
 	src/transform.cxx
+	src/lua_usertype_setup.cxx
 )
 target_include_directories(cpp_final_project PRIVATE include)
 

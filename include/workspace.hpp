@@ -16,6 +16,7 @@ public:
 
 	std::map<std::string, GameObject*> GetGameObjects();
 	GameObject* GetGameObject(std::string name);
+	sol::as_table_t<std::map<std::string, GameObject*>> GetGameObjects_Lua();
 	Camera* GetCamera();
 	
 	void Process(float delta);
