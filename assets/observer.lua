@@ -18,8 +18,6 @@ function process(delta)
 
 	camera.transform.rotation.x = -math.atan((average_position.y-camera.transform.position.y)/(average_position.z-camera.transform.position.z))
 	camera.transform.rotation.y = math.atan((average_position.x-camera.transform.position.x)/(average_position.z-camera.transform.position.z))
-	print(average_position.x, average_position.y, average_position.z)
-	print(camera.transform.rotation.x, camera.transform.rotation.y, camera.transform.rotation.z)
 
 	timer = timer + delta
 end
