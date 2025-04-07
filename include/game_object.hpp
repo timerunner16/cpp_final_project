@@ -27,6 +27,7 @@ public:
 	std::shared_ptr<Mesh> GetMesh();
 	std::shared_ptr<Material> GetMaterial();
 	Transform& GetTransform();
+	Transform GetGlobalTransform();
 
 	GameObject* GetParent();
 	GameObject* GetChild(std::string name);

@@ -8,7 +8,7 @@ end
 
 function process(delta)
 	local self = Engine.CurrentGameObject
-	self.transform.rotation = Vector3.new(timer):add(offset)
+	--self.transform.rotation = Vector3.new(timer):add(offset)
 
 	timer = timer + delta
 end

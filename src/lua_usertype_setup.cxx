@@ -1,4 +1,5 @@
 #include "lua_usertype_setup.hpp"
+#include "camera.hpp"
 #include "game.hpp"
 #include "vec3.hpp"
 #include "transform.hpp"
@@ -43,19 +44,24 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 	transform_data_type["rotation"] = sol::property(&Transform::get_rotation, &Transform::set_rotation);
 	transform_data_type["scale"] = sol::property(&Transform::get_scale, &Transform::set_scale);
 
-	sol::usertype<GameObject> game_object_data_type = lua_state.new_usertype<GameObject>("GameObject",
-		sol::constructors<>());
+	sol::usertype<GameObject> game_object_data_type = lua_state.new_usertype<GameObject>("GameObject",sol::no_constructor);
 
 	game_object_data_type["transform"] = sol::property(&GameObject::GetTransform, &GameObject::SetTransform);
+	game_object_data_type["global_transform"] = sol::readonly_property(&GameObject::GetGlobalTransform);
 	game_object_data_type.set_function("GetChild", &GameObject::GetChild);
 	game_object_data_type.set_function("GetChildren", &GameObject::GetChildren_Lua);
 	game_object_data_type.set_function("GetParent", &GameObject::GetParent);
 	game_object_data_type.set_function("GetName", &GameObject::GetName);
 
-	sol::usertype<Workspace> workspace_data_type = lua_state.new_usertype<Workspace>("Workspace", sol::constructors<>());
+	sol::usertype<Camera> camera_data_type = lua_state.new_usertype<Camera>("Camera", sol::no_constructor);
+	
+	camera_data_type["transform"] = sol::property(&Camera::GetTransform, &Camera::SetTransform);
+
+	sol::usertype<Workspace> workspace_data_type = lua_state.new_usertype<Workspace>("Workspace", sol::no_constructor);
 	
 	workspace_data_type.set_function("GetGameObject", &Workspace::GetGameObject);
 	workspace_data_type.set_function("GetGameObjects", &Workspace::GetGameObjects_Lua);
+	workspace_data_type.set_function("GetCamera", &Workspace::GetCamera);
 
 	sol::table engine_globals_table = lua_state.create_named_table("Engine");
 

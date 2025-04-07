@@ -60,6 +60,23 @@ std::string GameObject::GetName() {return m_name;}
 std::shared_ptr<Mesh> GameObject::GetMesh() {return m_mesh;}
 std::shared_ptr<Material> GameObject::GetMaterial() {return m_material;}
 Transform& GameObject::GetTransform() {return m_transform;}
+Transform GameObject::GetGlobalTransform() {
+	glm::mat4 model_matrix = m_transform.GetModelMatrix();
+	GameObject* parent = m_parent;
+	while (parent != nullptr) {
+		glm::mat4 parent_matrix = parent->GetTransform().GetModelMatrix();
+		model_matrix = parent_matrix * model_matrix;
+		parent = parent->GetParent();
+	}
+	vec3 position;
+	vec3 scale;
+	vec3 skew;
+	glm::vec4 perspective;
+	glm::quat orientation;
+	glm::decompose(model_matrix, scale, orientation, position, skew, perspective);
+	glm::vec3 rotation = glm::eulerAngles(orientation);	
+	return Transform{position, vec3(rotation.x, rotation.y, rotation.z), scale};
+}
 
 GameObject* GameObject::GetParent() {return m_parent;}
 GameObject* GameObject::GetChild(std::string name) {

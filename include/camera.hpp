@@ -8,6 +8,8 @@ class Camera {
 public:
 	Camera(Game* game, const Transform& viewpoint, const float& fov);
 
+	void SetTransform(const Transform& transform);
+
 	float& GetFOV();
 	Transform& GetTransform();
 
