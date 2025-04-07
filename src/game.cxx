@@ -6,8 +6,8 @@
 #include "material.hpp"
 #include "vec3.hpp"
 
-Game::Game() {
-	m_window = new Window(this, 960, 720, 3, true);
+Game::Game(int width, int height, int downscale, bool resizable) {
+	m_window = new Window(this, width, height, downscale, resizable);
 	m_workspace = new Workspace(this);
 	m_resource_manager = new ResourceManager(this);
 	m_should_shutdown = false;

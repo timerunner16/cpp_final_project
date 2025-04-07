@@ -10,7 +10,7 @@ class Shader;
 
 class Game {
 public:
-	Game();
+	Game(int width = 320, int height = 240, int downscale = 1, bool resizable = false);
 	~Game();
 
 	void Process();
