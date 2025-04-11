@@ -6,7 +6,7 @@
 Workspace::Workspace(Game* game) {
 	m_game = game;
 
-	m_camera = new Camera(m_game, Transform{vec3(0.0f,0.0f,-5.0f), vec3(0.0f), vec3(1.0f)}, glm::radians(45.0f));
+	m_camera = new Camera(m_game, Transform{vec3(0.0f), vec3(0.0f), vec3(1.0f)}, glm::radians(45.0f));
 }
 
 Workspace::~Workspace() {

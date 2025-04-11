@@ -20,6 +20,8 @@ add_executable(
 	src/material.cxx
 	src/transform.cxx
 	src/lua_usertype_setup.cxx
+	src/input.cxx
+	src/vec.cxx
 )
 target_include_directories(cpp_final_project PRIVATE include)
 

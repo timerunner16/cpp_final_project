@@ -21,6 +21,8 @@ public:
 	vec3& get_rotation();
 	vec3& get_scale();
 
-	glm::mat4 GetModelMatrix();
-	vec3 GetLookVector();
+	glm::mat4 GetModelMatrix() const;
+	vec3 GetLookVector() const;
+	vec3 GetRightVector() const;
+	vec3 GetUpVector() const;
 };

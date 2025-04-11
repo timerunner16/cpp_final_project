@@ -24,12 +24,12 @@ float& Camera::GetFOV() {
 
 glm::mat4 Camera::GetViewMatrix() const {
 	glm::mat4 view_matrix = glm::mat4(1.0f);
-	view_matrix *= glm::eulerAngleYXZ(m_transform.rotation.y, m_transform.rotation.x, m_transform.rotation.z);
-	view_matrix = glm::translate(view_matrix, m_transform.position);
+	view_matrix = glm::eulerAngleZXY(m_transform.rotation.z, m_transform.rotation.x, m_transform.rotation.y) * view_matrix;
+	view_matrix = glm::translate(view_matrix, -m_transform.position);
 	return view_matrix;
 }
 
 glm::mat4 Camera::GetProjectionMatrix() const {
 	float aspect_ratio = (float)m_game->GetWindow()->GetWidth()/(float)m_game->GetWindow()->GetHeight();
-	return glm::perspective(m_fov, aspect_ratio, 0.5f, 512.0f);
+	return glm::perspective(m_fov, aspect_ratio, 0.1f, 512.0f);
 }

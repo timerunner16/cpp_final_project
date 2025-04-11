@@ -6,7 +6,7 @@
 class Window;
 class Workspace;
 class ResourceManager;
-class Shader;
+class InputManager;
 
 class Game {
 public:
@@ -21,11 +21,13 @@ public:
 	Window* GetWindow();
 	Workspace* GetWorkspace();
 	ResourceManager* GetResourceManager();
+	InputManager* GetInputManager();
 	std::map<std::string, Uniform>* GetGlobalUniforms();
 private:
 	Window* m_window;
 	Workspace* m_workspace;
 	ResourceManager* m_resource_manager;
+	InputManager* m_input_manager;
 	
 	std::shared_ptr<Material> m_pp_material;
 

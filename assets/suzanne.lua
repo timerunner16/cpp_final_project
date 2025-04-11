@@ -6,7 +6,4 @@ end
 
 function process(delta)
 	timer = timer + delta
-	local self = Engine.CurrentGameObject;
-	self.transform.position.y = math.sin(timer)
-	self.transform.position.x = math.cos(timer)
 end

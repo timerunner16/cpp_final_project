@@ -3,13 +3,14 @@
 #include "window.hpp"
 #include "workspace.hpp"
 #include "resource_manager.hpp"
-#include "material.hpp"
+#include "input.hpp"
 #include "vec3.hpp"
 
 Game::Game(int width, int height, int downscale, bool resizable) {
 	m_window = new Window(this, width, height, downscale, resizable);
 	m_workspace = new Workspace(this);
 	m_resource_manager = new ResourceManager(this);
+	m_input_manager = new InputManager(this);
 	m_should_shutdown = false;
 
 	m_pp_material = m_resource_manager->GetResource<Material>("assets/postprocess.mat");
@@ -23,7 +24,7 @@ Game::Game(int width, int height, int downscale, bool resizable) {
 	GameObject* observer = m_workspace->CreateGameObject(
 		"observer", root,
 		"assets/observer.lua", nullptr, nullptr,
-		Transform{}
+		Transform{vec3(0.0f,0.0f,5.0f), vec3(0.0f), vec3(1.0f)}
 	);
 
 	GameObject* suzanne = m_workspace->CreateGameObject(
@@ -84,6 +85,7 @@ void Game::Process() {
 			}
 		}
 	}
+	m_input_manager->Update();
 	m_workspace->Process(m_delta);
 
 	m_tp_b = m_tp_a;
@@ -104,6 +106,7 @@ float Game::GetDelta() {
 Window* Game::GetWindow() {return m_window;}
 Workspace* Game::GetWorkspace() {return m_workspace;}
 ResourceManager* Game::GetResourceManager() {return m_resource_manager;}
+InputManager* Game::GetInputManager() {return m_input_manager;}
 
 std::map<std::string, Uniform>* Game::GetGlobalUniforms() {
 	return &m_global_uniforms;
