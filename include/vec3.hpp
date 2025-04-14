@@ -5,7 +5,8 @@ class ivec3;
 
 struct vec3 : public glm::vec3 {
 	using glm::vec3::vec;
-	
+
+	vec3(const glm::vec3& obj);
 	vec3(const ivec3& obj);
 
 	void set_x(float x);
@@ -23,4 +24,9 @@ struct vec3 : public glm::vec3 {
 
 	vec3 mulf(const float& other);
 	vec3 divf(const float& other);
+
+	float length() const;
+	float dot(const vec3& other) const;
+	vec3 unit() const;
+	vec3 cross(const vec3& other) const;
 };

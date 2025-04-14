@@ -42,7 +42,10 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 		"plus", &vec2::add,
 		"minus", &vec2::sub,
 		"times", sol::overload(&vec2::mul, &vec2::mulf),
-		"div", sol::overload(&vec2::div, &vec2::divf)
+		"div", sol::overload(&vec2::div, &vec2::divf),
+		"length", sol::readonly_property(&vec2::length),
+		"unit", sol::readonly_property(&vec2::unit),
+		"dot", &vec2::dot
 	);
 
 	sol::usertype<vec3> vec3_data_type = lua_state.new_usertype<vec3>(
@@ -68,7 +71,10 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 		"plus", &vec3::add,
 		"minus", &vec3::sub,
 		"times", sol::overload(&vec3::mul, &vec3::mulf),
-		"div", sol::overload(&vec3::div, &vec3::divf)
+		"div", sol::overload(&vec3::div, &vec3::divf),
+		"length", sol::readonly_property(&vec3::length),
+		"unit", sol::readonly_property(&vec3::unit),
+		"dot", &vec3::dot
 	);
 
 	sol::usertype<ivec2> ivec2_data_type = lua_state.new_usertype<ivec2>(
@@ -92,8 +98,9 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 		"y", sol::property(&ivec2::get_y, &ivec2::set_y),
 		"plus", &ivec2::add,
 		"minus", &ivec2::sub,
-		"times", &ivec2::mul,
-		"div", &ivec2::div
+		"times", sol::overload(&ivec2::mul, &ivec2::mulf),
+		"div", sol::overload(&ivec2::div, &ivec2::divf),
+		"length", &ivec2::length
 	);
 
 	sol::usertype<ivec3> ivec3_data_type = lua_state.new_usertype<ivec3>(
@@ -119,7 +126,8 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 		"plus", &ivec3::add,
 		"minus", &ivec3::sub,
 		"times", &ivec3::mul,
-		"div", &ivec3::div
+		"div", &ivec3::div,
+		"length", &ivec3::length
 	);
 
 

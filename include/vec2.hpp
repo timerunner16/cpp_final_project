@@ -6,6 +6,7 @@ class ivec2;
 struct vec2 : public glm::vec2 {
 	using glm::vec2::vec;
 
+	vec2(const glm::vec2& obj);
 	vec2(const ivec2& obj);
 
 	void set_x(float x);
@@ -21,4 +22,8 @@ struct vec2 : public glm::vec2 {
 
 	vec2 mulf(const float& other);
 	vec2 divf(const float& other);
+
+	float length() const;
+	float dot(const vec2& other) const;
+	vec2 unit() const;
 };

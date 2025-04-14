@@ -74,8 +74,8 @@ Transform GameObject::GetGlobalTransform() {
 	glm::vec4 perspective;
 	glm::quat orientation;
 	glm::decompose(model_matrix, scale, orientation, position, skew, perspective);
-	glm::vec3 rotation = glm::eulerAngles(orientation);	
-	return Transform{position, vec3(rotation.x, rotation.y, rotation.z), scale};
+	vec3 rotation = glm::eulerAngles(orientation);	
+	return Transform{position, rotation, scale};
 }
 
 GameObject* GameObject::GetParent() {return m_parent;}

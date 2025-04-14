@@ -20,25 +20,22 @@ glm::mat4 Transform::GetModelMatrix() const {
 }
 
 vec3 Transform::GetLookVector() const {
-	glm::vec3 normalized = glm::normalize(glm::vec3{
+	return glm::normalize(vec3{
 	   -glm::cos(rotation.x) * glm::sin(rotation.y),
 		glm::sin(rotation.x),
 	    glm::cos(rotation.x) * glm::cos(rotation.y),
 	});
-	return vec3{normalized.x, normalized.y, normalized.z};
 }
 
 vec3 Transform::GetRightVector() const {
 	vec3 lookvec = GetLookVector();
-	glm::vec3 rightvec = -glm::normalize(glm::cross(lookvec,glm::vec3(0.0f,1.0f,0.0f)));
-	return vec3{rightvec.x, rightvec.y, rightvec.z};
+	return -glm::normalize(glm::cross(lookvec,glm::vec3(0.0f,1.0f,0.0f)));
 }
 
 vec3 Transform::GetUpVector() const {
 	vec3 lookvec = GetLookVector();
-	glm::vec3 rightvec = glm::normalize(glm::cross(lookvec,glm::vec3(0.0f,1.0f,0.0f)));
-	glm::vec3 upvec = glm::normalize(glm::cross(rightvec, lookvec));
-	return vec3{upvec.x, upvec.y, upvec.z};
+	vec3 rightvec = glm::normalize(glm::cross(lookvec,glm::vec3(0.0f,1.0f,0.0f)));
+	return glm::normalize(glm::cross(rightvec, lookvec));
 }
 
 void Transform::set_position(vec3 position) {this->position = position;}
