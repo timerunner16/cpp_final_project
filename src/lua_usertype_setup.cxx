@@ -170,6 +170,10 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 
 	input_manager_data_type.set_function("QueryKey", &InputManager::QueryKey);
 	input_manager_data_type.set_function("QueryMouseButton", &InputManager::QueryMouseButton);
+	
+	input_manager_data_type.set_function("GetAxis", &InputManager::GetAxis);
+	input_manager_data_type.set_function("GetVector", &InputManager::GetVector);
+
 	input_manager_data_type.set_function("GetMousePos", &InputManager::GetMousePos);
 	input_manager_data_type.set_function("GetMouseDelta", &InputManager::GetMouseDelta);
 	

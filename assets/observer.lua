@@ -1,5 +1,4 @@
-local x = 0.0
-local velocity = Vector3.new(0.0)
+-- constants
 local lean = 0.15
 local leanspeed = 8.0
 local speed = 5.0
@@ -8,10 +7,13 @@ local gravity = 20.0
 local k_sensitivity = 2.0
 local m_sensitivity = 3.14
 
+-- properties
 local timer = 0.0
-
+local velocity = Vector3.new(0.0)
 local bobstrength = 0.0
+local x = 0.0
 
+-- object references
 local current
 local camera
 
@@ -28,32 +30,12 @@ function process(delta)
 	end
 
 	local input = Engine.InputManager
-	local input_vector = Vector2.new()
-	if (input:QueryKey(Keys.A).Pressed) then
-		input_vector.x = input_vector.x - 1.0
-	end
-	if (input:QueryKey(Keys.D).Pressed) then
-		input_vector.x = input_vector.x + 1.0
-	end
-	if (input:QueryKey(Keys.W).Pressed) then
-		input_vector.y = input_vector.y - 1.0
-	end
-	if (input:QueryKey(Keys.S).Pressed) then
-		input_vector.y = input_vector.y + 1.0
-	end
+	local input_vector = input:GetVector(Keys.A, Keys.D, Keys.W, Keys.S)
 
-	if (input:QueryKey(Keys.Left).Pressed) then
-		current.transform.rotation.y = current.transform.rotation.y - delta * k_sensitivity
-	end
-	if (input:QueryKey(Keys.Right).Pressed) then
-		current.transform.rotation.y = current.transform.rotation.y + delta * k_sensitivity
-	end
-	if (input:QueryKey(Keys.Up).Pressed) then
-		camera.transform.rotation.x = camera.transform.rotation.x - delta * k_sensitivity
-	end
-	if (input:QueryKey(Keys.Down).Pressed) then
-		camera.transform.rotation.x = camera.transform.rotation.x + delta * k_sensitivity
-	end
+	local key_rotation_vector = input:GetVector(Keys.Left, Keys.Right, Keys.Up, Keys.Down)
+	key_rotation_vector = key_rotation_vector:times(delta):times(k_sensitivity)
+	current.transform.rotation.y = current.transform.rotation.y + key_rotation_vector.x
+	camera.transform.rotation.x = camera.transform.rotation.x + key_rotation_vector.y
 
 	input:SetMouseCaptured(true)
 	local mouse_delta = Vector2.new(input:GetMouseDelta())

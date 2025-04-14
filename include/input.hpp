@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include "ivec2.hpp"
+#include "vec2.hpp"
 
 class Game;
 
@@ -21,6 +22,9 @@ public:
 
 	ButtonState QueryKey(int scancode);	
 	ButtonState QueryMouseButton(int index);
+
+	float GetAxis(int scancode_n, int scancode_p);
+	vec2 GetVector(int scancode_nx, int scancode_px, int scancode_ny, int scancode_py);
 	
 	ivec2 GetMousePos();
 	ivec2 GetMouseDelta();
