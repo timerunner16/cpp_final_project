@@ -72,7 +72,7 @@ Mesh::Mesh(std::string mesh_path) {
 				float v = 0.0f;
 				u = stof(values[0]);
 				v = stof(values[1]);
-				vertex_texture_coordinates.push_back(glm::vec2(u,v));
+				vertex_texture_coordinates.push_back(glm::vec2(u,1.0-v));
 				break;
 			}
 			case (VERTEX_NORMAL): {

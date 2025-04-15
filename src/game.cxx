@@ -29,20 +29,13 @@ Game::Game(int width, int height, int downscale, bool resizable) {
 
 	GameObject* suzanne = m_workspace->CreateGameObject(
 		"suzanne", root,
-		"assets/suzanne.lua", m_resource_manager->GetResource<Mesh>("assets/suzanne.obj"), m_resource_manager->GetResource<Material>("assets/test.mat"),
+		"assets/suzanne.lua", m_resource_manager->GetResource<Mesh>("assets/suzanne.obj"), m_resource_manager->GetResource<Material>("assets/test0.mat"),
 		Transform{vec3(0.0f), vec3(0.0f), vec3(1.0f)}
 	);
 
-	for (int i = 0; i < 10; i++) {
-		GameObject* signal_test = m_workspace->CreateGameObject(
-			"child_" + std::to_string(i), suzanne,
-			"assets/child.lua", m_resource_manager->GetResource<Mesh>("assets/cube.obj"), m_resource_manager->GetResource<Material>("assets/test.mat"),
-			Transform{vec3(glm::linearRand(-3.0f,3.0f), glm::linearRand(-3.0f,3.0f), 0.0f), vec3(0.0f), vec3(0.5f)}
-		);
-	}
-
 	suzanne->GetMaterial()->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
-	m_resource_manager->GetResource<Material>("assets/test.mat")->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
+	m_resource_manager->GetResource<Material>("assets/test0.mat")->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
+	m_resource_manager->GetResource<Material>("assets/test1.mat")->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
 
 	m_global_uniforms["window_resolution"] = Uniform{"window_resolution", IVEC2, (void*)new glm::ivec2{m_window->GetWidth(), m_window->GetHeight()}};
 	m_global_uniforms["window_downscale"] = Uniform{"window_downscale", INT, (void *)new int{m_window->GetDownscale()}};

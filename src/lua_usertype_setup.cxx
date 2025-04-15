@@ -1,6 +1,10 @@
 #include "lua_usertype_setup.hpp"
 #include "camera.hpp"
 #include "game.hpp"
+#include "material.hpp"
+#include "gltexture.hpp"
+#include "resource_manager.hpp"
+#include "shader.hpp"
 #include "vec2.hpp"
 #include "vec3.hpp"
 #include "ivec2.hpp"
@@ -151,11 +155,51 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 	game_object_data_type.set_function("GetChildren", &GameObject::GetChildren_Lua);
 	game_object_data_type.set_function("GetParent", &GameObject::GetParent);
 	game_object_data_type.set_function("GetName", &GameObject::GetName);
+	game_object_data_type.set_function("SetMesh", &GameObject::SetMesh);
+	game_object_data_type.set_function("SetMaterial", &GameObject::SetMaterial);
 
 
 	sol::usertype<Camera> camera_data_type = lua_state.new_usertype<Camera>("Camera", sol::no_constructor);
 	
 	camera_data_type["transform"] = sol::property(&Camera::GetTransform, &Camera::SetTransform);
+
+
+	sol::usertype<Mesh> mesh_data_type = lua_state.new_usertype<Mesh>("Mesh", sol::no_constructor);
+	sol::usertype<GLTexture> texture_data_type = lua_state.new_usertype<GLTexture>("Texture", sol::no_constructor);
+	sol::usertype<Shader> shader_data_type = lua_state.new_usertype<Shader>("Shader", sol::no_constructor);
+	sol::usertype<Uniform> uniform_data_type = lua_state.new_usertype<Uniform>(
+		"Uniform",
+		sol::factories(
+			[](const std::string& name, const bool& data) {
+				return std::make_shared<Uniform>(name, BOOL, (void*)(&data));
+			},
+			[](const std::string& name, const int& data) {
+				return std::make_shared<Uniform>(name, INT, (void*)(&data));
+			},
+			[](const std::string& name, const float& data) {
+				return std::make_shared<Uniform>(name, FLOAT, (void*)(&data));
+			},
+			[](const std::string& name, const vec2& data) {
+				return std::make_shared<Uniform>(name, VEC2, (void*)(&data));
+			},
+			[](const std::string& name, const vec3& data) {
+				return std::make_shared<Uniform>(name, VEC3, (void*)(&data));
+			},
+			[](const std::string& name, const ivec2& data) {
+				return std::make_shared<Uniform>(name, IVEC2, (void*)(&data));
+			},
+			[](const std::string& name, const ivec3& data) {
+				return std::make_shared<Uniform>(name, IVEC3, (void*)(&data));
+			}
+		)
+	);
+
+	sol::usertype<Material> material_data_type = lua_state.new_usertype<Material>("Material",
+		sol::no_constructor,
+		"SetUniform", &Material::SetUniform,
+		"SetTexture", &Material::SetTexture,
+		"SetShader", &Material::SetShader
+	);
 
 
 	sol::usertype<ButtonState> button_state_data_type = lua_state.new_usertype<ButtonState>(
@@ -259,6 +303,16 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 
 	keys_table[sol::metatable_key] = keys_metatable;
 
+	
+	sol::usertype<ResourceManager> resource_manager_data_type = lua_state.new_usertype<ResourceManager>(
+		"ResourceManager",
+		sol::no_constructor,
+		"GetMesh", &ResourceManager::GetResource<Mesh>,
+		"GetMaterial", &ResourceManager::GetResource<Material>,
+		"GetTexture", &ResourceManager::GetResource<GLTexture>,
+		"GetShader", &ResourceManager::GetResource<Shader>
+	);
+
 
 	sol::usertype<Window> window_data_type = lua_state.new_usertype<Window>(
 		"Window",
@@ -281,6 +335,7 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 	engine_globals_metatable["Window"] = game->GetWindow();
 	engine_globals_metatable["Workspace"] = game->GetWorkspace();
 	engine_globals_metatable["InputManager"] = game->GetInputManager();
+	engine_globals_metatable["ResourceManager"] = game->GetResourceManager();
 	engine_globals_metatable["CurrentGameObject"] = game_object;
 
 	engine_globals_metatable[sol::meta_function::new_index] = engine_globals_deny;
