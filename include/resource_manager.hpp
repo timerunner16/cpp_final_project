@@ -16,10 +16,16 @@ public:
 
 	std::string GetType() {return m_type_str;}
 	bool GetPersistent() {return m_persistent;}
+
+	float GetTimeUnused() {return m_time_unused;}
+	void IterateTime(float delta) {m_time_unused += delta;}
+	void ResetTimeUnused() {m_time_unused=0.0f;}
 protected:
 	std::string m_type_str;
 private:
 	bool m_persistent;
+
+	float m_time_unused;
 };
 
 class ResourceManager {

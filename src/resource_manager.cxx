@@ -6,6 +6,7 @@
 #include "gltexture.hpp"
 #include "shader.hpp"
 #include "material.hpp"
+#include "game.hpp"
 
 ResourceManager::ResourceManager(Game* game) {
 	IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
@@ -29,6 +30,7 @@ typename std::enable_if_t<std::constructible_from<T, Game*, std::string> && std:
 	}
 	
 	T* resource = new T{m_game, file_path};
+	resource->ResetTimeUnused();
 	m_resource_map.emplace(std::make_pair(file_path, resource));
 	return std::static_pointer_cast<T, GenericResource>(m_resource_map[file_path]);
 }
@@ -45,6 +47,7 @@ typename std::enable_if_t<std::constructible_from<T, std::string> && std::is_bas
 	}
 	
 	T* resource = new T{file_path};
+	resource->ResetTimeUnused();
 	m_resource_map.emplace(std::make_pair(file_path, resource));
 	return std::static_pointer_cast<T, GenericResource>(m_resource_map[file_path]);
 }
@@ -55,8 +58,12 @@ template std::shared_ptr<Shader> ResourceManager::GetResource<Shader>(std::strin
 template std::shared_ptr<Material> ResourceManager::GetResource<Material>(std::string);
 
 void ResourceManager::ClearUnusedResources() {
+	for (auto& [key, val] : m_resource_map) {
+		if (val.unique() || val->GetPersistent()) val->IterateTime(m_game->GetDelta());
+		else val->ResetTimeUnused();
+	}
 	std::erase_if(m_resource_map, [](const auto& item){
 		auto const& [key, val] = item;
-		return (val.unique() && !val->GetPersistent());
+		return (val->GetTimeUnused() >= 2.0f);
 	});
 }

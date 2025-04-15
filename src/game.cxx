@@ -80,6 +80,7 @@ void Game::Process() {
 	}
 	m_input_manager->Update();
 	m_workspace->Process(m_delta);
+	m_resource_manager->ClearUnusedResources();
 
 	m_tp_b = m_tp_a;
 }
