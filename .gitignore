@@ -37,3 +37,6 @@
 # Project-specific Directories
 build/
 .cache/
+
+# Doombuilder save files
+*.dbs

@@ -318,7 +318,8 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 		"Window",
 		sol::no_constructor,
 		"Width", sol::readonly_property(&Window::GetWidth),
-		"Height", sol::readonly_property(&Window::GetHeight)
+		"Height", sol::readonly_property(&Window::GetHeight),
+		"SetWireframeEnabled", &Window::SetWireframeEnabled
 	);
 	
 

@@ -16,8 +16,10 @@ public:
 
 	void Clear();
 	void DrawGameObject(Camera* camera, GameObject* game_object);
+	void DrawMap(Camera* camera);
 	void Present(std::shared_ptr<Material> pp_material);
 	void Resize(int width, int height, int downscale);
+	void SetWireframeEnabled(bool enabled);
 
 	int GetWidth();
 	int GetHeight();
@@ -30,4 +32,5 @@ private:
 	GLuint m_pp_vao;
 
 	int m_width, m_height, m_downscale;
+	bool m_wireframe;
 };

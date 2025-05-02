@@ -3,6 +3,7 @@
 #include <vector>
 #include <glm/ext.hpp>
 #include "mesh.hpp"
+#include "util.hpp"
 
 enum value_types {
 	UNDEFINED,
@@ -17,20 +18,6 @@ struct index_group {
 	unsigned int texture_coordinate_index;
 	unsigned int normal_index;
 };
-
-std::vector<std::string> split_string(std::string input, std::string delimiter) {
-	std::vector<std::string> output = std::vector<std::string>();
-	std::string remaining_string = input;
-	int pos = remaining_string.find(delimiter);
-	while (pos != std::string::npos) {
-		std::string current = remaining_string.substr(0, pos);
-		output.push_back(current);
-		remaining_string.erase(0,pos+delimiter.size());
-		pos = remaining_string.find(delimiter);
-	}
-	output.push_back(remaining_string);
-	return output;
-}
 
 Mesh::Mesh(std::string mesh_path) {
 	m_type_str = typeid(Mesh).name();
@@ -117,7 +104,7 @@ Mesh::Mesh(std::string mesh_path) {
 		}
 	}
 	
-	vertex* vertex_data = new vertex[indices.size()];
+	mesh_vertex* vertex_data = new mesh_vertex[indices.size()];
 	GLuint* index_data = new GLuint[indices.size()];
 	m_num_indices = indices.size();
 
@@ -127,7 +114,7 @@ Mesh::Mesh(std::string mesh_path) {
 		auto vertex_normal_iter = std::next(vertex_normals.begin(), index->normal_index);
 		auto vertex_texture_coordinate_iter = std::next(vertex_texture_coordinates.begin(), index->texture_coordinate_index);
 		index_data[i] = i;
-		vertex_data[i] = vertex{*vertex_position_iter, *vertex_normal_iter, *vertex_texture_coordinate_iter};
+		vertex_data[i] = mesh_vertex{*vertex_position_iter, *vertex_normal_iter, *vertex_texture_coordinate_iter};
 	}
 
 	glGenVertexArrays(1, &m_vertex_array_object);
@@ -137,17 +124,17 @@ Mesh::Mesh(std::string mesh_path) {
 
 	glGenBuffers(1, &m_vertex_buffer_object);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer_object);
-	glBufferData(GL_ARRAY_BUFFER, m_num_indices*sizeof(vertex), vertex_data, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, m_num_indices*sizeof(mesh_vertex), vertex_data, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &m_index_buffer_object);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_index_buffer_object);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_num_indices*sizeof(GLuint), index_data, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(mesh_vertex), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(glm::vec3)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(mesh_vertex), (void*)(sizeof(glm::vec3)));
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(sizeof(glm::vec3)+sizeof(glm::vec3)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(mesh_vertex), (void*)(sizeof(glm::vec3)+sizeof(glm::vec3)));
 	glEnableVertexAttribArray(2);
 	
 	glBindVertexArray(0);

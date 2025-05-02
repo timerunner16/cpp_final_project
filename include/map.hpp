@@ -1,0 +1,28 @@
+#include <string>
+#include <memory>
+#include <vector>
+#include "GL/glew.h"
+#include "GL/gl.h"
+
+class Material;
+class Game;
+
+struct MapSegmentRenderData {
+	GLuint vao;
+	GLuint vbo;
+	GLuint ibo;
+	GLuint num_indices;
+	std::shared_ptr<Material> material;
+};
+
+class Map {
+public:
+	Map(Game* game, std::string wad_path, std::string mapname);
+	~Map();
+
+	std::vector<MapSegmentRenderData> GetMapSegments();
+private:
+	std::vector<MapSegmentRenderData> m_map_segments;
+
+	Game* m_game;
+};

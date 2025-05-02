@@ -1,9 +1,11 @@
 #include <glm/common.hpp>
+#include <vector>
 #include "window.hpp"
 #include "game.hpp"
 #include "game_object.hpp"
 #include "mesh.hpp"
 #include "material.hpp"
+#include "map.hpp"
 
 Window::Window(Game* game, int width, int height, int downscale, bool resizable) {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -136,7 +138,57 @@ void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 
 	game_object->GetMaterial()->Bind(m_game);
 
+	if (m_wireframe) {
+		glDisable(GL_CULL_FACE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+
 	glDrawArrays(GL_TRIANGLES, 0, num_indices);
+
+	if (m_wireframe) {
+		glEnable(GL_CULL_FACE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+}
+
+void Window::DrawMap(Camera* camera) {
+	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
+	glViewport(0,0,m_width/m_downscale,m_height/m_downscale);
+
+	std::vector<MapSegmentRenderData> map_segments = m_game->GetMap()->GetMapSegments();
+
+	glm::mat4 view_matrix = camera->GetViewMatrix();
+	glm::mat4 model_view_matrix = view_matrix * glm::mat4(1.0f);
+	glm::mat4 normal_matrix = glm::transpose(glm::inverse(glm::mat4(1.0f)));
+	glm::mat4 projection_matrix = camera->GetProjectionMatrix();
+
+	Uniform u_model_view_matrix = Uniform{"model_view_matrix", MAT4, &model_view_matrix};
+	Uniform u_normal_matrix = Uniform{"normal_matrix", MAT4, &normal_matrix};
+	Uniform u_projection_matrix = Uniform{"projection_matrix", MAT4, &projection_matrix};
+	
+	if (m_wireframe) {
+		glDisable(GL_CULL_FACE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+
+	for (MapSegmentRenderData map_segment : map_segments) {
+		if (map_segment.material == nullptr) continue;
+
+		glBindVertexArray(map_segment.vao);
+
+		map_segment.material->SetUniform(u_model_view_matrix);
+		map_segment.material->SetUniform(u_normal_matrix);
+		map_segment.material->SetUniform(u_projection_matrix);
+		
+		map_segment.material->Bind(m_game);
+
+		glDrawArrays(GL_TRIANGLES, 0, map_segment.num_indices);
+	}
+
+	if (m_wireframe) {
+		glEnable(GL_CULL_FACE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 }
 
 void Window::Present(std::shared_ptr<Material> pp_material) {
@@ -206,6 +258,9 @@ void Window::Resize(int width, int height, int downscale) {
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glViewport(0,0, width/downscale, height/downscale);
+}
+void Window::SetWireframeEnabled(bool enabled) {
+	m_wireframe = enabled;
 }
 
 int Window::GetWidth() {return m_width;}

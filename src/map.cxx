@@ -1,0 +1,569 @@
+#include <algorithm>
+#include <cmath>
+#include <tpp_interface.hpp>
+#include "map.hpp"
+#include "game.hpp"
+#include "material.hpp"
+#include "resource_manager.hpp"
+#include "parse_wad.hpp"
+#include "tpp_iterators.hpp"
+#include "util.hpp"
+#include "mesh.hpp"
+#include "vec2.hpp"
+#include "vec3.hpp"
+using namespace tpp;
+
+#define SCALE (32.0f)
+
+struct udmf_vertex {
+	float x;
+	float y;
+
+	udmf_vertex() {
+		x = 0;
+		y = 0;
+	}
+	bool operator==(udmf_vertex obj) const {
+		return obj.x == x && obj.y == y;
+	}
+};
+
+struct udmf_linedef {
+	int v1;
+	int v2;
+	int sidefront;
+	int sideback;
+	bool twosided;
+
+	udmf_linedef() {
+		v1 = 0;
+		v2 = 0;
+		sidefront = -1;
+		sideback = -1;
+		twosided = false;
+	}
+};
+
+struct udmf_sidedef {
+	int offsetx;
+	int offsety;
+	std::string texturetop;
+	std::string texturebottom;
+	std::string texturemiddle;
+	int sector;
+
+	udmf_sidedef() {
+		offsetx = 0;
+		offsety = 0;
+		texturetop = "";
+		texturebottom = "";
+		texturemiddle = "";
+		sector = 0;
+	}
+};
+
+struct udmf_sector {
+	int heightfloor;
+	int heightceiling;
+	std::string texturefloor;
+	std::string textureceiling;
+	int lightlevel;
+
+	udmf_sector() {
+		heightfloor = 0;
+		heightceiling = 0;
+		texturefloor = "";
+		textureceiling = "";
+		lightlevel = 160;
+	}
+};
+
+struct udmf_thing {
+	float x;
+	float y;
+	float height;
+	int angle;
+	std::string data;
+
+	udmf_thing() {
+		x = 0;
+		y = 0;
+		height = 0;
+		angle = 0;
+		data = "";
+	}
+};
+
+struct tri_vertex {
+	float x, y;
+	tri_vertex() {
+		x = y = 0;
+	}
+	tri_vertex(float x, float y) {
+		this->x = x;
+		this->y = y;
+	}
+	bool operator==(tri_vertex obj) const {
+		return obj.x == x && obj.y == y;
+	}
+};
+
+struct tri_edge {
+	tri_vertex v0, v1;
+	tri_edge() {
+		v0 = v1 = tri_vertex();
+	}
+	tri_edge(tri_vertex v0, tri_vertex v1) {
+		this->v0 = v0;
+		this->v1 = v1;
+	}
+	bool operator==(tri_edge obj) const {
+		return obj.v0 == v0 && obj.v1 == v1;
+	}
+};
+
+struct tri_triangle {
+	tri_vertex v0, v1, v2;
+	tri_triangle() {
+		v0 = v1 = v2 = tri_vertex();
+	}
+	tri_triangle(tri_vertex v0, tri_vertex v1, tri_vertex v2) {
+		this->v0 = v0;
+		this->v1 = v1;
+		this->v2 = v2;
+	}
+	bool operator==(tri_triangle obj) const {
+		return obj.v0 == v0 && obj.v1 == v1 && obj.v2 == v2;
+	}
+};
+
+void addmapsegment(std::vector<MapSegmentRenderData>& map_segments, mesh_vertex* vertex_data, GLuint* index_data, const GLuint& num_indices, std::shared_ptr<Material> material) {
+	GLuint vertex_array_object, vertex_buffer_object, index_buffer_object;
+	
+	glGenVertexArrays(1, &vertex_array_object);
+	glBindVertexArray(vertex_array_object);
+	
+	glGenBuffers(1, &vertex_buffer_object);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(mesh_vertex)*num_indices, vertex_data, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &index_buffer_object);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_object);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*num_indices, index_data, GL_STATIC_DRAW);
+	
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(mesh_vertex), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(mesh_vertex), (void*)(sizeof(glm::vec3)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(mesh_vertex), (void*)(sizeof(glm::vec3)+sizeof(glm::vec3)));
+	glEnableVertexAttribArray(2);
+
+	glBindVertexArray(0);
+
+	map_segments.push_back(MapSegmentRenderData{
+		.vao=vertex_array_object,
+		.vbo=vertex_buffer_object,
+		.ibo=index_buffer_object,
+		.num_indices=num_indices,
+		.material=material
+	});
+}
+
+struct vertexloop_t {
+	std::vector<tri_vertex> vertices;
+	float area;
+
+	bool operator<(const vertexloop_t& obj) const {return area < obj.area;}
+};
+
+std::vector<tri_triangle> edges_to_faces(std::vector<tri_edge> edges) {
+	if (edges.size() <= 2) return std::vector<tri_triangle>();
+	
+	std::vector<vertexloop_t> vertexloops(1);
+	while (edges.size() > 0) {
+		tri_vertex start = edges[0].v0;
+		tri_vertex next = edges[0].v1;
+		vertexloops[vertexloops.size()-1].vertices.push_back(start);
+		vertexloops[vertexloops.size()-1].vertices.push_back(next);
+		edges.erase(edges.begin());
+		while (next != start && edges.size() > 0) {
+			for (size_t i = 0; i < edges.size(); i++) {
+				bool found = false;
+				if (edges[i].v0 == next) {
+					next = edges[i].v1;
+					found = true;
+				} else if (edges[i].v1 == next) {
+					next = edges[i].v0;
+					found = true;
+				}
+				if (found) {
+					edges.erase(std::next(edges.begin(), i));
+					break;
+				}
+			}
+			if (next != start) vertexloops[vertexloops.size()-1].vertices.push_back(next);
+		}
+		if (edges.size() > 0) vertexloops.push_back(vertexloop_t());
+	}
+	
+	for (size_t i = 0; i < vertexloops.size(); i++) {
+		vertexloop_t vertexloop = vertexloops[i];
+		std::vector<Delaunay::Point> points;
+		for (auto j : vertexloop.vertices) points.push_back(Delaunay::Point{j.x, j.y});
+		Delaunay generator(points);
+		generator.Triangulate();
+
+		float area = 0.0f;
+		for (FaceIterator fit = generator.fbegin(); fit != generator.fend(); ++fit) {
+			Delaunay::Point p1, p2, p3;
+			int v1 = fit.Org();
+			int v2 = fit.Dest();
+			int v3 = fit.Apex();
+			if (v1 < 0) fit.Org(&p1);
+			else p1 = points[v1];
+			if (v2 < 0) fit.Dest(&p2);
+			else p2 = points[v2];
+			if (v3 < 0) fit.Apex(&p3);
+			else p3 = points[v3];
+
+			tri_triangle triangle(tri_vertex(p1[0],p1[1]), tri_vertex(p2[0],p2[1]), tri_vertex(p3[0],p3[1]));
+			float p01 = sqrt(pow(triangle.v1.x-triangle.v0.x, 2.0) + pow(triangle.v1.y-triangle.v0.y, 2.0));
+			float p12 = sqrt(pow(triangle.v2.x-triangle.v1.x, 2.0) + pow(triangle.v2.y-triangle.v1.y, 2.0));
+			float p02 = sqrt(pow(triangle.v2.x-triangle.v0.x, 2.0) + pow(triangle.v2.y-triangle.v0.y, 2.0));
+			float semiperimeter = (p01+p12+p02)/2;
+			area += sqrt(semiperimeter * (semiperimeter - p01) * (semiperimeter - p12) * (semiperimeter - p02));
+		}
+		vertexloops[i].area = area;
+	}
+
+	std::sort(vertexloops.begin(), vertexloops.end());
+
+	std::vector<Delaunay::Point> points;
+	std::vector<Delaunay::Point> holes;
+	std::vector<int> segments;
+	size_t offset = 0;
+	for (size_t i = 0; i < vertexloops.size(); i++) {
+		vertexloop_t vertexloop = vertexloops[i];
+		if (i < vertexloops.size()-1) {
+			vec2 holecenter = vec2();
+			for (tri_vertex j : vertexloop.vertices) {
+				vec2 point(j.x, j.y);
+				holecenter = holecenter + point/float(vertexloop.vertices.size());
+		}
+			holes.push_back(Delaunay::Point{holecenter.x, holecenter.y});
+		}
+		
+		for (size_t j = 0; j < vertexloop.vertices.size(); j++) {
+			points.push_back(Delaunay::Point{vertexloop.vertices[j].x, vertexloop.vertices[j].y});
+			segments.push_back(offset+j);
+			if (j == vertexloop.vertices.size()-1) segments.push_back(offset);
+			else segments.push_back(offset+j+1);
+		}
+		offset += vertexloop.vertices.size();
+	}
+	
+	Delaunay generator(points);
+	generator.setHolesConstraint(holes);
+	generator.setSegmentConstraint(segments);
+	generator.Triangulate();
+	
+	std::vector<tri_triangle> output;
+	
+	for (FaceIterator fit = generator.fbegin(); fit != generator.fend(); ++fit) {
+		Delaunay::Point p1, p2, p3;
+		int v1 = fit.Org();
+		int v2 = fit.Dest();
+		int v3 = fit.Apex();
+		if (v1 < 0) fit.Org(&p1);
+		else p1 = points[v1];
+		if (v2 < 0) fit.Dest(&p2);
+		else p2 = points[v2];
+		if (v3 < 0) fit.Apex(&p3);
+		else p3 = points[v3];
+
+		if (vec3(0,1,0).unit().dot(vec3(p1[0],0,p1[1])) < 0) {
+			Delaunay::Point temp = p1;
+			p1 = p2;
+			p2 = temp;
+		}
+
+		output.push_back(tri_triangle(tri_vertex(p1[0],p1[1]),tri_vertex(p2[0],p2[1]),tri_vertex(p3[0],p3[1])));
+	}
+
+	return output;
+}
+
+enum editing {
+	UNDEFINED,
+	VERTEX,
+	LINEDEF,
+	SIDEDEF,
+	SECTOR,
+	THING
+};
+
+Map::Map(Game* game, std::string wad_path, std::string mapname) {
+	m_game = game;
+
+	lumpdata mapdata = extract_lump_from_wad(wad_path, mapname, 1);
+	if (!mapdata.successful) return;
+
+	std::vector<udmf_vertex> vertices;
+	std::vector<udmf_linedef> linedefs;
+	std::vector<udmf_sidedef> sidedefs;
+	std::vector<udmf_sector> sectors;
+	std::vector<udmf_thing> things;
+
+	udmf_vertex c_vertex;
+	udmf_linedef c_linedef;
+	udmf_sidedef c_sidedef;
+	udmf_sector c_sector;
+	udmf_thing c_thing;
+
+	editing state = UNDEFINED;
+
+	const char* data_char = (const char*)mapdata.data;
+	std::string data_str(data_char);
+	std::vector<std::string> data = split_string(data_str, "\n");
+	for (auto i : data) {
+		i = trim_trailing_comment(i);
+		i = trim_whitespace(i);
+		std::vector<std::string> split = split_string(i, " ");
+		switch (state) {
+			case UNDEFINED: {
+				std::string tag = split.size() > 0 ? split[0] : "";
+				if (tag == "vertex") state = VERTEX;
+				else if (tag == "linedef") state = LINEDEF;
+				else if (tag == "sidedef") state = SIDEDEF;
+				else if (tag == "sector") state = SECTOR;
+				else if (tag == "thing") state = THING;
+				break;
+			}
+			case VERTEX: {
+				if (split[0] == "x") c_vertex.x=atof(split[2].c_str());
+				else if (split[0] == "y") c_vertex.y=atof(split[2].c_str());
+				else if (split[0] == "}\x0d") {
+					state = UNDEFINED;
+					vertices.push_back(c_vertex);
+					c_vertex = udmf_vertex{};
+				}
+				break;
+			}
+			case LINEDEF: {
+				if (split[0] == "v1") c_linedef.v1=atoi(split[2].c_str());
+				else if (split[0] == "v2") c_linedef.v2=atoi(split[2].c_str());
+				else if (split[0] == "sidefront") c_linedef.sidefront=atoi(split[2].c_str());
+				else if (split[0] == "sideback") c_linedef.sideback=atoi(split[2].c_str());
+				else if (split[0] == "twosided") c_linedef.twosided=(split[2]=="true");
+				else if (split[0] == "}\x0d") {
+					state = UNDEFINED;
+					linedefs.push_back(c_linedef);
+					c_linedef = udmf_linedef{};
+				}
+				break;
+			}
+			case SIDEDEF: {
+				if (split[0] == "offsetx_mid") c_sidedef.offsetx=atoi(split[2].c_str());
+				else if (split[0] == "offsety_mid") c_sidedef.offsety=atoi(split[2].c_str());
+				else if (split[0] == "texturebottom") c_sidedef.texturebottom=trim_whitespace(trim_last(split[2]),"\"");
+				else if (split[0] == "texturetop") c_sidedef.texturetop=trim_whitespace(trim_last(split[2]),"\"");
+				else if (split[0] == "texturemiddle") c_sidedef.texturemiddle=trim_whitespace(trim_last(split[2]),"\"");
+				else if (split[0] == "sector") c_sidedef.sector=atoi(split[2].c_str());
+				else if (split[0] == "}\x0d") {
+					state = UNDEFINED;
+					sidedefs.push_back(c_sidedef);
+					c_sidedef = udmf_sidedef{};
+				}
+				break;
+			}
+			case SECTOR: {
+				if (split[0] == "heightfloor") c_sector.heightfloor=atoi(split[2].c_str());
+				else if (split[0] == "heightceiling") c_sector.heightceiling=atoi(split[2].c_str());
+				else if (split[0] == "texturefloor") c_sector.texturefloor=trim_whitespace(trim_last(split[2]),"\"");
+				else if (split[0] == "textureceiling") c_sector.textureceiling=trim_whitespace(trim_last(split[2]),"\"");
+				else if (split[0] == "lightlevel") c_sector.lightlevel=atoi(split[2].c_str());
+				else if (split[0] == "}\x0d") {
+					state = UNDEFINED;
+					sectors.push_back(c_sector);
+					c_sector = udmf_sector{};
+				}
+				break;
+			}
+			case THING: {
+				if (split[0] == "x") c_thing.x=atof(split[2].c_str());
+				else if (split[0] == "y") c_thing.y=atof(split[2].c_str());
+				else if (split[0] == "height") c_thing.height=atof(split[2].c_str());
+				else if (split[0] == "angle") c_thing.angle=atoi(split[2].c_str());
+				else if (split[0] == "comment") {
+					std::string last("");
+					for (size_t j = 2; j < split.size(); j++) last += split[j];
+					c_thing.data=trim_whitespace(trim_last(last), "\"");
+				}
+				else if (split[0] == "}\x0d") {
+					state = UNDEFINED;
+					things.push_back(c_thing);
+					c_thing = udmf_thing{};
+				}
+				break;
+			}
+		}
+	}
+	
+	m_map_segments = std::vector<MapSegmentRenderData>();
+
+	for (size_t i = 0; i < sectors.size(); i++) {
+		udmf_sector current_sector = sectors[i];
+		std::vector<udmf_sidedef> connected_sidedefs;
+		std::vector<size_t> connected_sidedef_ids;
+		for (size_t j = 0; j < sidedefs.size(); j++) {
+			udmf_sidedef potential_sidedef = sidedefs[j];
+			if (potential_sidedef.sector == i) {
+				connected_sidedefs.push_back(potential_sidedef);
+				connected_sidedef_ids.push_back(j);
+			}
+		}
+		std::vector<udmf_linedef> connected_linedefs;
+		for (size_t j = 0; j < sidedefs.size(); j++) {
+			size_t id = connected_sidedef_ids[j];
+			for (auto potential_linedef : linedefs) {
+				if (potential_linedef.sidefront == id || potential_linedef.sideback == id)
+					connected_linedefs.push_back(potential_linedef);
+			}
+		}
+
+		std::vector<tri_edge> floor_edges;
+
+		int realfloor = current_sector.heightfloor;
+		int realceiling = current_sector.heightceiling;
+
+		for (auto current_linedef : connected_linedefs) {
+			udmf_vertex v1 = vertices[current_linedef.v1];
+			udmf_vertex v2 = vertices[current_linedef.v2];
+			tri_edge new_edge(tri_vertex(v1.x, v1.y), tri_vertex(v2.x, v2.y));
+			bool add = true; for (auto i : floor_edges) if (i == new_edge) add = false;
+			if (add) floor_edges.push_back(tri_edge(tri_vertex(v1.x,v1.y),tri_vertex(v2.x,v2.y)));
+
+			udmf_sidedef current_sidedef;
+			udmf_sidedef alt_sidedef;
+			udmf_sector alt_sector;
+			int midfloor;
+			int midceiling;
+			if (current_linedef.sideback != -1) {
+				if (sidedefs[current_linedef.sidefront].sector == i) {current_sidedef = sidedefs[current_linedef.sidefront]; alt_sidedef = sidedefs[current_linedef.sideback];}
+				else {current_sidedef = sidedefs[current_linedef.sideback]; alt_sidedef = sidedefs[current_linedef.sidefront];}
+				alt_sector = sectors[alt_sidedef.sector];
+				
+				if (current_sector.heightfloor >= alt_sector.heightfloor) midfloor = current_sector.heightfloor;
+				else midfloor = alt_sector.heightfloor;
+				
+				if (current_sector.heightceiling <= alt_sector.heightceiling) midceiling = current_sector.heightceiling;
+				else midceiling = alt_sector.heightceiling;
+			} else {
+				current_sidedef = sidedefs[current_linedef.sidefront];
+				midfloor = current_sector.heightfloor;
+				midceiling = current_sector.heightceiling;
+			}
+			float length = sqrt((v2.x-v1.x)*(v2.x-v1.x) + (v2.y-v1.y)*(v2.y-v1.y));
+
+			float v1u = 0.0f + current_sidedef.offsetx/SCALE;
+			float v2u = length/SCALE + current_sidedef.offsetx/SCALE;
+			
+			float norm_x = -(v2.y-v1.y)/length;
+			float norm_y = (v2.x-v1.x)/length;
+
+			if (!current_sidedef.texturemiddle.empty()) {
+				float lowv = (midfloor+current_sidedef.offsety)/SCALE;
+				float highv = (midceiling+current_sidedef.offsety)/SCALE;
+
+				mesh_vertex vertex_data[6] = {
+					{glm::vec3{v1.x/SCALE,midfloor/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,lowv}},
+					{glm::vec3{v1.x/SCALE,midceiling/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v2.x/SCALE,midfloor/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
+					{glm::vec3{v1.x/SCALE,midceiling/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v2.x/SCALE,midceiling/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,highv}},
+					{glm::vec3{v2.x/SCALE,midfloor/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
+				};
+				GLuint index_data[6] = {
+					0,1,2,
+					4,5,6
+				};
+				
+				addmapsegment(m_map_segments, vertex_data, index_data, 6, m_game->GetResourceManager()->GetResource<Material>("assets/test0.mat"));
+			}
+			if (!current_sidedef.texturebottom.empty() && midfloor > realfloor) {
+				float lowv = (realfloor+current_sidedef.offsety)/SCALE;
+				float highv = (midfloor+current_sidedef.offsety)/SCALE;
+
+				mesh_vertex vertex_data[6] = {
+					{glm::vec3{v1.x/SCALE,realfloor/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,lowv}},
+					{glm::vec3{v1.x/SCALE,midfloor/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v2.x/SCALE,realfloor/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
+					{glm::vec3{v1.x/SCALE,midfloor/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v2.x/SCALE,midfloor/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,highv}},
+					{glm::vec3{v2.x/SCALE,realfloor/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
+				};
+				GLuint index_data[6] = {
+					0,1,2,
+					3,4,5
+				};
+				addmapsegment(m_map_segments, vertex_data, index_data, 6, m_game->GetResourceManager()->GetResource<Material>("assets/test0.mat"));
+			}
+			if (!current_sidedef.texturetop.empty() && midceiling < realceiling) {
+				float lowv = (midceiling+current_sidedef.offsety)/SCALE;
+				float highv = (realceiling+current_sidedef.offsety)/SCALE;
+
+				mesh_vertex vertex_data[6] = {
+					{glm::vec3{v1.x/SCALE,midceiling/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,lowv}},
+					{glm::vec3{v1.x/SCALE,realceiling/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v2.x/SCALE,midceiling/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
+					{glm::vec3{v1.x/SCALE,realceiling/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v2.x/SCALE,realceiling/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,highv}},
+					{glm::vec3{v2.x/SCALE,midceiling/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
+				};
+				GLuint index_data[6] = {
+					0,1,2,
+					4,5,6
+				};
+				addmapsegment(m_map_segments, vertex_data, index_data, 6, m_game->GetResourceManager()->GetResource<Material>("assets/test0.mat"));
+			}
+		}
+		
+		std::vector<tri_triangle> floor_triangles = edges_to_faces(floor_edges);
+
+		mesh_vertex* floor_vertex_data = new mesh_vertex[floor_triangles.size()*3];
+		mesh_vertex* ceiling_vertex_data = new mesh_vertex[floor_triangles.size()*3];
+		GLuint* index_data = new GLuint[floor_triangles.size()*3];
+
+		for (size_t j = 0; j < floor_triangles.size(); j++) {
+			size_t index = j*3;
+			tri_triangle triangle = floor_triangles[j];
+			floor_vertex_data[index] = mesh_vertex{glm::vec3{triangle.v0.x/SCALE, realfloor/SCALE, triangle.v0.y/SCALE}, glm::vec3{0,1,0}, glm::vec2{triangle.v0.x/SCALE,triangle.v0.y/SCALE}};
+			floor_vertex_data[index+1] = mesh_vertex{glm::vec3{triangle.v2.x/SCALE, realfloor/SCALE, triangle.v2.y/SCALE}, glm::vec3{0,1,0}, glm::vec2{triangle.v2.x/SCALE,triangle.v2.y/SCALE}};
+			floor_vertex_data[index+2] = mesh_vertex{glm::vec3{triangle.v1.x/SCALE, realfloor/SCALE, triangle.v1.y/SCALE}, glm::vec3{0,1,0}, glm::vec2{triangle.v1.x/SCALE,triangle.v1.y/SCALE}};
+			ceiling_vertex_data[index] = mesh_vertex{glm::vec3{triangle.v0.x/SCALE, realceiling/SCALE, triangle.v0.y/SCALE}, glm::vec3{0,-1,0}, glm::vec2{triangle.v0.x/SCALE,triangle.v0.y/SCALE}};
+			ceiling_vertex_data[index+1] = mesh_vertex{glm::vec3{triangle.v1.x/SCALE, realceiling/SCALE, triangle.v1.y/SCALE}, glm::vec3{0,-1,0}, glm::vec2{triangle.v1.x/SCALE,triangle.v1.y/SCALE}};
+			ceiling_vertex_data[index+2] = mesh_vertex{glm::vec3{triangle.v2.x/SCALE, realceiling/SCALE, triangle.v2.y/SCALE}, glm::vec3{0,-1,0}, glm::vec2{triangle.v2.x/SCALE,triangle.v2.y/SCALE}};
+			index_data[index] = index;
+			index_data[index+1] = index+1;
+			index_data[index+2] = index+2;
+		}
+
+		addmapsegment(m_map_segments, floor_vertex_data, index_data, floor_triangles.size()*3, m_game->GetResourceManager()->GetResource<Material>("assets/test1.mat"));
+		addmapsegment(m_map_segments, ceiling_vertex_data, index_data, floor_triangles.size()*3, m_game->GetResourceManager()->GetResource<Material>("assets/test1.mat"));
+	}
+}
+
+Map::~Map() {
+	m_game = nullptr;
+
+	for (auto map_segment : m_map_segments) {
+		glDeleteVertexArrays(1, &map_segment.vao);
+		glDeleteBuffers(1, &map_segment.vbo);
+		glDeleteBuffers(1, &map_segment.ibo);
+	}
+	m_map_segments.clear();
+}
+
+std::vector<MapSegmentRenderData> Map::GetMapSegments() {
+	return m_map_segments;
+}

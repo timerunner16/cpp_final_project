@@ -7,6 +7,7 @@ class Window;
 class Workspace;
 class ResourceManager;
 class InputManager;
+class Map;
 
 class Game {
 public:
@@ -22,12 +23,14 @@ public:
 	Workspace* GetWorkspace();
 	ResourceManager* GetResourceManager();
 	InputManager* GetInputManager();
+	Map* GetMap();
 	std::map<std::string, Uniform>* GetGlobalUniforms();
 private:
 	Window* m_window;
 	Workspace* m_workspace;
 	ResourceManager* m_resource_manager;
 	InputManager* m_input_manager;
+	Map* m_map;
 	
 	std::shared_ptr<Material> m_pp_material;
 

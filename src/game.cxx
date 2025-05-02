@@ -4,13 +4,15 @@
 #include "workspace.hpp"
 #include "resource_manager.hpp"
 #include "input.hpp"
-#include "vec3.hpp"
+//#include "vec3.hpp"
+#include "map.hpp"
 
 Game::Game(int width, int height, int downscale, bool resizable) {
 	m_window = new Window(this, width, height, downscale, resizable);
 	m_workspace = new Workspace(this);
 	m_resource_manager = new ResourceManager(this);
 	m_input_manager = new InputManager(this);
+	m_map = new Map(this, "assets/testmap.wad", "MAP01");
 	m_should_shutdown = false;
 
 	m_pp_material = m_resource_manager->GetResource<Material>("assets/postprocess.mat");
@@ -27,13 +29,13 @@ Game::Game(int width, int height, int downscale, bool resizable) {
 		Transform{vec3(0.0f,0.0f,5.0f), vec3(0.0f), vec3(1.0f)}
 	);
 
-	GameObject* suzanne = m_workspace->CreateGameObject(
+	/*GameObject* suzanne = m_workspace->CreateGameObject(
 		"suzanne", root,
 		"assets/suzanne.lua", m_resource_manager->GetResource<Mesh>("assets/suzanne.obj"), m_resource_manager->GetResource<Material>("assets/test0.mat"),
 		Transform{vec3(0.0f), vec3(0.0f), vec3(1.0f)}
-	);
+	);*/
 
-	suzanne->GetMaterial()->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
+	//suzanne->GetMaterial()->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
 	m_resource_manager->GetResource<Material>("assets/test0.mat")->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
 	m_resource_manager->GetResource<Material>("assets/test1.mat")->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
 
@@ -87,6 +89,7 @@ void Game::Process() {
 
 void Game::Render() {
 	m_window->Clear();
+	m_window->DrawMap(m_workspace->GetCamera());
 	for (auto [key, val] : m_workspace->GetGameObjects()) {
 		m_window->DrawGameObject(m_workspace->GetCamera(), val);
 	}
@@ -101,6 +104,7 @@ Window* Game::GetWindow() {return m_window;}
 Workspace* Game::GetWorkspace() {return m_workspace;}
 ResourceManager* Game::GetResourceManager() {return m_resource_manager;}
 InputManager* Game::GetInputManager() {return m_input_manager;}
+Map* Game::GetMap() {return m_map;}
 
 std::map<std::string, Uniform>* Game::GetGlobalUniforms() {
 	return &m_global_uniforms;

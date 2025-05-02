@@ -1,2 +1,2 @@
-shader assets/basic.glsl
+shader assets/basic_nowarp.glsl
 texture assets/test1.png

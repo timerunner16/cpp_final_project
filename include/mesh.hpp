@@ -4,7 +4,7 @@
 #include <string>
 #include "resource_manager.hpp"
 
-struct vertex {
+struct mesh_vertex {
 	glm::vec3 position;
 	glm::vec3 normal;
 	glm::vec2 uv;

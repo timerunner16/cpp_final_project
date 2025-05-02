@@ -22,6 +22,9 @@ add_executable(
 	src/lua_usertype_setup.cxx
 	src/input.cxx
 	src/vec.cxx
+	src/map.cxx
+	src/parse_wad.cxx
+	src/util.cxx
 )
 target_include_directories(cpp_final_project PRIVATE include)
 
@@ -55,6 +58,7 @@ target_include_directories(cpp_final_project PRIVATE ${GLEW_INCLUDE_DIRECTORIES}
 add_subdirectory(third_party)
 target_link_libraries(cpp_final_project PRIVATE sol2::sol2)
 target_link_libraries(cpp_final_project PRIVATE glm::glm)
+target_link_libraries(cpp_final_project PRIVATE TrianglePP)
 
 
 add_custom_target(

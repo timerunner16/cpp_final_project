@@ -1,2 +1,2 @@
 shader assets/pp_quantize_dither.glsl
-texture assets/test.png
+texture assets/test0.png

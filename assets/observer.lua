@@ -12,6 +12,7 @@ local timer = 0.0
 local velocity = Vector3.new(0.0)
 local bobstrength = 0.0
 local x = 0.0
+local wireframe = false
 
 -- object references
 local current
@@ -30,6 +31,12 @@ function process(delta)
 	end
 
 	local input = Engine.InputManager
+	local tab = input:QueryKey(Keys.Tab)
+	if (tab.Pressed and tab.OnEdge) then
+		wireframe = not wireframe
+		Engine.Window:SetWireframeEnabled(wireframe)
+	end
+
 	local input_vector = input:GetVector(Keys.A, Keys.D, Keys.W, Keys.S)
 
 	local key_rotation_vector = input:GetVector(Keys.Left, Keys.Right, Keys.Up, Keys.Down)
@@ -76,5 +83,5 @@ function process(delta)
 	local alignment = velocity_flat:dot(lookvec_flat)
 	target_bobstrength = target_bobstrength * alignment
 	bobstrength = bobstrength + (target_bobstrength - bobstrength) * delta * 4.0
-	camera.transform.position.y = camera.transform.position.y + math.sin(timer * 8.0) * 0.05 * bobstrength
+	camera.transform.position.y = camera.transform.position.y + math.sin(timer * 8.0) * 0.05 * bobstrength + 1.0
 end
