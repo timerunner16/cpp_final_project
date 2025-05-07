@@ -11,7 +11,7 @@ class Map;
 
 class Game {
 public:
-	Game(int width = 320, int height = 240, int downscale = 1, bool resizable = false);
+	Game(std::string wad_path = "assets/testmap.wad", int width = 320, int height = 240, int downscale = 1, bool resizable = false);
 	~Game();
 
 	void Process();
@@ -25,12 +25,14 @@ public:
 	InputManager* GetInputManager();
 	Map* GetMap();
 	std::map<std::string, Uniform>* GetGlobalUniforms();
+	std::string GetWADPath();
 private:
 	Window* m_window;
 	Workspace* m_workspace;
 	ResourceManager* m_resource_manager;
 	InputManager* m_input_manager;
 	Map* m_map;
+	std::string m_wad_path;
 	
 	std::shared_ptr<Material> m_pp_material;
 

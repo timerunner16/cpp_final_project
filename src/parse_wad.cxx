@@ -16,6 +16,7 @@ std::string _8xU8tostr(uint8_t a, uint8_t b, uint8_t c, uint8_t d,
 	i += std::string(1,(char)f);
 	i += std::string(1,(char)g);
 	i += std::string(1,(char)h);
+	i = i.substr(0, i.find_first_of((char)0x00));
 	return i;
 }
 
@@ -26,7 +27,7 @@ uint32_t _4xU8to1xU32(uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
 			 (uint32_t)a);
 }
 
-lumpdata extract_lump_from_wad(std::string wad_path, std::string lumpname, int advance) {
+lumpdata extract_lump_from_wad(std::string wad_path, std::string lumpname, std::string marker, bool ignore_not_found, int advance) {
 	std::vector<uint8_t> binary(0);
 
 	std::ifstream file(wad_path, std::ios::binary);
@@ -38,8 +39,6 @@ lumpdata extract_lump_from_wad(std::string wad_path, std::string lumpname, int a
 		printf("Error: invalid lumpname \"%s\", lumpname must be at most 8 characters\n", lumpname.c_str());
 		return BAD_LUMP_DATA;
 	}
-
-	for (size_t i = lumpname.size(); i < 8; i++) lumpname += std::string(1, (char)0x00);
 
 	file.unsetf(std::ios::skipws);
 
@@ -67,7 +66,7 @@ lumpdata extract_lump_from_wad(std::string wad_path, std::string lumpname, int a
 	
 	std::vector<lumpinfo> lumps(0);
 	size_t i = dirpointer;
-	while (i < buf.size()) {
+	while (i < dirpointer + 16*lumpnumber) {
 		lumps.push_back(lumpinfo{
 			_4xU8to1xU32(buf[i+0x0], buf[i+0x1], buf[i+0x2], buf[i+0x3]),
 			_4xU8to1xU32(buf[i+0x4], buf[i+0x5], buf[i+0x6], buf[i+0x7]),
@@ -77,14 +76,19 @@ lumpdata extract_lump_from_wad(std::string wad_path, std::string lumpname, int a
 	}
 
 	lumpinfo found{0,0,""};
+	bool inrange = false;
 	for (size_t i = 0; i < lumps.size(); i++) {
-		if (lumps[i].filename.compare(lumpname) == 0) {
+		if (!marker.empty()) {
+			if (lumps[i].filename == marker + "_START") inrange = true;
+			else if (lumps[i].filename == marker + "_END") inrange = false;
+		}
+		if (lumps[i].filename == lumpname && (inrange || marker.empty())) {
 			found = lumps[i+advance];
 			break;
 		}
 	}
 	if (found.filepos == 0) {
-		printf("Error: couldn't find lump \"%s\" in wad file \"%s\"\n", lumpname.c_str(), wad_path.c_str());
+		if (!ignore_not_found) printf("Error: couldn't find lump \"%s\" in wad file \"%s\"\n", lumpname.c_str(), wad_path.c_str());
 		return BAD_LUMP_DATA;
 	}
 

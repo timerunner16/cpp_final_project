@@ -66,3 +66,6 @@ add_custom_target(
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
 )
 add_dependencies(cpp_final_project copy_assets)
+
+add_compile_options(-fsanitize=address)
+add_link_options(-fsanitize=address)

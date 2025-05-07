@@ -45,27 +45,8 @@ std::string fragment_defines = "#version 330 core\n\n#define FRAGMENT_SHADER\n";
 std::string default_combined_vertex_shader_source = (vertex_defines + default_shader_source);
 std::string default_combined_fragment_shader_source = (fragment_defines + default_shader_source);
 
-Shader::Shader(std::string shader_path) {
-	m_type_str = typeid(Shader).name();
-
-	std::string shader_source;
-
-	std::ifstream shader_source_file;
-
-	shader_source_file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-	try {
-		shader_source_file.open(shader_path);
-
-		std::stringstream shader_source_stream;
-
-		shader_source_stream << shader_source_file.rdbuf();
-
-		shader_source_file.close();
-
-		shader_source = shader_source_stream.str();
-	} catch (std::ifstream::failure exception) {
-		printf("Unable to read shader file!\n");
-	}
+Shader::Shader(uint8_t* data, uint32_t size) {
+	std::string shader_source = std::string((char*)data, size);
 
 	std::string combined_vertex_shader_source = (vertex_defines + shader_source).c_str();
 	const GLchar* vertex_shader_source;

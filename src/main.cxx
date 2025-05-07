@@ -12,6 +12,7 @@ char* getOption(char** begin, char** end, const std::string& option) {
 }
 
 int main(int argc, char* argv[]) {
+	std::string wad_path;
 	int width = 320;
 	int height = 240;
 	int downscale = 1;
@@ -28,6 +29,10 @@ int main(int argc, char* argv[]) {
 	bool resizable = false;
 	if (optionExists(argv, argv+argc, "-r")) resizable = true;
 
-	Game game = Game(width, height, downscale, resizable);
+	char* wad_path_c = getOption(argv, argv+argc, "-p");
+	if (wad_path_c != nullptr) wad_path = std::string(wad_path_c);
+	else wad_path = "assets/testmap.wad";
+
+	Game game = Game(wad_path_c, width, height, downscale, resizable);
 	return 0;
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <string>
+#include <vector>
 #include "resource_manager.hpp"
 
 class Game;
@@ -28,13 +29,16 @@ struct Uniform {
 
 class Material : public GenericResource {
 public:
-	Material(Game* game, std::string file_path);
+	Material(Game* game, std::string wad_path, std::vector<std::string> data);
 
 	void Cleanup();
 
 	void SetTexture(std::shared_ptr<GLTexture> texture);
 	void SetShader(std::shared_ptr<Shader> shader);
 	void SetUniform(Uniform uniform);
+
+	std::shared_ptr<GLTexture> GetTexture();
+	std::shared_ptr<Shader> GetShader();
 
 	void Bind(Game* game);
 private:

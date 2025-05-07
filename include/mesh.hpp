@@ -12,7 +12,7 @@ struct mesh_vertex {
 
 class Mesh : public GenericResource {
 public:
-	Mesh(std::string path);
+	Mesh(std::vector<std::string> mesh_source);
 
 	void Cleanup();
 

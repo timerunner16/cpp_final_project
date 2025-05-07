@@ -20,4 +20,4 @@ std::string _8xU8tostr(uint8_t a, uint8_t b, uint8_t c, uint8_t d,
 
 uint32_t _4xU8to1xU32(uint8_t a, uint8_t b, uint8_t c, uint8_t d);
 
-lumpdata extract_lump_from_wad(std::string wad_path, std::string lumpname, int advance = 0);
+lumpdata extract_lump_from_wad(std::string wad_path, std::string lumpname, std::string marker = "", bool ignore_not_found = false, int advance = 0);

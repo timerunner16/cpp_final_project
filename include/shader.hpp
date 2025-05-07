@@ -7,7 +7,7 @@
 
 class Shader : public GenericResource {
 public:
-	Shader(std::string shader_path);
+	Shader(uint8_t* data, uint32_t size);
 	
 	void Cleanup();
 

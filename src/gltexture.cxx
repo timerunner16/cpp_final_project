@@ -1,11 +1,12 @@
 #include "gltexture.hpp"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_rwops.h>
 
-GLTexture::GLTexture(std::string texture_path) {
-	m_type_str = typeid(GLTexture).name();
-
-	SDL_Surface* surface = IMG_Load(texture_path.c_str());
+GLTexture::GLTexture(uint8_t* data, uint32_t size) {
+	SDL_RWops* rw = SDL_RWFromConstMem(data, size);
+	SDL_Surface* surface = IMG_LoadPNG_RW(rw);
+	delete rw;
 	SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA8888, 0);
 	
 	glGenTextures(1, &m_texture_id);
@@ -22,10 +23,11 @@ GLTexture::GLTexture(std::string texture_path) {
 
 	SDL_FreeSurface(surface);
 }
-
 void GLTexture::Cleanup() {
 	glDeleteTextures(1, &m_texture_id);
 }
 
 GLuint GLTexture::GetTextureID() {return m_texture_id;}
 
+int GLTexture::GetWidth() {return m_width;}
+int GLTexture::GetHeight() {return m_height;}

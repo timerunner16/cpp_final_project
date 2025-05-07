@@ -17,7 +17,7 @@ struct MapSegmentRenderData {
 
 class Map {
 public:
-	Map(Game* game, std::string wad_path, std::string mapname);
+	Map(Game* game, std::string mapname);
 	~Map();
 
 	std::vector<MapSegmentRenderData> GetMapSegments();

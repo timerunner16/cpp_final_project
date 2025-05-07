@@ -45,16 +45,24 @@ struct udmf_linedef {
 };
 
 struct udmf_sidedef {
-	int offsetx;
-	int offsety;
+	int offsetx_top;
+	int offsety_top;
+	int offsetx_bottom;
+	int offsety_bottom;
+	int offsetx_mid;
+	int offsety_mid;
 	std::string texturetop;
 	std::string texturebottom;
 	std::string texturemiddle;
 	int sector;
 
 	udmf_sidedef() {
-		offsetx = 0;
-		offsety = 0;
+		offsetx_top = 0;
+		offsety_top = 0;
+		offsetx_bottom = 0;
+		offsety_bottom = 0;
+		offsetx_mid = 0;
+		offsety_mid = 0;
 		texturetop = "";
 		texturebottom = "";
 		texturemiddle = "";
@@ -180,6 +188,34 @@ std::vector<tri_triangle> edges_to_faces(std::vector<tri_edge> edges) {
 	if (edges.size() <= 2) return std::vector<tri_triangle>();
 	
 	std::vector<vertexloop_t> vertexloops(1);
+	bool clear = false;
+	while (!clear) {
+		clear = true;
+		std::vector<tri_edge> to_delete(0);
+		for (size_t i = 0; i < edges.size(); i++) {
+			tri_vertex v0 = edges[i].v0;
+			tri_vertex v1 = edges[i].v1;
+			bool v0matched = false;
+			bool v1matched = false;
+			for (size_t j = 0; j < edges.size(); j++) {
+				if (i == j) continue;
+
+				if (edges[j].v0 == v0 || edges[j].v1 == v0) v0matched = true;
+				if (edges[j].v0 == v1 || edges[j].v1 == v1) v1matched = true;
+			}
+			if (!v0matched || !v1matched) {
+				clear = false;
+				to_delete.push_back(edges[i]);
+			}
+		}
+		std::erase_if(edges, [&to_delete](const tri_edge& edge) -> bool {
+			for (auto i : to_delete) {
+				if (i == edge) return true;
+			}
+			return false;
+		});
+	}
+
 	while (edges.size() > 0) {
 		tri_vertex start = edges[0].v0;
 		tri_vertex next = edges[0].v1;
@@ -205,6 +241,10 @@ std::vector<tri_triangle> edges_to_faces(std::vector<tri_edge> edges) {
 		}
 		if (edges.size() > 0) vertexloops.push_back(vertexloop_t());
 	}
+
+	std::erase_if(vertexloops, [](const vertexloop_t& vertexloop) -> bool {
+		return vertexloop.vertices.size() < 3;
+	});
 	
 	for (size_t i = 0; i < vertexloops.size(); i++) {
 		vertexloop_t vertexloop = vertexloops[i];
@@ -302,10 +342,11 @@ enum editing {
 	THING
 };
 
-Map::Map(Game* game, std::string wad_path, std::string mapname) {
+Map::Map(Game* game, std::string mapname) {
 	m_game = game;
+	std::string wad_path = m_game->GetWADPath();
 
-	lumpdata mapdata = extract_lump_from_wad(wad_path, mapname, 1);
+	lumpdata mapdata = extract_lump_from_wad(wad_path, mapname, "", false, 1);
 	if (!mapdata.successful) return;
 
 	std::vector<udmf_vertex> vertices;
@@ -328,10 +369,17 @@ Map::Map(Game* game, std::string wad_path, std::string mapname) {
 	for (auto i : data) {
 		i = trim_trailing_comment(i);
 		i = trim_whitespace(i);
-		std::vector<std::string> split = split_string(i, " ");
+		std::vector<std::string> split = split_string(i, "=");
+		for (auto& i : split) {
+			i = trim_whitespace(i);
+			i = trim_trailing_comment(i);
+			i = trim_trailing_comment(i, ";");
+			i = trim_whitespace(i, "\"");
+		}
+		std::string tag = split.size() > 0 ? split[0] : "";
+		std::string value = split.size() > 1 ? split[1] : "";
 		switch (state) {
 			case UNDEFINED: {
-				std::string tag = split.size() > 0 ? split[0] : "";
 				if (tag == "vertex") state = VERTEX;
 				else if (tag == "linedef") state = LINEDEF;
 				else if (tag == "sidedef") state = SIDEDEF;
@@ -340,9 +388,9 @@ Map::Map(Game* game, std::string wad_path, std::string mapname) {
 				break;
 			}
 			case VERTEX: {
-				if (split[0] == "x") c_vertex.x=atof(split[2].c_str());
-				else if (split[0] == "y") c_vertex.y=atof(split[2].c_str());
-				else if (split[0] == "}\x0d") {
+				if (tag == "x") c_vertex.x=atof(value.c_str());
+				else if (tag == "y") c_vertex.y=-atof(value.c_str());
+				else if (tag == "}") {
 					state = UNDEFINED;
 					vertices.push_back(c_vertex);
 					c_vertex = udmf_vertex{};
@@ -350,12 +398,12 @@ Map::Map(Game* game, std::string wad_path, std::string mapname) {
 				break;
 			}
 			case LINEDEF: {
-				if (split[0] == "v1") c_linedef.v1=atoi(split[2].c_str());
-				else if (split[0] == "v2") c_linedef.v2=atoi(split[2].c_str());
-				else if (split[0] == "sidefront") c_linedef.sidefront=atoi(split[2].c_str());
-				else if (split[0] == "sideback") c_linedef.sideback=atoi(split[2].c_str());
-				else if (split[0] == "twosided") c_linedef.twosided=(split[2]=="true");
-				else if (split[0] == "}\x0d") {
+				if (tag == "v1") c_linedef.v1=atoi(value.c_str());
+				else if (tag == "v2") c_linedef.v2=atoi(value.c_str());
+				else if (tag == "sidefront") c_linedef.sidefront=atoi(value.c_str());
+				else if (tag == "sideback") c_linedef.sideback=atoi(value.c_str());
+				else if (tag == "twosided") c_linedef.twosided=(value=="true");
+				else if (tag == "}") {
 					state = UNDEFINED;
 					linedefs.push_back(c_linedef);
 					c_linedef = udmf_linedef{};
@@ -363,13 +411,17 @@ Map::Map(Game* game, std::string wad_path, std::string mapname) {
 				break;
 			}
 			case SIDEDEF: {
-				if (split[0] == "offsetx_mid") c_sidedef.offsetx=atoi(split[2].c_str());
-				else if (split[0] == "offsety_mid") c_sidedef.offsety=atoi(split[2].c_str());
-				else if (split[0] == "texturebottom") c_sidedef.texturebottom=trim_whitespace(trim_last(split[2]),"\"");
-				else if (split[0] == "texturetop") c_sidedef.texturetop=trim_whitespace(trim_last(split[2]),"\"");
-				else if (split[0] == "texturemiddle") c_sidedef.texturemiddle=trim_whitespace(trim_last(split[2]),"\"");
-				else if (split[0] == "sector") c_sidedef.sector=atoi(split[2].c_str());
-				else if (split[0] == "}\x0d") {
+				if (tag == "offsetx_top") c_sidedef.offsetx_top=atoi(value.c_str());
+				else if (tag == "offsety_top") c_sidedef.offsety_top=atoi(value.c_str());
+				else if (tag == "offsetx_bottom") c_sidedef.offsetx_bottom=atoi(value.c_str());
+				else if (tag == "offsety_bottom") c_sidedef.offsety_bottom=atoi(value.c_str());
+				else if (tag == "offsetx_mid") c_sidedef.offsetx_mid=atoi(value.c_str());
+				else if (tag == "offsety_mid") c_sidedef.offsety_mid=atoi(value.c_str());
+				else if (tag == "texturebottom") c_sidedef.texturebottom=value;
+				else if (tag == "texturetop") c_sidedef.texturetop=value;
+				else if (tag == "texturemiddle") c_sidedef.texturemiddle=value;
+				else if (tag == "sector") c_sidedef.sector=atoi(value.c_str());
+				else if (tag == "}") {
 					state = UNDEFINED;
 					sidedefs.push_back(c_sidedef);
 					c_sidedef = udmf_sidedef{};
@@ -377,12 +429,12 @@ Map::Map(Game* game, std::string wad_path, std::string mapname) {
 				break;
 			}
 			case SECTOR: {
-				if (split[0] == "heightfloor") c_sector.heightfloor=atoi(split[2].c_str());
-				else if (split[0] == "heightceiling") c_sector.heightceiling=atoi(split[2].c_str());
-				else if (split[0] == "texturefloor") c_sector.texturefloor=trim_whitespace(trim_last(split[2]),"\"");
-				else if (split[0] == "textureceiling") c_sector.textureceiling=trim_whitespace(trim_last(split[2]),"\"");
-				else if (split[0] == "lightlevel") c_sector.lightlevel=atoi(split[2].c_str());
-				else if (split[0] == "}\x0d") {
+				if (tag == "heightfloor") c_sector.heightfloor=atoi(value.c_str());
+				else if (tag == "heightceiling") c_sector.heightceiling=atoi(value.c_str());
+				else if (tag == "texturefloor") c_sector.texturefloor=value;
+				else if (tag == "textureceiling") c_sector.textureceiling=value;
+				else if (tag == "lightlevel") c_sector.lightlevel=atoi(value.c_str());
+				else if (tag == "}") {
 					state = UNDEFINED;
 					sectors.push_back(c_sector);
 					c_sector = udmf_sector{};
@@ -390,16 +442,16 @@ Map::Map(Game* game, std::string wad_path, std::string mapname) {
 				break;
 			}
 			case THING: {
-				if (split[0] == "x") c_thing.x=atof(split[2].c_str());
-				else if (split[0] == "y") c_thing.y=atof(split[2].c_str());
-				else if (split[0] == "height") c_thing.height=atof(split[2].c_str());
-				else if (split[0] == "angle") c_thing.angle=atoi(split[2].c_str());
-				else if (split[0] == "comment") {
+				if (tag == "x") c_thing.x=atof(value.c_str());
+				else if (tag == "y") c_thing.y=atof(value.c_str());
+				else if (tag == "height") c_thing.height=atof(value.c_str());
+				else if (tag == "angle") c_thing.angle=atoi(value.c_str());
+				else if (tag == "comment") {
 					std::string last("");
 					for (size_t j = 2; j < split.size(); j++) last += split[j];
 					c_thing.data=trim_whitespace(trim_last(last), "\"");
 				}
-				else if (split[0] == "}\x0d") {
+				else if (tag == "}") {
 					state = UNDEFINED;
 					things.push_back(c_thing);
 					c_thing = udmf_thing{};
@@ -465,66 +517,76 @@ Map::Map(Game* game, std::string wad_path, std::string mapname) {
 			}
 			float length = sqrt((v2.x-v1.x)*(v2.x-v1.x) + (v2.y-v1.y)*(v2.y-v1.y));
 
-			float v1u = 0.0f + current_sidedef.offsetx/SCALE;
-			float v2u = length/SCALE + current_sidedef.offsetx/SCALE;
-			
 			float norm_x = -(v2.y-v1.y)/length;
-			float norm_y = (v2.x-v1.x)/length;
+			float norm_y =  (v2.x-v1.x)/length;
 
 			if (!current_sidedef.texturemiddle.empty()) {
-				float lowv = (midfloor+current_sidedef.offsety)/SCALE;
-				float highv = (midceiling+current_sidedef.offsety)/SCALE;
+				std::shared_ptr<Material> material = m_game->GetResourceManager()->GetMaterial(current_sidedef.texturemiddle);
 
+				float v1u = current_sidedef.offsetx_mid/SCALE;
+				float v2u = length/SCALE + current_sidedef.offsetx_mid/SCALE;
+				float lowv = (midfloor+current_sidedef.offsety_mid)/SCALE;
+				float highv = (midceiling+current_sidedef.offsety_mid)/SCALE;
+				
 				mesh_vertex vertex_data[6] = {
 					{glm::vec3{v1.x/SCALE,midfloor/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,lowv}},
-					{glm::vec3{v1.x/SCALE,midceiling/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
 					{glm::vec3{v2.x/SCALE,midfloor/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
 					{glm::vec3{v1.x/SCALE,midceiling/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v1.x/SCALE,midceiling/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v2.x/SCALE,midfloor/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
 					{glm::vec3{v2.x/SCALE,midceiling/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,highv}},
-					{glm::vec3{v2.x/SCALE,midfloor/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
 				};
 				GLuint index_data[6] = {
 					0,1,2,
 					4,5,6
 				};
 				
-				addmapsegment(m_map_segments, vertex_data, index_data, 6, m_game->GetResourceManager()->GetResource<Material>("assets/test0.mat"));
+				addmapsegment(m_map_segments, vertex_data, index_data, 6, material);
 			}
 			if (!current_sidedef.texturebottom.empty() && midfloor > realfloor) {
-				float lowv = (realfloor+current_sidedef.offsety)/SCALE;
-				float highv = (midfloor+current_sidedef.offsety)/SCALE;
+				std::shared_ptr<Material> material = m_game->GetResourceManager()->GetMaterial(current_sidedef.texturebottom);
+
+				float v1u = current_sidedef.offsetx_bottom/SCALE;
+				float v2u = length/SCALE + current_sidedef.offsetx_bottom/SCALE;
+				float lowv = (realfloor+current_sidedef.offsety_bottom)/SCALE;
+				float highv = (midfloor+current_sidedef.offsety_bottom)/SCALE;
 
 				mesh_vertex vertex_data[6] = {
 					{glm::vec3{v1.x/SCALE,realfloor/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,lowv}},
-					{glm::vec3{v1.x/SCALE,midfloor/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
 					{glm::vec3{v2.x/SCALE,realfloor/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
 					{glm::vec3{v1.x/SCALE,midfloor/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v1.x/SCALE,midfloor/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v2.x/SCALE,realfloor/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
 					{glm::vec3{v2.x/SCALE,midfloor/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,highv}},
-					{glm::vec3{v2.x/SCALE,realfloor/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
 				};
 				GLuint index_data[6] = {
 					0,1,2,
 					3,4,5
 				};
-				addmapsegment(m_map_segments, vertex_data, index_data, 6, m_game->GetResourceManager()->GetResource<Material>("assets/test0.mat"));
+				addmapsegment(m_map_segments, vertex_data, index_data, 6, material);
 			}
 			if (!current_sidedef.texturetop.empty() && midceiling < realceiling) {
-				float lowv = (midceiling+current_sidedef.offsety)/SCALE;
-				float highv = (realceiling+current_sidedef.offsety)/SCALE;
+				std::shared_ptr<Material> material = m_game->GetResourceManager()->GetMaterial(current_sidedef.texturetop);
+
+				float v1u = current_sidedef.offsetx_top/SCALE;
+				float v2u = length/SCALE + current_sidedef.offsetx_top/SCALE;
+				
+				float lowv = (midceiling+current_sidedef.offsety_top)/SCALE;
+				float highv = (realceiling+current_sidedef.offsety_top)/SCALE;
 
 				mesh_vertex vertex_data[6] = {
 					{glm::vec3{v1.x/SCALE,midceiling/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,lowv}},
-					{glm::vec3{v1.x/SCALE,realceiling/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
 					{glm::vec3{v2.x/SCALE,midceiling/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
 					{glm::vec3{v1.x/SCALE,realceiling/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v1.x/SCALE,realceiling/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v2.x/SCALE,midceiling/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
 					{glm::vec3{v2.x/SCALE,realceiling/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,highv}},
-					{glm::vec3{v2.x/SCALE,midceiling/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
 				};
 				GLuint index_data[6] = {
 					0,1,2,
 					4,5,6
 				};
-				addmapsegment(m_map_segments, vertex_data, index_data, 6, m_game->GetResourceManager()->GetResource<Material>("assets/test0.mat"));
+				addmapsegment(m_map_segments, vertex_data, index_data, 6, material);
 			}
 		}
 		
@@ -533,6 +595,9 @@ Map::Map(Game* game, std::string wad_path, std::string mapname) {
 		mesh_vertex* floor_vertex_data = new mesh_vertex[floor_triangles.size()*3];
 		mesh_vertex* ceiling_vertex_data = new mesh_vertex[floor_triangles.size()*3];
 		GLuint* index_data = new GLuint[floor_triangles.size()*3];
+
+		std::shared_ptr<Material> floor_material = m_game->GetResourceManager()->GetMaterial(current_sector.texturefloor);
+		std::shared_ptr<Material> ceiling_material = m_game->GetResourceManager()->GetMaterial(current_sector.textureceiling);
 
 		for (size_t j = 0; j < floor_triangles.size(); j++) {
 			size_t index = j*3;
@@ -547,9 +612,9 @@ Map::Map(Game* game, std::string wad_path, std::string mapname) {
 			index_data[index+1] = index+1;
 			index_data[index+2] = index+2;
 		}
-
-		addmapsegment(m_map_segments, floor_vertex_data, index_data, floor_triangles.size()*3, m_game->GetResourceManager()->GetResource<Material>("assets/test1.mat"));
-		addmapsegment(m_map_segments, ceiling_vertex_data, index_data, floor_triangles.size()*3, m_game->GetResourceManager()->GetResource<Material>("assets/test1.mat"));
+		
+		addmapsegment(m_map_segments, floor_vertex_data, index_data, floor_triangles.size()*3, floor_material);
+		addmapsegment(m_map_segments, ceiling_vertex_data, index_data, floor_triangles.size()*3, floor_material);
 	}
 }
 

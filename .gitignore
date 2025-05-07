@@ -40,3 +40,4 @@ build/
 
 # Doombuilder save files
 *.dbs
+*.wad.*

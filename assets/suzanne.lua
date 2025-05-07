@@ -1,12 +1,12 @@
 local timer = 0.0
 
 local models = {
-	"assets/cube.obj",
-	"assets/suzanne.obj"
+	"CUBE",
+	"SUZANNE"
 }
 local materials = {
-	"assets/test0.mat",
-	"assets/test1.mat"
+	"TEST0",
+	"TEST1"
 }
 
 local current

@@ -1,26 +1,23 @@
 #include <GL/glew.h>
 #include <GL/glu.h>
-#include <fstream>
 #include "material.hpp"
 #include "shader.hpp"
 #include "gltexture.hpp"
 #include "game.hpp"
+#include "resource_manager.hpp"
+#include "parse_wad.hpp"
 
-Material::Material(Game* game, std::string file_path) {
-	m_type_str = typeid(Material).name();
-
-	std::ifstream infile(file_path);
+Material::Material(Game* game, std::string wad_path, std::vector<std::string> data) {
 	m_uniforms = std::map<std::string, Uniform>();
 	m_shader = nullptr;
 	m_texture = nullptr;
-	std::string line;
-	while (std::getline(infile, line)) {
+	for (std::string line : data) {
 		std::string identifier = line.substr(0,line.find(" "));
 		std::string path = line.substr(line.find(" ")+1,line.size());
 		if (identifier == "shader") {
-			m_shader = game->GetResourceManager()->GetResource<Shader>(path);
+			m_shader = game->GetResourceManager()->GetShader(path);
 		} else if (identifier == "texture") {
-			m_texture = game->GetResourceManager()->GetResource<GLTexture>(path);
+			m_texture = game->GetResourceManager()->GetGLTexture(path);
 		}
 	}
 }
@@ -104,3 +101,5 @@ void Material::ApplyUniform(const Uniform& uniform) {
 	}
 }
 
+std::shared_ptr<GLTexture> Material::GetTexture() {return m_texture;}
+std::shared_ptr<Shader> Material::GetShader() {return m_shader;}

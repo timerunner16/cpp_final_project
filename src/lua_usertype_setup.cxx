@@ -307,10 +307,10 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 	sol::usertype<ResourceManager> resource_manager_data_type = lua_state.new_usertype<ResourceManager>(
 		"ResourceManager",
 		sol::no_constructor,
-		"GetMesh", &ResourceManager::GetResource<Mesh>,
-		"GetMaterial", &ResourceManager::GetResource<Material>,
-		"GetTexture", &ResourceManager::GetResource<GLTexture>,
-		"GetShader", &ResourceManager::GetResource<Shader>
+		"GetMesh", &ResourceManager::GetMesh,
+		"GetMaterial", &ResourceManager::GetMaterial,
+		"GetTexture", &ResourceManager::GetGLTexture,
+		"GetShader", &ResourceManager::GetShader
 	);
 
 
