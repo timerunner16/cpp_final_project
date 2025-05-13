@@ -28,14 +28,15 @@ The `Window` class will handle:
 - integration with SDL2
 - providing functions for drawing objects and managing the display
 
-The `Renderer` class will handle:
-- determining parts of the scene to render
-- sending data to the `Window`
-
 The `Resource Manager` class will handle:
 - loading in assets from storage
 - accessing assets without unnecessary duplicate loading
 - unloading assets from storage when no references are left
+
+The `Input Manager` class will handle:
+- managing the states of keyboard keys/mouse buttons
+- managing mouse position/delta
+- providing tools for easier input math
 
 The `Workspace` class will handle:
 - storage of current game data
@@ -61,7 +62,8 @@ The `Mesh` class will include:
 - a reference to a Vertex Array Object
 
 The `GLTexture` class will include:
-- a reference to a Texture Buffer
+- a reference to a Texture
+- a width/height value
 
 The `Material` class will handle:
 - setting of `Uniform`s (global and material)
@@ -74,9 +76,9 @@ and will include:
 The `Transform` class will handle:
 - constructing a model matrix from its values
 and will include:
-- an X, Y, Z position
-- a Pitch, Roll, Yaw (Euclid Angle) rotation
-- an X, Y, Z scale
+- a `vec3` position
+- a `vec3` pitch, roll, yaw (Euclid Angle) rotation
+- a `vec3` scale
 
 The `Shader` class will handle:
 - generating Programs from vertex and fragment shaders
@@ -88,6 +90,18 @@ The `Uniform` class will include:
 - a name
 - a data type (INT, VEC3, etc.)
 - data matching the data type
+
+The `vec2` class will include:
+- float `x` and `y` values
+
+The `vec3` class will include:
+- float `x`, `y` and `z` values
+
+The `ivec2` class will include:
+- int `x` and `y` values
+
+The `ivec3` class will include:
+- int `x`, `y` and `z` values
 
 ## Build Process
 This game was designed and programmed on Linux (specifically Ubuntu 24.04), and as such I only have build instructions for Linux.
