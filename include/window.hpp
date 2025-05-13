@@ -8,6 +8,8 @@
 class Game;
 class GameObject;
 class Material;
+class Shader;
+class GLTexture;
 
 class Window {
 public:
@@ -17,6 +19,7 @@ public:
 	void Clear();
 	void DrawGameObject(Camera* camera, GameObject* game_object);
 	void DrawMap(Camera* camera);
+	void DrawString(int x, int y, uint8_t r, uint8_t b, uint8_t g, uint8_t a, std::string string);
 	void Present(std::shared_ptr<Material> pp_material);
 	void Resize(int width, int height, int downscale);
 	void SetWireframeEnabled(bool enabled);
@@ -24,12 +27,18 @@ public:
 	int GetWidth();
 	int GetHeight();
 	int GetDownscale();
+
+	bool GetFocused();
 private:
 	Game* m_game;
 	SDL_Window* m_window;
 	SDL_GLContext m_context;
 	GLuint m_framebuffer, m_color, m_depth;
+	GLuint m_text_framebuffer, m_text_color, m_text_depth;
 	GLuint m_pp_vao;
+	GLuint m_text_vbo;
+	GLTexture* m_text_texture;
+	Shader* m_text_shader;
 
 	int m_width, m_height, m_downscale;
 	bool m_wireframe;

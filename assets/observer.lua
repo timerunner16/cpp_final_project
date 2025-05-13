@@ -17,10 +17,14 @@ local wireframe = false
 -- object references
 local current
 local camera
+local input
+local window
 
 function init()
 	current = Engine.CurrentGameObject
 	camera = Engine.Workspace:GetCamera()
+	input = Engine.InputManager
+	window = Engine.Window
 end
 
 function process(delta)
@@ -30,7 +34,8 @@ function process(delta)
 		print(i,v)
 	end
 
-	local input = Engine.InputManager
+	if (input:SomethingPressed()) then input:SetMouseCaptured(true) end
+
 	local tab = input:QueryKey(Keys.Tab)
 	if (tab.Pressed and tab.OnEdge) then
 		wireframe = not wireframe
@@ -44,13 +49,16 @@ function process(delta)
 	current.transform.rotation.y = current.transform.rotation.y + key_rotation_vector.x
 	camera.transform.rotation.x = camera.transform.rotation.x + key_rotation_vector.y
 
-	input:SetMouseCaptured(true)
-	local mouse_delta = Vector2.new(input:GetMouseDelta())
-	local window_size = Vector2.new(Engine.Window.Width, Engine.Window.Height)
-	mouse_delta = mouse_delta:div(window_size)
-	current.transform.rotation.y = current.transform.rotation.y + mouse_delta.x * m_sensitivity	
-	camera.transform.rotation.x = camera.transform.rotation.x + mouse_delta.y * m_sensitivity
-	camera.transform.rotation.x = math.min(math.max(camera.transform.rotation.x, -math.pi/2), math.pi/2)
+	if (window.Focused) then
+		local mouse_delta = Vector2.new(input:GetMouseDelta())
+		local window_size = Vector2.new(window.Width, window.Height)
+		mouse_delta = mouse_delta:div(window_size)
+		current.transform.rotation.y = current.transform.rotation.y + mouse_delta.x * m_sensitivity	
+		camera.transform.rotation.x = camera.transform.rotation.x + mouse_delta.y * m_sensitivity
+		camera.transform.rotation.x = math.min(math.max(camera.transform.rotation.x, -math.pi/2), math.pi/2)
+	else
+		input:SetMouseCaptured(false)
+	end
 
 	if (current.transform.position.y <= 0) then
 		current.transform.position.y = 0
@@ -84,4 +92,7 @@ function process(delta)
 	target_bobstrength = target_bobstrength * alignment
 	bobstrength = bobstrength + (target_bobstrength - bobstrength) * delta * 4.0
 	camera.transform.position.y = camera.transform.position.y + math.sin(timer * 8.0) * 0.05 * bobstrength + 1.0
+
+	Engine.Window:DrawString(0, 0,  255, 255, 0,   255,  "Look, I'm yellow!");
+	Engine.Window:DrawString(0, 8,  255, 255, 255, 255,  string.format("FPS: %.2f", tostring(1.0/delta)));
 end

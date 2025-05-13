@@ -6,6 +6,10 @@
 #include "mesh.hpp"
 #include "material.hpp"
 #include "map.hpp"
+#include "shader.hpp"
+#include "builtin_text_shader.h"
+#include "gltexture.hpp"
+#include "engine_font.hpp"
 
 Window::Window(Game* game, int width, int height, int downscale, bool resizable) {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -29,6 +33,9 @@ Window::Window(Game* game, int width, int height, int downscale, bool resizable)
 	
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glGenFramebuffers(1, &m_framebuffer);
 	glGenTextures(1, &m_color);
@@ -55,6 +62,31 @@ Window::Window(Game* game, int width, int height, int downscale, bool resizable)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depth, 0);
 
+	glGenFramebuffers(1, &m_text_framebuffer);
+	glGenTextures(1, &m_text_color);
+	glGenTextures(1, &m_text_depth);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_text_framebuffer);
+	glBindTexture(GL_TEXTURE_2D, m_text_color);
+	glTexImage2D(
+		GL_TEXTURE_2D, 0, GL_RGBA,
+		width/downscale, height/downscale,
+		0, GL_RGBA, GL_UNSIGNED_BYTE, NULL
+	);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_text_color, 0);
+
+	glBindTexture(GL_TEXTURE_2D, m_text_depth);
+	glTexImage2D(
+			GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+			width/downscale, height/downscale,
+			0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL
+	);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_text_depth, 0);
+	
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glViewport(0,0, width/downscale, height/downscale);
 
@@ -79,6 +111,12 @@ Window::Window(Game* game, int width, int height, int downscale, bool resizable)
 
 	glBindVertexArray(0);
 
+	glGenBuffers(1, &m_text_vbo);
+
+	m_text_shader = new Shader((uint8_t*)shader_source.c_str(), shader_source.size());
+
+	m_text_texture = new GLTexture((uint8_t*)__engine_font, __engine_font_len, BMP);
+
 	m_width = width;
 	m_height = height;
 	m_downscale = downscale;
@@ -94,6 +132,11 @@ void Window::Clear() {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 	glViewport(0,0,m_width/m_downscale,m_height/m_downscale);
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_text_framebuffer);
+	glViewport(0,0,m_width/m_downscale,m_height/m_downscale);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -191,6 +234,68 @@ void Window::DrawMap(Camera* camera) {
 	}
 }
 
+void Window::DrawString(int x, int y, uint8_t r, uint8_t g, uint8_t b, uint8_t a, std::string string) {
+	std::vector<glm::vec4> vertices(0);
+	int lastx = x;
+	
+	for (char c : string) {
+		int minx = lastx;
+		int miny = y;
+		int maxx = minx + 8;
+		int maxy = y + 8;
+		
+		int width_res = m_width/m_downscale;
+		int height_res = m_height/m_downscale;
+
+		float c_minx = (2.0f*((float)minx/width_res)-1.0f);
+		float c_miny =-(2.0f*((float)miny/height_res)-1.0f);
+		float c_maxx = (2.0f*((float)maxx/width_res)-1.0f);
+		float c_maxy =-(2.0f*((float)maxy/height_res)-1.0f);
+
+		uint8_t row = ((c&0xf0) >> 4) - 2;
+		uint8_t col = c&0x0f;
+		if (row < 0 || row > 5) row = 0;
+
+		float t_minx = (float)(col*8)/m_text_texture->GetWidth();
+		float t_miny = (float)(row*8)/m_text_texture->GetHeight();
+		float t_maxx = (float)(col*8+8)/m_text_texture->GetWidth();
+		float t_maxy = (float)(row*8+8)/m_text_texture->GetHeight();
+		
+		vertices.push_back({c_minx, c_miny, t_minx, t_miny});
+		vertices.push_back({c_maxx, c_maxy, t_maxx, t_maxy});
+		vertices.push_back({c_maxx, c_miny, t_maxx, t_miny});
+		vertices.push_back({c_minx, c_miny, t_minx, t_miny});
+		vertices.push_back({c_minx, c_maxy, t_minx, t_maxy});
+		vertices.push_back({c_maxx, c_maxy, t_maxx, t_maxy});
+		
+		lastx += 8;
+	}
+
+	glm::vec4 color{(float)r/255, (float)g/255, (float)b/255, (float)a/255};
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_text_framebuffer);
+	glViewport(0,0,m_width/m_downscale,m_height/m_downscale);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, m_text_vbo);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(glm::vec4), vertices.data(), GL_STATIC_DRAW);
+	
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glUseProgram(m_text_shader->GetProgramID());
+	m_text_shader->UniformVec4("modulate", color);
+	glBindTexture(GL_TEXTURE_2D, m_text_texture->GetTextureID());
+	
+	glDisable(GL_DEPTH_TEST);
+
+	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+	
+	glEnable(GL_DEPTH_TEST);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glUseProgram(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 void Window::Present(std::shared_ptr<Material> pp_material) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0,0,m_width,m_height);
@@ -204,18 +309,24 @@ void Window::Present(std::shared_ptr<Material> pp_material) {
 			GL_COLOR_BUFFER_BIT,
 			GL_NEAREST
 		);
+		glBlitNamedFramebuffer(m_text_framebuffer, 0,
+			0, 0, m_width/m_downscale, m_height/m_downscale,
+			0, 0, m_width, m_height,
+			GL_COLOR_BUFFER_BIT,
+			GL_NEAREST
+		);
 	} else {
-		glBindVertexArray(m_pp_vao);
-		
-		pp_material->Bind(m_game);
-		
 		glDisable(GL_DEPTH_TEST);
+		
+		glBindVertexArray(m_pp_vao);
+		pp_material->Bind(m_game);
 		glBindTexture(GL_TEXTURE_2D, m_color);
-
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		
-		glEnable(GL_DEPTH_TEST);
+		glBindTexture(GL_TEXTURE_2D, m_text_color);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
+		glEnable(GL_DEPTH_TEST);
 		glBindVertexArray(0);
 		glUseProgram(0);
 	}
@@ -258,7 +369,40 @@ void Window::Resize(int width, int height, int downscale) {
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glViewport(0,0, width/downscale, height/downscale);
+
+	glDeleteFramebuffers(1, &m_text_framebuffer);
+	glDeleteTextures(1, &m_text_color);
+	glDeleteTextures(1, &m_text_depth);
+
+	glGenFramebuffers(1, &m_text_framebuffer);
+	glGenTextures(1, &m_text_color);
+	glGenTextures(1, &m_text_depth);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_text_framebuffer);
+	glBindTexture(GL_TEXTURE_2D, m_text_color);
+	glTexImage2D(
+		GL_TEXTURE_2D, 0, GL_RGBA,
+		width/downscale, height/downscale,
+		0, GL_RGBA, GL_UNSIGNED_BYTE, NULL
+	);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_text_color, 0);
+
+	glBindTexture(GL_TEXTURE_2D, m_text_depth);
+	glTexImage2D(
+		GL_TEXTURE_2D, 0, GL_RGBA,
+		width/downscale, height/downscale,
+		0, GL_RGBA, GL_UNSIGNED_BYTE, NULL
+	);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_text_depth, 0);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glViewport(0,0, width/downscale, height/downscale);
 }
+
 void Window::SetWireframeEnabled(bool enabled) {
 	m_wireframe = enabled;
 }
@@ -266,3 +410,7 @@ void Window::SetWireframeEnabled(bool enabled) {
 int Window::GetWidth() {return m_width;}
 int Window::GetHeight() {return m_height;}
 int Window::GetDownscale() {return m_downscale;}
+
+bool Window::GetFocused() {
+	return (SDL_GetWindowFlags(m_window) & SDL_WINDOW_INPUT_FOCUS) != 0;
+}

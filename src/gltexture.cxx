@@ -3,9 +3,20 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_rwops.h>
 
-GLTexture::GLTexture(uint8_t* data, uint32_t size) {
+GLTexture::GLTexture(uint8_t* data, uint32_t size, IMAGE_FORMAT format) {
 	SDL_RWops* rw = SDL_RWFromConstMem(data, size);
-	SDL_Surface* surface = IMG_LoadPNG_RW(rw);
+	SDL_Surface* surface = nullptr;
+	switch (format) {
+		case PNG:
+			surface = IMG_LoadPNG_RW(rw);
+			break;
+		case BMP:
+			surface = IMG_LoadBMP_RW(rw);
+			break;
+		case JPG:
+			surface = IMG_LoadJPG_RW(rw);
+			break;
+	}
 	delete rw;
 	SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA8888, 0);
 	
@@ -20,6 +31,9 @@ GLTexture::GLTexture(uint8_t* data, uint32_t size) {
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	m_width = surface->w;
+	m_height = surface->h;
 
 	SDL_FreeSurface(surface);
 }

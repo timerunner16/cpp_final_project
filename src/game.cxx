@@ -68,7 +68,7 @@ Game::~Game() {
 void Game::Process() {
 	m_tp_a = std::chrono::high_resolution_clock::now();
 	m_delta = (m_tp_a-m_tp_b).count()/(1e9);
-
+	
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
@@ -84,6 +84,8 @@ void Game::Process() {
 			}
 		}
 	}
+	m_window->Clear();
+
 	m_input_manager->Update();
 	m_workspace->Process(m_delta);
 	m_resource_manager->ClearUnusedResources();
@@ -92,7 +94,6 @@ void Game::Process() {
 }
 
 void Game::Render() {
-	m_window->Clear();
 	m_window->DrawMap(m_workspace->GetCamera());
 	for (auto [key, val] : m_workspace->GetGameObjects()) {
 		m_window->DrawGameObject(m_workspace->GetCamera(), val);

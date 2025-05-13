@@ -19,7 +19,7 @@ GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 	m_lua_loaded = !script_path.empty();
 	if (!m_lua_loaded) return;
 	m_lua_state = sol::state();
-	m_lua_state.open_libraries(sol::lib::base, sol::lib::math);
+	m_lua_state.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string);
 
 	lua_usertype_setup(m_game, m_lua_state, this);
 

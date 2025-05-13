@@ -1,9 +1,6 @@
 #include "shader.hpp"
-#include <fstream>
-#include <iostream>
-#include <sstream>
 
-std::string default_shader_source = "#if VERTEX_SHADER\n\
+std::string default_shader_source = "#ifdef VERTEX_SHADER\n\
 \n\
 layout (location=0) in vec3 i_vertex_position;\n\
 layout (location=1) in vec3 i_vertex_normal;\n\

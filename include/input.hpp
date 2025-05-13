@@ -23,6 +23,8 @@ public:
 	ButtonState QueryKey(int scancode);	
 	ButtonState QueryMouseButton(int index);
 
+	bool SomethingPressed();
+
 	float GetAxis(int scancode_n, int scancode_p);
 	vec2 GetVector(int scancode_nx, int scancode_px, int scancode_ny, int scancode_py);
 	

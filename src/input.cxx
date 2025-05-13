@@ -32,6 +32,16 @@ void InputManager::Update() {
 ButtonState InputManager::QueryKey(int scancode) {return m_keys[scancode];}
 ButtonState InputManager::QueryMouseButton(int index) {return m_mouse_buttons[index];}
 
+bool InputManager::SomethingPressed() {
+	for (size_t i = 0; i < SDL_NUM_SCANCODES; i++) {
+		if (m_keys[i].pressed) return true;
+	}
+	for (size_t i = 0; i < 8; i++) {
+		if (m_mouse_buttons[i].pressed) return true;
+	}
+	return false;
+}
+
 float InputManager::GetAxis(int scancode_n, int scancode_p) {
 	return (QueryKey(scancode_p).pressed ? 1.0f : 0.0f) - (QueryKey(scancode_n).pressed ? 1.0f : 0.0f);
 }
