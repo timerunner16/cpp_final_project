@@ -25,6 +25,7 @@ add_executable(
 	src/map.cxx
 	src/parse_wad.cxx
 	src/util.cxx
+	src/particle_system.cxx
 )
 target_include_directories(cpp_final_project PRIVATE include)
 

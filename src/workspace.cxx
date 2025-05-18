@@ -25,7 +25,12 @@ GameObject* Workspace::CreateGameObject(std::string name, GameObject* parent,
 	return game_object;
 }
 
+void Workspace::CreateParticleSystem(particle_system_create_info info) {
+	m_particle_systems.push_back(new ParticleSystem(info));
+}
+
 std::map<std::string, GameObject*> Workspace::GetGameObjects() {return m_game_objects;}
+std::vector<ParticleSystem*> Workspace::GetParticleSystems() {return m_particle_systems;}
 sol::as_table_t<std::map<std::string, GameObject*>> Workspace::GetGameObjects_Lua() {
 	return (sol::as_table_t<std::map<std::string, GameObject*>>)(m_game_objects);
 }
@@ -41,4 +46,10 @@ void Workspace::Process(float delta) {
 	for (auto& [key, val] : m_game_objects) {
 		val->Process(delta);
 	}
+	for (auto& i : m_particle_systems) {
+		i->Update(delta);
+	}
+	std::erase_if(m_particle_systems, [](const auto& particle_system) -> bool {
+		return particle_system->GetDead();
+	});
 }

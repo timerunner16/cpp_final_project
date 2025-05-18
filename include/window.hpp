@@ -10,6 +10,7 @@ class GameObject;
 class Material;
 class Shader;
 class GLTexture;
+class ParticleSystem;
 
 class Window {
 public:
@@ -20,6 +21,7 @@ public:
 	void DrawGameObject(Camera* camera, GameObject* game_object);
 	void DrawMap(Camera* camera);
 	void DrawString(int x, int y, uint8_t r, uint8_t b, uint8_t g, uint8_t a, std::string string);
+	void DrawParticleSystem(Camera* camera, ParticleSystem* particle_system);
 	void Present(std::shared_ptr<Material> pp_material);
 	void Resize(int width, int height, int downscale);
 	void SetWireframeEnabled(bool enabled);

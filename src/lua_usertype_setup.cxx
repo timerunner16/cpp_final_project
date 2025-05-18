@@ -3,6 +3,7 @@
 #include "game.hpp"
 #include "material.hpp"
 #include "gltexture.hpp"
+#include "particle_system.hpp"
 #include "resource_manager.hpp"
 #include "shader.hpp"
 #include "vec2.hpp"
@@ -305,6 +306,28 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 
 	keys_table[sol::metatable_key] = keys_metatable;
 
+
+	sol::usertype<particle_system_create_info> particle_system_create_info_data_type = lua_state.new_usertype<particle_system_create_info>(
+		"ParticleSystemCreateInfo",
+		sol::factories(
+			[]() {
+				return new particle_system_create_info{};
+			}
+		),
+		"Position", &particle_system_create_info::position,
+		"Direction", &particle_system_create_info::position,
+		"Randomization", &particle_system_create_info::randomization,
+		"Size", &particle_system_create_info::size,
+		"Speed", &particle_system_create_info::speed,
+		"Gravity", &particle_system_create_info::gravity,
+		"Lifetime", &particle_system_create_info::lifetime,
+		"R", &particle_system_create_info::r,
+		"G", &particle_system_create_info::g,
+		"B", &particle_system_create_info::b,
+		"A", &particle_system_create_info::a,
+		"NumParticles", &particle_system_create_info::num_particles
+	);
+
 	
 	sol::usertype<ResourceManager> resource_manager_data_type = lua_state.new_usertype<ResourceManager>(
 		"ResourceManager",
@@ -327,11 +350,13 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 	);
 	
 
-	sol::usertype<Workspace> workspace_data_type = lua_state.new_usertype<Workspace>("Workspace", sol::no_constructor);
-	
-	workspace_data_type.set_function("GetGameObject", &Workspace::GetGameObject);
-	workspace_data_type.set_function("GetGameObjects", &Workspace::GetGameObjects_Lua);
-	workspace_data_type.set_function("GetCamera", &Workspace::GetCamera);
+	sol::usertype<Workspace> workspace_data_type = lua_state.new_usertype<Workspace>(
+		"Workspace", sol::no_constructor,
+		"GetGameObject", &Workspace::GetGameObject,
+		"GetGameObjects", &Workspace::GetGameObjects_Lua,
+		"GetCamera", &Workspace::GetCamera,
+		"CreateParticleSystem", &Workspace::CreateParticleSystem
+	);
 
 
 	sol::table engine_globals_table = lua_state.create_named_table("Engine");

@@ -13,8 +13,11 @@ local current
 local model = 1
 local material = 1
 
+local resource_manager
+
 function init()
 	current = Engine.CurrentGameObject
+	resource_manager = Engine.ResourceManager
 end
 
 function process(delta)
@@ -26,6 +29,6 @@ function process(delta)
 		if (model > #models) then model = 1 end
 		if (material > #materials) then material = 1 end
 	end
-	current:SetMesh(Engine.ResourceManager:GetMesh(models[model]))
-	current:SetMaterial(Engine.ResourceManager:GetMaterial(materials[material]))
+	current:SetMesh(resource_manager:GetMesh(models[model]))
+	current:SetMaterial(resource_manager:GetMaterial(materials[material]))
 end

@@ -22,6 +22,12 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 	}
 }
 
+Material::Material(std::shared_ptr<Shader> shader, std::shared_ptr<GLTexture> texture) {
+	m_uniforms = std::map<std::string, Uniform>();
+	m_shader = shader;
+	m_texture = texture;
+}
+
 void Material::Cleanup() {}
 
 void Material::SetTexture(std::shared_ptr<GLTexture> texture) {m_texture = texture;}
@@ -29,7 +35,7 @@ void Material::SetShader(std::shared_ptr<Shader> shader) {m_shader = shader;}
 void Material::SetUniform(Uniform uniform) {m_uniforms[uniform.name] = uniform;}
 
 void Material::Bind(Game* game) {
-	glBindTexture(GL_TEXTURE_2D, m_texture->GetTextureID());
+	if (m_texture != nullptr) glBindTexture(GL_TEXTURE_2D, m_texture->GetTextureID());
 	glUseProgram(m_shader->GetProgramID());
 
 	for (auto i = m_uniforms.begin(); i != m_uniforms.end(); i++) {

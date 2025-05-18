@@ -36,6 +36,12 @@ Game::Game(std::string wad_path, int width, int height, int downscale, bool resi
 		Transform{vec3(0.0f, 1.0f, 0.0f), vec3(0.0f), vec3(1.0f)}
 	);
 
+	GameObject* particler = m_workspace->CreateGameObject(
+		"particler", root,
+		"assets/particle.lua", nullptr, nullptr,
+		Transform{}
+	);
+
 	m_resource_manager->GetMaterial("TEST0")->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
 	m_resource_manager->GetMaterial("TEST1")->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
 
@@ -95,8 +101,11 @@ void Game::Process() {
 
 void Game::Render() {
 	m_window->DrawMap(m_workspace->GetCamera());
-	for (auto [key, val] : m_workspace->GetGameObjects()) {
+	for (auto& [key, val] : m_workspace->GetGameObjects()) {
 		m_window->DrawGameObject(m_workspace->GetCamera(), val);
+	}
+	for (const auto& i : m_workspace->GetParticleSystems()) {
+		m_window->DrawParticleSystem(m_workspace->GetCamera(), i);
 	}
 	m_window->Present(m_pp_material);
 }

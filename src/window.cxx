@@ -6,6 +6,7 @@
 #include "mesh.hpp"
 #include "material.hpp"
 #include "map.hpp"
+#include "particle_system.hpp"
 #include "shader.hpp"
 #include "builtin_text_shader.h"
 #include "gltexture.hpp"
@@ -294,6 +295,39 @@ void Window::DrawString(int x, int y, uint8_t r, uint8_t g, uint8_t b, uint8_t a
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glUseProgram(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Window::DrawParticleSystem(Camera* camera, ParticleSystem* particle_system) {
+	if (particle_system == nullptr || camera == nullptr) return;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
+	glViewport(0,0,m_width/m_downscale,m_height/m_downscale);
+
+	glBindVertexArray(particle_system->GetVAO());
+	
+	glm::mat4 view_matrix = camera->GetViewMatrix();
+	glm::mat4 projection_matrix = camera->GetProjectionMatrix();
+	
+	Uniform u_model_view_matrix = Uniform{"view", MAT4, &view_matrix};
+	Uniform u_projection_matrix = Uniform{"projection", MAT4, &projection_matrix};
+	
+	particle_system->GetMaterial()->SetUniform(u_model_view_matrix);
+	particle_system->GetMaterial()->SetUniform(u_projection_matrix);
+
+	particle_system->GetMaterial()->Bind(m_game);
+	
+	if (m_wireframe) {
+		glDisable(GL_CULL_FACE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+
+	//glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDrawArraysInstanced(GL_TRIANGLES, 0, 6, particle_system->GetInstances());
+
+	if (m_wireframe) {
+		glEnable(GL_CULL_FACE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 }
 
 void Window::Present(std::shared_ptr<Material> pp_material) {

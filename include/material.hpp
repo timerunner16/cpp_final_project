@@ -30,6 +30,7 @@ struct Uniform {
 class Material : public GenericResource {
 public:
 	Material(Game* game, std::string wad_path, std::vector<std::string> data);
+	Material(std::shared_ptr<Shader>, std::shared_ptr<GLTexture>);
 
 	void Cleanup();
 
