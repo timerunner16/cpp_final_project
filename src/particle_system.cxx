@@ -1,8 +1,5 @@
 #include "particle_system.hpp"
 #include "shader.hpp"
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/euler_angles.hpp>
-#include <glm/gtx/rotate_vector.hpp>
 #include "material.hpp"
 #include "util.hpp"
 #include "builtin_particle_shader.h"
@@ -13,9 +10,10 @@ ParticleSystem::ParticleSystem(particle_system_create_info info) {
 	m_particles = std::vector<particle>(0);
 
 	glm::quat q = glm::quatLookAt(info.direction, glm::vec3(0,1,0));
-	glm::vec3 euler = glm::eulerAngles(q);
+	glm::vec3 euler_base = glm::eulerAngles(q);
 
 	for (size_t i = 0; i < info.num_particles; i++) {
+		glm::vec3 euler = euler_base;
 		euler.x += glm::linearRand(-info.randomization.x, info.randomization.x);
 		euler.y += glm::linearRand(-info.randomization.y, info.randomization.y);
 		vec3 direction{
