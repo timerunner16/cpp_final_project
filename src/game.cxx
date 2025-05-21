@@ -6,6 +6,7 @@
 #include "input.hpp"
 #include "vec3.hpp"
 #include "map.hpp"
+#include "physics.hpp"
 
 Game::Game(std::string wad_path, int width, int height, int downscale, bool resizable) {
 	m_wad_path = wad_path;
@@ -21,31 +22,31 @@ Game::Game(std::string wad_path, int width, int height, int downscale, bool resi
 	GameObject* root = m_workspace->CreateGameObject(
 		"root", nullptr,
 		"", nullptr, nullptr,
-		Transform()
+		Transform(), Box{}
 	);
 	
 	GameObject* observer = m_workspace->CreateGameObject(
 		"Observer", root,
 		"assets/observer.lua", nullptr, nullptr,
-		Transform{vec3(0.0f), vec3(0.0f), vec3(1.0f)}
+		Transform{vec3(0.0f), vec3(0.0f), vec3(1.0f)}, Box{vec2{0.5f, 0.5f}, vec2{0,0}}
 	);
 
 	GameObject* suzanne = m_workspace->CreateGameObject(
 		"Suzanne", root,
 		"assets/suzanne.lua", m_resource_manager->GetMesh("SUZANNE"), m_resource_manager->GetMaterial("TEST0"),
-		Transform{vec3(0.0f, 1.0f, 0.0f), vec3(0.0f), vec3(1.0f)}
+		Transform{vec3(0.0f, 1.0f, 0.0f), vec3(0.0f), vec3(1.0f)}, Box{vec2{1,1}, vec2{0,0}}
 	);
 
 	GameObject* particle_host = m_workspace->CreateGameObject(
 		"ParticleHost", root,
 		"assets/particle_host.lua", nullptr, nullptr,
-		Transform{}
+		Transform{}, Box{}
 	);
 
 	GameObject* particle_creator = m_workspace->CreateGameObject(
 		"ParticleCreator", root,
 		"assets/particle_creator.lua", nullptr, nullptr,
-		Transform{}
+		Transform{}, Box{}
 	);
 
 	m_resource_manager->GetMaterial("TEST0")->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});

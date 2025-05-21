@@ -5,16 +5,18 @@
 #include <string>
 #include <map>
 #include "transform.hpp"
-#include "mesh.hpp"
-#include "material.hpp"
+#include "physics.hpp"
 
 class Game;
+class Event;
+class Mesh;
+class Material;
 
 class GameObject {
 public:
 	GameObject(Game* game, std::string name, GameObject* parent,
 			std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
-			const Transform& transform);
+			const Transform& transform, const Box& box);
 	~GameObject();
 
 	void Process(float delta);
@@ -22,20 +24,22 @@ public:
 	void SetMesh(std::shared_ptr<Mesh> mesh);
 	void SetMaterial(std::shared_ptr<Material> material);
 	void SetTransform(const Transform& transform);
+	void SetBox(const Box& box);
+	void SetVelocity(const vec3& velocity);
 
 	std::string GetName();
 	std::shared_ptr<Mesh> GetMesh();
 	std::shared_ptr<Material> GetMaterial();
 	Transform& GetTransform();
+	Box& GetBox();
 	Transform GetGlobalTransform();
+	vec3& GetVelocity();
 
 	GameObject* GetParent();
 	GameObject* GetChild(std::string name);
 	std::map<std::string, GameObject*> GetChildren();
 	sol::as_table_t<std::map<std::string, GameObject*>> GetChildren_Lua();
-
 	void SetParent(GameObject*);
-
 	void RemoveChild(std::string name);
 	void AddChild(GameObject* child);
 
@@ -50,6 +54,8 @@ private:
 	std::shared_ptr<Mesh> m_mesh;
 	std::shared_ptr<Material> m_material;
 	Transform m_transform;
+	Box m_box;
+	vec3 m_velocity;
 
 	bool m_lua_loaded;
 	std::shared_ptr<sol::state> m_lua_state;

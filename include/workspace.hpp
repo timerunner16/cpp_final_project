@@ -10,6 +10,7 @@ class GameObject;
 class Event;
 class Mesh;
 class Material;
+class Box;
 
 class Workspace {
 public:
@@ -18,7 +19,7 @@ public:
 	
 	GameObject* CreateGameObject(std::string name, GameObject* parent,
 		std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
-		const Transform& transform);
+		const Transform& transform, const Box& box);
 	void CreateParticleSystem(particle_system_create_info info);
 	Event* CreateEvent(std::string name, GameObject* parent);
 

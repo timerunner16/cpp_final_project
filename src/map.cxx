@@ -462,6 +462,7 @@ Map::Map(Game* game, std::string mapname) {
 	}
 	
 	m_map_segments = std::vector<MapSegmentRenderData>();
+	m_lines = std::vector<line>();
 
 	for (size_t i = 0; i < sectors.size(); i++) {
 		udmf_sector current_sector = sectors[i];
@@ -522,6 +523,14 @@ Map::Map(Game* game, std::string mapname) {
 
 			if (!current_sidedef.texturemiddle.empty()) {
 				std::shared_ptr<Material> material = m_game->GetResourceManager()->GetMaterial(current_sidedef.texturemiddle);
+				line l = line{vec2{v1.x,v1.y}/SCALE, vec2{v2.x,v2.y}/SCALE};
+				vec2 ln = l.n();
+				if (ln.dot(vec2{norm_x, norm_y}) < 0) {
+					vec2 tmp = l.a;
+					l.a = l.b;
+					l.b = tmp;
+				}
+				m_lines.push_back(l);
 
 				float v1u = current_sidedef.offsetx_mid/SCALE;
 				float v2u = length/SCALE + current_sidedef.offsetx_mid/SCALE;
@@ -631,4 +640,8 @@ Map::~Map() {
 
 std::vector<MapSegmentRenderData> Map::GetMapSegments() {
 	return m_map_segments;
+}
+
+std::vector<line> Map::GetLines() {
+	return m_lines;
 }

@@ -17,11 +17,11 @@ Workspace::~Workspace() {
 
 GameObject* Workspace::CreateGameObject(std::string name, GameObject* parent,
 		std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
-		const Transform& transform) {
+		const Transform& transform, const Box& box) {
 	GameObject* game_object = new GameObject(
 		m_game, name, parent,
 		script_path, mesh, material,
-		transform
+		transform, box
 	);
 	if (parent == nullptr) m_game_objects.insert(std::make_pair(name, game_object));
 	return game_object;

@@ -27,6 +27,7 @@ add_executable(
 	src/util.cxx
 	src/particle_system.cxx
 	src/event.cxx
+	src/physics.cxx
 )
 target_include_directories(cpp_final_project PRIVATE include)
 

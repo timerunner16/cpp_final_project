@@ -7,7 +7,7 @@
 
 GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 		std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
-		const Transform& transform) {
+		const Transform& transform, const Box& box) {
 	m_game = game;
 
 	m_name = name;
@@ -18,6 +18,7 @@ GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 	m_mesh = mesh;
 	m_material = material;
 	m_transform = transform;
+	m_box = box;
 
 	m_lua_loaded = !script_path.empty();
 	if (!m_lua_loaded) return;
@@ -52,17 +53,37 @@ void GameObject::Process(float delta) {
 		}
 	}
 
+	m_box.center = vec2{m_transform.position.x, m_transform.position.z};
+	std::vector<vec2> forces(0);
+	vec2 in_velocity = vec2{m_velocity.x, m_velocity.z} * delta;
+	for (line segment : m_game->GetMap()->GetLines()) {
+		collision_result result = sweep_box_line(m_box, segment, in_velocity);
+		if (result.hit) forces.push_back(result.until_blocked + result.out_velocity - in_velocity);
+	}
+	m_transform.position.x += in_velocity.x;
+	m_transform.position.y += m_velocity.y * delta;
+	m_transform.position.z += in_velocity.y;
+	for (vec2 force : forces) {
+		printf("{%f, %f}\n", force.x, force.y);
+		m_transform.position.x += force.x;
+		m_transform.position.z += force.y;
+	}
+	m_box.center = m_transform.position;
+
 	for (auto& [key, val] : m_children) {val->Process(delta);}
 }
 
 void GameObject::SetMesh(std::shared_ptr<Mesh> mesh) {m_mesh = mesh;}
 void GameObject::SetMaterial(std::shared_ptr<Material> material) {m_material = material;}
 void GameObject::SetTransform(const Transform& transform) {m_transform = transform;}
+void GameObject::SetBox(const Box& box) {m_box = box;}
+void GameObject::SetVelocity(const vec3& velocity) {m_velocity = velocity;}
 
 std::string GameObject::GetName() {return m_name;}
 std::shared_ptr<Mesh> GameObject::GetMesh() {return m_mesh;}
 std::shared_ptr<Material> GameObject::GetMaterial() {return m_material;}
 Transform& GameObject::GetTransform() {return m_transform;}
+Box& GameObject::GetBox() {return m_box;}
 Transform GameObject::GetGlobalTransform() {
 	glm::mat4 model_matrix = m_transform.GetModelMatrix();
 	GameObject* parent = m_parent;
@@ -80,6 +101,7 @@ Transform GameObject::GetGlobalTransform() {
 	vec3 rotation = glm::eulerAngles(orientation);	
 	return Transform{position, rotation, scale};
 }
+vec3& GameObject::GetVelocity() {return m_velocity;}
 
 GameObject* GameObject::GetParent() {return m_parent;}
 GameObject* GameObject::GetChild(std::string name) {
