@@ -1,6 +1,9 @@
 #include "game_object.hpp"
 #include "game.hpp"
 #include "lua_usertype_setup.hpp"
+#include "material.hpp"
+#include "mesh.hpp"
+#include "map.hpp"
 
 GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 		std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
@@ -18,21 +21,21 @@ GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 
 	m_lua_loaded = !script_path.empty();
 	if (!m_lua_loaded) return;
-	m_lua_state = sol::state();
-	m_lua_state.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string);
+	m_lua_state = std::make_shared<sol::state>();
+	m_lua_state->open_libraries(sol::lib::base, sol::lib::math, sol::lib::string);
 
 	lua_usertype_setup(m_game, m_lua_state, this);
 
-	m_lua_state.script_file(script_path, sol::load_mode::text);
+	m_lua_state->script_file(script_path, sol::load_mode::text);
 
-	sol::safe_function init = m_lua_state["init"];
+	sol::safe_function init = m_lua_state->get<sol::function>("init");
 	sol::protected_function_result result = init();
 	if (!result.valid()) {
 		sol::error error = result;
 		printf("[Lua Error]: %s\n", error.what());
 	}
 
-	m_lua_process = m_lua_state["process"];
+	m_lua_process = m_lua_state->get<sol::function>("process");
 }
 
 GameObject::~GameObject() {
@@ -105,4 +108,16 @@ void GameObject::RemoveChild(std::string name) {
 void GameObject::AddChild(GameObject* child) {
 	if (child == nullptr) return;
 	m_children[child->GetName()] = child;
+}
+
+Event* GameObject::GetEvent(std::string name) {
+	if (m_events.contains(name)) return m_events[name];
+	return nullptr;
+}
+void GameObject::RemoveEvent(std::string name) {
+	if (m_events.contains(name)) m_events.erase(name);
+}
+void GameObject::AddEvent(Event* event, std::string name) {
+	if (event == nullptr) return;
+	m_events[name] = event;
 }

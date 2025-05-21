@@ -25,20 +25,26 @@ Game::Game(std::string wad_path, int width, int height, int downscale, bool resi
 	);
 	
 	GameObject* observer = m_workspace->CreateGameObject(
-		"observer", root,
+		"Observer", root,
 		"assets/observer.lua", nullptr, nullptr,
 		Transform{vec3(0.0f), vec3(0.0f), vec3(1.0f)}
 	);
 
 	GameObject* suzanne = m_workspace->CreateGameObject(
-		"suzanne", root,
+		"Suzanne", root,
 		"assets/suzanne.lua", m_resource_manager->GetMesh("SUZANNE"), m_resource_manager->GetMaterial("TEST0"),
 		Transform{vec3(0.0f, 1.0f, 0.0f), vec3(0.0f), vec3(1.0f)}
 	);
 
-	GameObject* particler = m_workspace->CreateGameObject(
-		"particler", root,
-		"assets/particle.lua", nullptr, nullptr,
+	GameObject* particle_host = m_workspace->CreateGameObject(
+		"ParticleHost", root,
+		"assets/particle_host.lua", nullptr, nullptr,
+		Transform{}
+	);
+
+	GameObject* particle_creator = m_workspace->CreateGameObject(
+		"ParticleCreator", root,
+		"assets/particle_creator.lua", nullptr, nullptr,
 		Transform{}
 	);
 

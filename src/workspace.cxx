@@ -2,6 +2,8 @@
 #include <cmath>
 #include "workspace.hpp"
 #include "game.hpp"
+#include "game_object.hpp"
+#include "event.hpp"
 
 Workspace::Workspace(Game* game) {
 	m_game = game;
@@ -27,6 +29,13 @@ GameObject* Workspace::CreateGameObject(std::string name, GameObject* parent,
 
 void Workspace::CreateParticleSystem(particle_system_create_info info) {
 	m_particle_systems.push_back(new ParticleSystem(info));
+}
+
+Event* Workspace::CreateEvent(std::string name, GameObject* parent) {
+	Event* event = new Event();
+	if (parent == nullptr) m_events.insert(std::make_pair(name, event));
+	parent->AddEvent(event, name);
+	return event;
 }
 
 std::map<std::string, GameObject*> Workspace::GetGameObjects() {return m_game_objects;}

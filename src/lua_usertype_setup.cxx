@@ -15,6 +15,8 @@
 #include "window.hpp"
 #include "workspace.hpp"
 #include "input.hpp"
+#include "event.hpp"
+#include "mesh.hpp"
 
 int engine_globals_deny(lua_State* L) {
 	return luaL_error(L, "Can't modify Engine global table.");
@@ -24,8 +26,19 @@ int keys_deny(lua_State* L) {
 	return luaL_error(L, "Can't modify Keys table.");
 }
 
-void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_object) {
-	sol::usertype<vec2> vec2_data_type = lua_state.new_usertype<vec2>(
+void lua_usertype_setup(Game *game, std::shared_ptr<sol::state> lua_state, GameObject* game_object) {
+	sol::usertype<Event> event_data_type = lua_state->new_usertype<Event>(
+		"Event", sol::no_constructor,
+		"Connect", [lua_state](Event& event, std::string function_name) -> void {
+			event.Connect(lua_state, function_name);
+		},
+		"Disconnect", [lua_state](Event& event, std::string function_name) -> void {
+			event.Disconnect(lua_state, function_name);
+		},
+		"Fire", &Event::Fire
+	);
+
+	sol::usertype<vec2> vec2_data_type = lua_state->new_usertype<vec2>(
 		"Vector2",
 		sol::meta_function::construct,
 		sol::factories(
@@ -53,7 +66,7 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 		"dot", &vec2::dot
 	);
 
-	sol::usertype<vec3> vec3_data_type = lua_state.new_usertype<vec3>(
+	sol::usertype<vec3> vec3_data_type = lua_state->new_usertype<vec3>(
 		"Vector3",
 		sol::meta_function::construct,
 		sol::factories(
@@ -82,7 +95,7 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 		"dot", &vec3::dot
 	);
 
-	sol::usertype<ivec2> ivec2_data_type = lua_state.new_usertype<ivec2>(
+	sol::usertype<ivec2> ivec2_data_type = lua_state->new_usertype<ivec2>(
 		"IVector2",
 		sol::meta_function::construct,
 		sol::factories(
@@ -108,7 +121,7 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 		"length", &ivec2::length
 	);
 
-	sol::usertype<ivec3> ivec3_data_type = lua_state.new_usertype<ivec3>(
+	sol::usertype<ivec3> ivec3_data_type = lua_state->new_usertype<ivec3>(
 		"IVector3",
 		sol::meta_function::construct,
 		sol::factories(
@@ -136,39 +149,42 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 	);
 
 
-	sol::usertype<Transform> transform_data_type = lua_state.new_usertype<Transform>("Transform",
+	sol::usertype<Transform> transform_data_type = lua_state->new_usertype<Transform>("Transform",
 		sol::constructors<Transform(vec3,vec3,vec3)>());
 
-	transform_data_type["position"] = sol::property(&Transform::get_position, &Transform::set_position);
-	transform_data_type["rotation"] = sol::property(&Transform::get_rotation, &Transform::set_rotation);
-	transform_data_type["scale"] = sol::property(&Transform::get_scale, &Transform::set_scale);
+	transform_data_type["Position"] = sol::property(&Transform::get_position, &Transform::set_position);
+	transform_data_type["Rotation"] = sol::property(&Transform::get_rotation, &Transform::set_rotation);
+	transform_data_type["Scale"] = sol::property(&Transform::get_scale, &Transform::set_scale);
 
 	transform_data_type["LookVector"] = sol::readonly_property(&Transform::GetLookVector);
 	transform_data_type["RightVector"] = sol::readonly_property(&Transform::GetRightVector);
 	transform_data_type["UpVector"] = sol::readonly_property(&Transform::GetUpVector);
 
 
-	sol::usertype<GameObject> game_object_data_type = lua_state.new_usertype<GameObject>("GameObject",sol::no_constructor);
-
-	game_object_data_type["transform"] = sol::property(&GameObject::GetTransform, &GameObject::SetTransform);
-	game_object_data_type["global_transform"] = sol::readonly_property(&GameObject::GetGlobalTransform);
-	game_object_data_type.set_function("GetChild", &GameObject::GetChild);
-	game_object_data_type.set_function("GetChildren", &GameObject::GetChildren_Lua);
-	game_object_data_type.set_function("GetParent", &GameObject::GetParent);
-	game_object_data_type.set_function("GetName", &GameObject::GetName);
-	game_object_data_type.set_function("SetMesh", &GameObject::SetMesh);
-	game_object_data_type.set_function("SetMaterial", &GameObject::SetMaterial);
-
-
-	sol::usertype<Camera> camera_data_type = lua_state.new_usertype<Camera>("Camera", sol::no_constructor);
-	
-	camera_data_type["transform"] = sol::property(&Camera::GetTransform, &Camera::SetTransform);
+	sol::usertype<GameObject> game_object_data_type = lua_state->new_usertype<GameObject>(
+		"GameObject", sol::no_constructor,
+		"Transform", sol::property(&GameObject::GetTransform, &GameObject::SetTransform),
+		"Velocity", sol::property(&GameObject::GetVelocity, &GameObject::SetVelocity),
+		"GlobalTransform", sol::readonly_property(&GameObject::GetGlobalTransform),
+		"GetChild", &GameObject::GetChild,
+		"GetChildren", &GameObject::GetChildren_Lua,
+		"GetParent", &GameObject::GetParent,
+		"GetName", &GameObject::GetName,
+		"SetMesh", &GameObject::SetMesh,
+		"SetMaterial", &GameObject::SetMaterial,
+		"GetEvent", &GameObject::GetEvent
+	);
 
 
-	sol::usertype<Mesh> mesh_data_type = lua_state.new_usertype<Mesh>("Mesh", sol::no_constructor);
-	sol::usertype<GLTexture> texture_data_type = lua_state.new_usertype<GLTexture>("Texture", sol::no_constructor);
-	sol::usertype<Shader> shader_data_type = lua_state.new_usertype<Shader>("Shader", sol::no_constructor);
-	sol::usertype<Uniform> uniform_data_type = lua_state.new_usertype<Uniform>(
+	sol::usertype<Camera> camera_data_type = lua_state->new_usertype<Camera>(
+		"Camera", sol::no_constructor,
+		"Transform", sol::property(&Camera::GetTransform, &Camera::SetTransform)
+	);
+
+	sol::usertype<Mesh> mesh_data_type = lua_state->new_usertype<Mesh>("Mesh", sol::no_constructor);
+	sol::usertype<GLTexture> texture_data_type = lua_state->new_usertype<GLTexture>("Texture", sol::no_constructor);
+	sol::usertype<Shader> shader_data_type = lua_state->new_usertype<Shader>("Shader", sol::no_constructor);
+	sol::usertype<Uniform> uniform_data_type = lua_state->new_usertype<Uniform>(
 		"Uniform",
 		sol::factories(
 			[](const std::string& name, const bool& data) {
@@ -195,7 +211,7 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 		)
 	);
 
-	sol::usertype<Material> material_data_type = lua_state.new_usertype<Material>("Material",
+	sol::usertype<Material> material_data_type = lua_state->new_usertype<Material>("Material",
 		sol::no_constructor,
 		"SetUniform", &Material::SetUniform,
 		"SetTexture", &Material::SetTexture,
@@ -203,7 +219,7 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 	);
 
 
-	sol::usertype<ButtonState> button_state_data_type = lua_state.new_usertype<ButtonState>(
+	sol::usertype<ButtonState> button_state_data_type = lua_state->new_usertype<ButtonState>(
 		"ButtonState",
 		sol::no_constructor,
 		"Pressed", sol::readonly_property(&ButtonState::GetPressed),
@@ -211,7 +227,7 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 	);
 
 
-	sol::usertype<InputManager> input_manager_data_type = lua_state.new_usertype<InputManager>("InputManager",sol::no_constructor);
+	sol::usertype<InputManager> input_manager_data_type = lua_state->new_usertype<InputManager>("InputManager",sol::no_constructor);
 
 	input_manager_data_type.set_function("QueryKey", &InputManager::QueryKey);
 	input_manager_data_type.set_function("QueryMouseButton", &InputManager::QueryMouseButton);
@@ -227,9 +243,9 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 	input_manager_data_type.set_function("SetMouseCaptured", &InputManager::SetMouseCaptured);
 
 
-	sol::table keys_table = lua_state.create_named_table("Keys");
+	sol::table keys_table = lua_state->create_named_table("Keys");
 
-	sol::table keys_metatable = lua_state.create_table_with();
+	sol::table keys_metatable = lua_state->create_table_with();
 	keys_metatable["A"] = SDL_SCANCODE_A;
 	keys_metatable["B"] = SDL_SCANCODE_B;
 	keys_metatable["C"] = SDL_SCANCODE_C;
@@ -307,7 +323,7 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 	keys_table[sol::metatable_key] = keys_metatable;
 
 
-	sol::usertype<particle_system_create_info> particle_system_create_info_data_type = lua_state.new_usertype<particle_system_create_info>(
+	sol::usertype<particle_system_create_info> particle_system_create_info_data_type = lua_state->new_usertype<particle_system_create_info>(
 		"ParticleSystemCreateInfo",
 		sol::factories(
 			[]() {
@@ -329,9 +345,8 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 	);
 
 	
-	sol::usertype<ResourceManager> resource_manager_data_type = lua_state.new_usertype<ResourceManager>(
-		"ResourceManager",
-		sol::no_constructor,
+	sol::usertype<ResourceManager> resource_manager_data_type = lua_state->new_usertype<ResourceManager>(
+		"ResourceManager", sol::no_constructor,
 		"GetMesh", &ResourceManager::GetMesh,
 		"GetMaterial", &ResourceManager::GetMaterial,
 		"GetTexture", &ResourceManager::GetGLTexture,
@@ -339,9 +354,8 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 	);
 
 
-	sol::usertype<Window> window_data_type = lua_state.new_usertype<Window>(
-		"Window",
-		sol::no_constructor,
+	sol::usertype<Window> window_data_type = lua_state->new_usertype<Window>(
+		"Window", sol::no_constructor,
 		"Width", sol::readonly_property(&Window::GetWidth),
 		"Height", sol::readonly_property(&Window::GetHeight),
 		"Focused", sol::readonly_property(&Window::GetFocused),
@@ -350,18 +364,19 @@ void lua_usertype_setup(Game *game, sol::state& lua_state, GameObject* game_obje
 	);
 	
 
-	sol::usertype<Workspace> workspace_data_type = lua_state.new_usertype<Workspace>(
+	sol::usertype<Workspace> workspace_data_type = lua_state->new_usertype<Workspace>(
 		"Workspace", sol::no_constructor,
 		"GetGameObject", &Workspace::GetGameObject,
 		"GetGameObjects", &Workspace::GetGameObjects_Lua,
 		"GetCamera", &Workspace::GetCamera,
-		"CreateParticleSystem", &Workspace::CreateParticleSystem
+		"CreateParticleSystem", &Workspace::CreateParticleSystem,
+		"CreateEvent", &Workspace::CreateEvent
 	);
 
 
-	sol::table engine_globals_table = lua_state.create_named_table("Engine");
+	sol::table engine_globals_table = lua_state->create_named_table("Engine");
 
-	sol::table engine_globals_metatable = lua_state.create_table_with();
+	sol::table engine_globals_metatable = lua_state->create_table_with();
 	engine_globals_metatable["Window"] = game->GetWindow();
 	engine_globals_metatable["Workspace"] = game->GetWorkspace();
 	engine_globals_metatable["InputManager"] = game->GetInputManager();

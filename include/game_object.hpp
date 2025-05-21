@@ -38,6 +38,10 @@ public:
 
 	void RemoveChild(std::string name);
 	void AddChild(GameObject* child);
+
+	Event* GetEvent(std::string name);
+	void RemoveEvent(std::string name);
+	void AddEvent(Event* event, std::string name);
 private:
 	Game* m_game;
 
@@ -48,9 +52,11 @@ private:
 	Transform m_transform;
 
 	bool m_lua_loaded;
-	sol::state m_lua_state;
+	std::shared_ptr<sol::state> m_lua_state;
 	sol::safe_function m_lua_process;
 
 	GameObject* m_parent;
 	std::map<std::string, GameObject*> m_children;
+
+	std::map<std::string, Event*> m_events;
 };

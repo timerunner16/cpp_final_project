@@ -1,10 +1,15 @@
 #pragma once
 #include <string>
 #include <map>
-#include "game_object.hpp"
+#include <sol/sol.hpp>
 #include "camera.hpp"
 #include "particle_system.hpp"
+
 class Game;
+class GameObject;
+class Event;
+class Mesh;
+class Material;
 
 class Workspace {
 public:
@@ -15,6 +20,7 @@ public:
 		std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
 		const Transform& transform);
 	void CreateParticleSystem(particle_system_create_info info);
+	Event* CreateEvent(std::string name, GameObject* parent);
 
 	std::map<std::string, GameObject*> GetGameObjects();
 	std::vector<ParticleSystem*> GetParticleSystems();
@@ -27,5 +33,6 @@ private:
 	Game* m_game;
 	std::map<std::string, GameObject*> m_game_objects;
 	std::vector<ParticleSystem*> m_particle_systems; 
+	std::map<std::string, Event*> m_events;
 	Camera* m_camera;
 };
