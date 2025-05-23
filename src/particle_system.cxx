@@ -6,29 +6,20 @@
 
 ParticleSystem::ParticleSystem(particle_system_create_info info) {
 	m_gravity = info.gravity;
-	m_remaining_life = info.lifetime;
 	m_particles = std::vector<particle>(0);
+	m_speed = info.speed;
+	m_randomization = info.randomization;
+	m_position = info.position;
+	m_direction = info.direction;
 
-	glm::quat q = glm::quatLookAt(info.direction, glm::vec3(0,1,0));
-	glm::vec3 euler_base = glm::eulerAngles(q);
+	m_particles_per_launch = info.num_particles;
+	m_remaining_launches = info.num_launches;
+	m_launch_interval = info.launch_interval;
+	m_remaining_life = info.lifetime+m_launch_interval*m_remaining_launches;
+	m_lifetime = info.lifetime;
 
-	for (size_t i = 0; i < info.num_particles; i++) {
-		glm::vec3 euler = euler_base;
-		euler.x += glm::linearRand(-info.randomization.x, info.randomization.x);
-		euler.y += glm::linearRand(-info.randomization.y, info.randomization.y);
-		vec3 direction{
-		   -glm::cos(euler.x) * glm::sin(euler.y),
-			glm::sin(euler.x),
-	    	glm::cos(euler.x) * glm::cos(euler.y),
-		};
+	AddParticles();
 
-		vec3 position = info.position;
-		vec3 velocity = direction.unit() * info.speed;
-		m_particles.push_back(particle{
-			info.position, velocity
-		});
-	}
-	
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
 	
@@ -63,13 +54,43 @@ ParticleSystem::~ParticleSystem() {
 }
 
 void ParticleSystem::Update(float delta) {
+	m_remaining_life -= delta;
+	if (m_last_launch - m_remaining_life > m_launch_interval && m_remaining_launches > 0)
+		AddParticles();
 	for (auto& i : m_particles) {
-		i.velocity.y += delta * m_gravity;
 		i.position += i.velocity * delta;
+		i.velocity.y += delta * m_gravity;
+		i.remaining_life -= delta;
 	}
+	std::erase_if(m_particles, [](const particle& p) -> bool {
+		return p.remaining_life <= 0;
+	});
 	for (size_t i = 0; i < m_particles.size(); i++)
 		m_material->SetUniform({"offsets[" + std::to_string(i) + "]", VEC3, &m_particles[i].position});
-	m_remaining_life -= delta;
+}
+
+void ParticleSystem::AddParticles() {
+	glm::quat q = glm::quatLookAt(m_direction, glm::vec3(0,1,0));
+	glm::vec3 euler_base = glm::eulerAngles(q);
+
+	for (size_t i = 0; i < m_particles_per_launch; i++) {
+		glm::vec3 euler = euler_base;
+		euler.x += glm::linearRand(-m_randomization.x, m_randomization.x);
+		euler.y += glm::linearRand(-m_randomization.y, m_randomization.y);
+		vec3 direction{
+		   -glm::cos(euler.x) * glm::sin(euler.y),
+			glm::sin(euler.x),
+	    	glm::cos(euler.x) * glm::cos(euler.y),
+		};
+
+		vec3 position = m_position;
+		vec3 velocity = direction.unit() * m_speed;
+		m_particles.push_back(particle{
+			position, velocity, m_lifetime
+		});
+	}
+	m_remaining_launches--;
+	m_last_launch = m_remaining_life;
 }
 
 std::shared_ptr<Material> ParticleSystem::GetMaterial() {return m_material;}

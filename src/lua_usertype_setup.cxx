@@ -35,7 +35,9 @@ void lua_usertype_setup(Game *game, std::shared_ptr<sol::state> lua_state, GameO
 		"Disconnect", [lua_state](Event& event, std::string function_name) -> void {
 			event.Disconnect(lua_state, function_name);
 		},
-		"Fire", &Event::Fire
+		"Fire", &Event::Fire,
+		"SetValue", &Event::SetValue,
+		"GetValue", &Event::GetValue
 	);
 
 	sol::usertype<vec2> vec2_data_type = lua_state->new_usertype<vec2>(
@@ -337,11 +339,13 @@ void lua_usertype_setup(Game *game, std::shared_ptr<sol::state> lua_state, GameO
 		"Speed", &particle_system_create_info::speed,
 		"Gravity", &particle_system_create_info::gravity,
 		"Lifetime", &particle_system_create_info::lifetime,
+		"NumParticles", &particle_system_create_info::num_particles,
+		"NumLaunches", &particle_system_create_info::num_launches,
+		"LaunchInterval", &particle_system_create_info::launch_interval,
 		"R", &particle_system_create_info::r,
 		"G", &particle_system_create_info::g,
 		"B", &particle_system_create_info::b,
-		"A", &particle_system_create_info::a,
-		"NumParticles", &particle_system_create_info::num_particles
+		"A", &particle_system_create_info::a
 	);
 
 	
