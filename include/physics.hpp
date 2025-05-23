@@ -28,5 +28,4 @@ struct collision_result {
 vec2 closest_point_on_line(vec2 p, line l);
 
 collision_result sweep_box_line(Box a, line l, vec2 v);
-
-void resolve_collisions(std::vector<line> lines, std::vector<Box> boxes);
+collision_result discrete_box_box(Box moving, Box unmoving, vec2 v);

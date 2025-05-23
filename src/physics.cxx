@@ -1,4 +1,5 @@
 #include "physics.hpp"
+#include <cstdio>
 
 #define EPSILON 0.005f
 #define SIDE_EPSILON 0.05f
@@ -110,4 +111,34 @@ collision_result sweep_box_line(Box a, line l, vec2 v) {
 	}
 
 	return collision_result{true, until_blocked, out_velocity, hit_normal};
+}
+
+collision_result discrete_box_box(Box moving, Box unmoving, vec2 v) {
+	vec2 mmin = moving.min() + v;
+	vec2 umin = unmoving.min();
+	vec2 mmax = moving.max() + v;
+	vec2 umax = unmoving.max();
+
+	if (mmax.x < umin.x || mmin.x > umax.x || mmax.y < umin.y || mmin.y > umax.y)
+		return collision_result{false};
+
+	vec2 r_left{umin.x-mmax.x, 0};
+	vec2 r_right{umax.x-mmin.x, 0};
+	vec2 r_down{0, umin.y-mmax.y};
+	vec2 r_up{0, umax.y-mmin.y};
+
+	float l_r_left = r_left.length();
+	float l_r_right = r_right.length();
+	float l_r_down = r_down.length();
+	float l_r_up = r_up.length();
+
+	if (l_r_left < l_r_right && l_r_left < l_r_down && l_r_left < l_r_up)
+		return collision_result{true, r_left, vec2{0,0}, vec2{1,0}};
+	else if (l_r_right < l_r_left && l_r_right < l_r_down && l_r_right < l_r_up)
+		return collision_result{true, r_right, vec2{0,0}, vec2{-1,0}};
+	else if (l_r_down < l_r_left && l_r_down < l_r_right && l_r_down < l_r_up)
+		return collision_result{true, r_down, vec2{0,0}, vec2{0,1}};
+	else
+		return collision_result{true, r_up, vec2{0,0}, vec2{0,-1}};
+	return collision_result{true, vec2{0,0}, vec2{0,0}, vec2{0,0}};
 }

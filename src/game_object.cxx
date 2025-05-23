@@ -4,6 +4,7 @@
 #include "material.hpp"
 #include "mesh.hpp"
 #include "map.hpp"
+#include "workspace.hpp"
 
 GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 		std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
@@ -19,6 +20,7 @@ GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 	m_material = material;
 	m_transform = transform;
 	m_box = box;
+	m_box.center = vec2{m_transform.position.x, m_transform.position.z};
 
 	m_lua_loaded = !script_path.empty();
 	if (!m_lua_loaded) return;
@@ -54,23 +56,43 @@ void GameObject::Process(float delta) {
 	}
 
 	m_box.center = vec2{m_transform.position.x, m_transform.position.z};
-	std::vector<vec2> forces(0);
 	vec2 in_velocity = vec2{m_velocity.x, m_velocity.z} * delta;
-	for (line segment : m_game->GetMap()->GetLines()) {
-		collision_result result = sweep_box_line(m_box, segment, in_velocity);
-		if (result.hit) forces.push_back(result.until_blocked + result.out_velocity - in_velocity);
+
+	if (m_box.bound.x > 0 && m_box.bound.y > 0) {
+		std::vector<vec2> forces(0);
+		for (line segment : m_game->GetMap()->GetLines()) {
+			collision_result result = sweep_box_line(m_box, segment, in_velocity);
+			if (result.hit) forces.push_back(result.until_blocked + result.out_velocity - in_velocity);
+		}
+		for (auto& [key, val] : m_game->GetWorkspace()->GetGameObjects()) {
+			std::vector<collision_result> results = val->CollideBox(m_box, in_velocity);
+			for (collision_result result : results)
+				if (result.hit) forces.push_back(result.until_blocked);
+		}
+		for (vec2 force : forces) {
+			m_transform.position.x += force.x;
+			m_transform.position.z += force.y;
+		}
 	}
+	
 	m_transform.position.x += in_velocity.x;
 	m_transform.position.y += m_velocity.y * delta;
 	m_transform.position.z += in_velocity.y;
-	for (vec2 force : forces) {
-		printf("{%f, %f}\n", force.x, force.y);
-		m_transform.position.x += force.x;
-		m_transform.position.z += force.y;
-	}
-	m_box.center = m_transform.position;
+	m_box.center = vec2{m_transform.position.x, m_transform.position.z};
 
 	for (auto& [key, val] : m_children) {val->Process(delta);}
+}
+
+std::vector<collision_result> GameObject::CollideBox(const Box& moving, vec2 v) {
+	if (moving.center == m_box.center) return std::vector<collision_result>(0);
+	std::vector<collision_result> outputs(0);
+	for (auto& [key, val] : m_children) {
+		std::vector<collision_result> child_outputs(0);
+		child_outputs = val->CollideBox(moving, v);
+		for (collision_result i : child_outputs) outputs.push_back(i);
+	}
+	outputs.push_back(discrete_box_box(moving, m_box, v));
+	return outputs;
 }
 
 void GameObject::SetMesh(std::shared_ptr<Mesh> mesh) {m_mesh = mesh;}

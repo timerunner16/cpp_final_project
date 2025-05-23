@@ -28,13 +28,13 @@ Game::Game(std::string wad_path, int width, int height, int downscale, bool resi
 	GameObject* observer = m_workspace->CreateGameObject(
 		"Observer", root,
 		"assets/observer.lua", nullptr, nullptr,
-		Transform{vec3(0.0f), vec3(0.0f), vec3(1.0f)}, Box{vec2{0.5f, 0.5f}, vec2{0,0}}
+		Transform{vec3(0.0f, 0.0f, -3.0f), vec3(0.0f), vec3(1.0f)}, Box{vec2{0.5f, 0.5f}}
 	);
 
 	GameObject* suzanne = m_workspace->CreateGameObject(
 		"Suzanne", root,
 		"assets/suzanne.lua", m_resource_manager->GetMesh("SUZANNE"), m_resource_manager->GetMaterial("TEST0"),
-		Transform{vec3(0.0f, 1.0f, 0.0f), vec3(0.0f), vec3(1.0f)}, Box{vec2{1,1}, vec2{0,0}}
+		Transform{vec3(0.0f, 1.0f, 0.0f), vec3(0.0f), vec3(1.0f)}, Box{vec2{1,1}}
 	);
 
 	GameObject* particle_host = m_workspace->CreateGameObject(

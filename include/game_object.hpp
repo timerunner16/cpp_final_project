@@ -35,6 +35,8 @@ public:
 	Transform GetGlobalTransform();
 	vec3& GetVelocity();
 
+	std::vector<collision_result> CollideBox(const Box& moving, vec2 v);
+
 	GameObject* GetParent();
 	GameObject* GetChild(std::string name);
 	std::map<std::string, GameObject*> GetChildren();
