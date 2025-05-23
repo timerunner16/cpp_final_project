@@ -20,6 +20,15 @@ add_executable(
 	src/material.cxx
 	src/transform.cxx
 	src/lua_usertype_setup.cxx
+	src/geom_usertype.cxx
+	src/go_usertype.cxx
+	src/prtcl_usertype.cxx
+	src/vdata_usertype.cxx
+	src/input_usertype.cxx
+	src/rsmgr_usertype.cxx
+	src/win_usertype.cxx
+	src/wkspc_usertype.cxx
+	src/engine_globals.cxx
 	src/input.cxx
 	src/vec.cxx
 	src/map.cxx
