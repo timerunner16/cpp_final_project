@@ -104,11 +104,25 @@ The `ivec3` class will include:
 - int `x`, `y` and `z` values
 
 ## Build Process
-This game was designed and programmed on Linux (specifically Ubuntu 24.04), and as such I only have build instructions for Linux.
-To build on linux, simply:
+### Linux (Ubuntu/Debian)
+Tested on Ubuntu 24.04 LTS:
 
 1. Install build requirements
-`sudo apt install cmake libsdl2-dev libsdl2-image-dev libglew-dev libgl-dev liblua5.4-dev`
+`sudo apt install gcc git cmake libsdl2-dev libsdl2-image-dev libglew-dev libgl-dev liblua5.4-dev`
+2. Clone the repository
+`git clone https://github.com/timerunner16/cpp_final_project --recursive`
+3. Prepare build directory
+`mkdir cpp_final_project/build && cd cpp_final_project/build`
+4. Create build files
+`cmake <OPTIONS> ..`
+5. Build the project
+`cmake --build .`
+
+### Windows (MSYS2 MINGW64)
+Tested on Windows 11 w/ MSYS2 MINGW64
+
+1. Install build requirements
+`pacman -S git mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-make mingw-w64-x86_64-ninja mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_image mingw-w64-x86_64-glew mingw-w64-x86_64-lua`
 2. Clone the repository
 `git clone https://github.com/timerunner16/cpp_final_project --recursive`
 3. Prepare build directory
