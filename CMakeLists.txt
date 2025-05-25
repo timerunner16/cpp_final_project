@@ -47,6 +47,9 @@ target_include_directories(cpp_final_project PRIVATE ${LUA_INCLUDE_DIR})
 
 
 find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
+if (WIN32)
+	target_link_libraries(cpp_final_project PRIVATE SDL2::SDL2main)
+endif()
 target_link_libraries(cpp_final_project PRIVATE SDL2::SDL2)
 target_include_directories(cpp_final_project PRIVATE ${SDL2_INCLUDE_DIRS})
 
@@ -58,7 +61,8 @@ target_include_directories(cpp_final_project PRIVATE ${SDL2_IMAGE_INCLUDE_DIRS})
 
 set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL REQUIRED)
-target_link_libraries(cpp_final_project PRIVATE OpenGL::OpenGL)
+target_link_libraries(cpp_final_project PRIVATE OpenGL::GL)
+target_link_libraries(cpp_final_project PRIVATE OpenGL::GLU)
 target_include_directories(cpp_final_project PRIVATE ${OPENGL_INCLUDE_DIRS})
 
 
