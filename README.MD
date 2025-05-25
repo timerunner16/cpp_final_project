@@ -7,13 +7,13 @@ First, on the technical side:
 - SDL2-based core
 - OpenGL based renderer
 - OpenAL based audio
-- Lua embedded into the engine for game scripting
+- Lua embedded into the engine for game scripting with sol2 for integration
 
 Second, on the game side:
-- Changing labyrinth dungeon generation (load a room between two hallways, delete once in the next room)
-- ✨ Magic ✨ (several spells that can be learned and swapped between) 
+- Changing labyrinth dungeon generation (load a room between two hallways, swap map to move into next room)
+- ✨ Magic ✨ (several spells that can be learned and swapped between)
 - Enemies (berserker/melee, archer/ranged)
-- 1996 style DOS graphics (Quake) using shaders
+- 1993-1996 idSoftware style graphics (DOOM-Quake) using shaders
 
 ## Engine Architecture
 To keep the engine simple, an OOP approach will be taken for each of the engine's components.
@@ -40,17 +40,42 @@ The `Input Manager` class will handle:
 
 The `Workspace` class will handle:
 - storage of current game data
-- running lua game scripts
+- processing game objects
+- processing events
+- processing particle systems
+
+The `Map` class will handle:
+- loading a UDMF format map from a WAD file
+- parsing the map into
+	- sectors/line segments for physics
+	- meshes for rendering
+	- `GameObject`s to add to the Workspace
 
 Game data will be stored through several different classes that represent different data types.
 
-The `GameObject` class will include:
+The `GameObject` class will handle:
+- processing its lua script
+- processing collisions
+and will include:
 - a reference to a `Mesh`
 - a reference to a `Material`
+- a map of child `GameObject`s
+- a map of `Event`s
 - a `Transform`
+- a name
 - a reference to a lua script with:
 	- an init function (optional)
 	- a process function (optional)
+
+The `ParticleSystem` class will handle:
+- processing point particles
+- setting up buffers for instanced rendering of quads
+
+The `Event` class will handle:
+- connecting lua scripts
+- triggering connected lua scripts when fired
+and will include:
+- a map of stored values
 
 The `Camera` class will handle:
 - constructing a view projection matrix from its values
