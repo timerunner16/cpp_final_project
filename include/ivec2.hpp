@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/ext.hpp>
+#include <string>
 
 class vec2;
 
@@ -24,4 +25,8 @@ struct ivec2 : public glm::ivec2 {
 	ivec2 divf(const float& other);
 
 	float length() const;
+
+	std::string to_string() {
+		return "{" + std::to_string(x) + ", " + std::to_string(y) + "}";
+	}
 };

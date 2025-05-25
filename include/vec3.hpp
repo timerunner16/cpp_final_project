@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/ext.hpp>
+#include <string>
 
 class ivec3;
 
@@ -29,4 +30,8 @@ struct vec3 : public glm::vec3 {
 	float dot(const vec3& other) const;
 	vec3 unit() const;
 	vec3 cross(const vec3& other) const;
+
+	std::string to_string() {
+		return "{" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + "}";
+	}
 };
