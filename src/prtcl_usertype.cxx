@@ -10,7 +10,7 @@ void prtcl_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject *gam
 			}
 		),
 		"Position", &particle_system_create_info::position,
-		"Direction", &particle_system_create_info::position,
+		"Direction", &particle_system_create_info::direction,
 		"Randomization", &particle_system_create_info::randomization,
 		"Size", &particle_system_create_info::size,
 		"Speed", &particle_system_create_info::speed,

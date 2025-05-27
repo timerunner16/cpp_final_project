@@ -6,10 +6,12 @@ local workspace
 
 local event
 local player
+local camera
 
 function init()
 	input = Engine.InputManager
 	workspace = Engine.Workspace
+	camera = Engine.Workspace:GetCamera()
 	event = workspace:CreateEvent("CreateParticles", Engine.CurrentGameObject)
 end
 
@@ -24,8 +26,10 @@ function process(delta)
 	local q = input:QueryKey(Keys.Q)
 	if (q.Pressed and timer > timer_delay) then
 		timer = 0
-		local position = player.Transform.Position
+		local position = camera.Transform.Position:plus(camera.Transform.LookVector:times(-1))
+		local direction = camera.Transform.LookVector
 		event:SetValue("position", position)
+		event:SetValue("direction", direction)
 		event:Fire()
 	end
 end
