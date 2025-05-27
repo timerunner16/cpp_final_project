@@ -23,11 +23,26 @@ std::string trim_whitespace(std::string input, std::string whitespace) {
 }
 
 std::string trim_trailing_comment(std::string input, std::string comment) {
-	size_t pos = input.find_first_of(comment);
+	size_t pos = input.find(comment);
 	if (pos == std::string::npos) return input;
 	return input.substr(0,pos);
 }
 
 std::string trim_last(std::string input) {
 	return input.substr(0,input.size()-2);
+}
+
+std::string trim_double(std::string input, char character) {
+	while (true) {
+		bool found = false;
+		for (size_t i = 0; i < input.size();) {
+			if (i < input.size()-1 && input[i] == character && input[i+1] == character) {
+				input.erase(i, 1);
+				found = true;
+			}
+			else i++;
+		}
+		if (!found) break;
+	}
+	return input;
 }

@@ -9,10 +9,7 @@ end
 function process(delta)
 	if (event) then return end
 
-	local root = workspace:GetGameObject("root")
-	if (not root) then return end
-
-	local host = root:GetChild("ParticleHost")
+	local host = workspace:GetGameObject("ParticleHost")
 	if (not host) then return end
 
 	event = host:GetEvent("CreateParticles")

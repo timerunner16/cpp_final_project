@@ -34,6 +34,7 @@ std::shared_ptr<Material> ResourceManager::GetMaterial(std::string lumpname) {
 	}
 	
 	lumpdata data = extract_lump_from_wad(m_game->GetWADPath(), lumpname, "M");
+	if (!data.successful) return nullptr;
 	std::string data_str((char*)data.data);
 	std::vector<std::string> data_vec = split_string(data_str, "\n");
 	Material* resource = new Material(m_game, m_game->GetWADPath(), data_vec);
@@ -49,6 +50,7 @@ std::shared_ptr<GLTexture> ResourceManager::GetGLTexture(std::string lumpname) {
 	
 	lumpdata data = extract_lump_from_wad(m_game->GetWADPath(), lumpname, "P", true);
 	if (!data.successful) data = extract_lump_from_wad(m_game->GetWADPath(), lumpname, "F", false);
+	if (!data.successful) return nullptr;
 	GLTexture* resource = new GLTexture(data.data, data.size);
 	m_texture_map.emplace(std::make_pair(lumpname, resource));
 	delete data.data;
@@ -61,6 +63,7 @@ std::shared_ptr<Shader> ResourceManager::GetShader(std::string lumpname) {
 	}
 	
 	lumpdata data = extract_lump_from_wad(m_game->GetWADPath(), lumpname, "GL");
+	if (!data.successful) return nullptr;
 	Shader* resource = new Shader(data.data, data.size);
 	m_shader_map.emplace(std::make_pair(lumpname, resource));
 	delete data.data;
@@ -73,6 +76,7 @@ std::shared_ptr<Mesh> ResourceManager::GetMesh(std::string lumpname) {
 	}
 	
 	lumpdata data = extract_lump_from_wad(m_game->GetWADPath(), lumpname, "MD");
+	if (!data.successful) return nullptr;
 	std::string data_str((char*)data.data, data.size);
 	std::vector<std::string> data_vec = split_string(data_str, "\n");
 	Mesh* resource = new Mesh(data_vec);

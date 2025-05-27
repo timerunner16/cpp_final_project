@@ -5,8 +5,6 @@
 #include "builtin_particle_shader.h"
 
 ParticleSystem::ParticleSystem(particle_system_create_info info) {
-	printf("PS Position: %s\n", info.position.to_string().c_str());
-	printf("PS Direction: %s\n", info.direction.to_string().c_str());
 	m_gravity = info.gravity;
 	m_particles = std::vector<particle>(0);
 	m_speed = info.speed;
@@ -79,11 +77,6 @@ void ParticleSystem::AddParticles() {
 		direction += right * glm::linearRand(-m_randomization, m_randomization);
 		direction += up * glm::linearRand(-m_randomization, m_randomization);
 		direction = direction.unit();
-		printf("L{%f,%f,%f}\nR{%f,%f,%f}\nU{%f,%f,%f}",
-			m_direction.x, m_direction.y, m_direction.z,
-			right.x, right.y, right.z,
-			up.x, up.y, up.z
-		);
 
 		vec3 position = m_position;
 		vec3 velocity = direction.unit() * m_speed;

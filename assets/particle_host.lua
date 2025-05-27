@@ -17,8 +17,7 @@ end
 
 function process(delta)
 	if (not player) then
-		local root = workspace:GetGameObject("root")
-		player = root:GetChild("Observer")
+		player = workspace:GetGameObject("Observer")
 		return
 	end
 

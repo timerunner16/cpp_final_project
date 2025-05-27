@@ -7,10 +7,12 @@
 #include "resource_manager.hpp"
 #include "parse_wad.hpp"
 #include "tpp_iterators.hpp"
+#include "transform.hpp"
 #include "util.hpp"
 #include "mesh.hpp"
 #include "vec2.hpp"
 #include "vec3.hpp"
+#include "workspace.hpp"
 using namespace tpp;
 
 #define SCALE (32.0f)
@@ -345,7 +347,7 @@ enum editing {
 Map::Map(Game* game, std::string mapname) {
 	m_game = game;
 	std::string wad_path = m_game->GetWADPath();
-
+	
 	lumpdata mapdata = extract_lump_from_wad(wad_path, mapname, "", false, 1);
 	if (!mapdata.successful) return;
 
@@ -378,6 +380,8 @@ Map::Map(Game* game, std::string mapname) {
 		}
 		std::string tag = split.size() > 0 ? split[0] : "";
 		std::string value = split.size() > 1 ? split[1] : "";
+		for (size_t i = 2; i < split.size(); i++)
+			value += "=" + split[i];
 		switch (state) {
 			case UNDEFINED: {
 				if (tag == "vertex") state = VERTEX;
@@ -447,9 +451,7 @@ Map::Map(Game* game, std::string mapname) {
 				else if (tag == "height") c_thing.height=atof(value.c_str());
 				else if (tag == "angle") c_thing.angle=atoi(value.c_str());
 				else if (tag == "comment") {
-					std::string last("");
-					for (size_t j = 2; j < split.size(); j++) last += split[j];
-					c_thing.data=trim_whitespace(trim_last(last), "\"");
+					c_thing.data=value;
 				}
 				else if (tag == "}") {
 					state = UNDEFINED;
@@ -624,6 +626,49 @@ Map::Map(Game* game, std::string mapname) {
 		
 		addmapsegment(m_map_segments, floor_vertex_data, index_data, floor_triangles.size()*3, floor_material);
 		addmapsegment(m_map_segments, ceiling_vertex_data, index_data, floor_triangles.size()*3, floor_material);
+	}
+	
+	for (udmf_thing thing : things) {
+		std::string name;
+		std::string scriptname;
+		std::string meshname;
+		std::string matname;
+		std::string bbvalue;
+		thing.data = trim_double(thing.data);
+		std::vector<std::string> values = split_string(thing.data, " ");
+		for (std::string i : values) {
+			i = trim_whitespace(i);
+			std::vector<std::string> split = split_string(i, "=");
+			std::string thing_tag = split[0];
+			std::string thing_value = split[1];
+			if (thing_tag == "name") name = thing_value;
+			else if (thing_tag == "script") scriptname = trim_whitespace(thing_value);
+			else if (thing_tag == "mesh") meshname = trim_whitespace(thing_value);
+			else if (thing_tag == "mat") matname = trim_whitespace(thing_value);
+			else if (thing_tag == "bb") bbvalue = trim_whitespace(thing_value);
+		}
+		if (name.empty()) {
+			printf("Error: all game objects in the map must at least have a name.\n");
+			printf("Errored thing: %s\n", thing.data.c_str());
+			continue;
+		}
+		std::shared_ptr<Mesh> mesh = nullptr;
+		std::shared_ptr<Material> mat = nullptr;
+		if (!meshname.empty() && meshname != "NULL") mesh = m_game->GetResourceManager()->GetMesh(meshname);
+		if (!matname.empty() && matname != "NULL") mat = m_game->GetResourceManager()->GetMaterial(matname);
+		float bbx;
+		float bby;
+		if (!bbvalue.empty()) {
+			std::vector<std::string> bbsplit = split_string(bbvalue, ",");
+			bbx = atof(bbsplit[0].c_str());
+			bby = atof(bbsplit[1].c_str());
+		}
+		m_game->GetWorkspace()->CreateGameObject(
+			name, nullptr, scriptname,
+			mesh, mat,
+			Transform{vec3{thing.x/SCALE, thing.height/SCALE, thing.y/SCALE}, vec3{0,M_PI_2+thing.angle/180.0*M_PI,0}, vec3{1,1,1}},
+			Box{vec2{bbx,bby},vec2{thing.x/SCALE,thing.y/SCALE}}
+		);
 	}
 }
 
