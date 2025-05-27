@@ -5,6 +5,8 @@
 #include "builtin_particle_shader.h"
 
 ParticleSystem::ParticleSystem(particle_system_create_info info) {
+	printf("PS Position: %s\n", info.position.to_string().c_str());
+	printf("PS Direction: %s\n", info.direction.to_string().c_str());
 	m_gravity = info.gravity;
 	m_particles = std::vector<particle>(0);
 	m_speed = info.speed;
@@ -70,18 +72,18 @@ void ParticleSystem::Update(float delta) {
 }
 
 void ParticleSystem::AddParticles() {
-	glm::quat q = glm::quatLookAt(m_direction, glm::vec3(0,1,0));
-	glm::vec3 euler_base = glm::eulerAngles(q);
-
 	for (size_t i = 0; i < m_particles_per_launch; i++) {
-		glm::vec3 euler = euler_base;
-		euler.x += glm::linearRand(-m_randomization.x, m_randomization.x);
-		euler.y += glm::linearRand(-m_randomization.y, m_randomization.y);
-		vec3 direction{
-		   -glm::cos(euler.x) * glm::sin(euler.y),
-			glm::sin(euler.x),
-	    	glm::cos(euler.x) * glm::cos(euler.y),
-		};
+		vec3 direction = m_direction;
+		vec3 right = direction.cross(vec3{0,1,0}).unit();
+		vec3 up = direction.cross(right).unit();
+		direction += right * glm::linearRand(-m_randomization, m_randomization);
+		direction += up * glm::linearRand(-m_randomization, m_randomization);
+		direction = direction.unit();
+		printf("L{%f,%f,%f}\nR{%f,%f,%f}\nU{%f,%f,%f}",
+			m_direction.x, m_direction.y, m_direction.z,
+			right.x, right.y, right.z,
+			up.x, up.y, up.z
+		);
 
 		vec3 position = m_position;
 		vec3 velocity = direction.unit() * m_speed;

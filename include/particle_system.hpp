@@ -11,8 +11,8 @@ class Material;
 struct particle_system_create_info {
 	vec3 position=vec3(0,0,0);
 	vec3 direction=vec3(0,1,0);
-	vec2 randomization=vec2(M_PI_4,M_PI_4);
 	vec2 size=vec2(0.5f,0.5f);
+	float randomization=M_PI_4;
 	float speed=10;
 	float gravity=-9.81f;
 	float lifetime=1;
@@ -56,7 +56,7 @@ private:
 	float m_launch_interval;
 	std::shared_ptr<Material> m_material;
 	glm::vec4 m_color;
-	vec2 m_randomization;
+	float m_randomization;
 	vec3 m_position;
 	vec3 m_direction;
 };
