@@ -25,7 +25,8 @@ void go_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game_o
 		"GetName", &GameObject::GetName,
 		"SetMesh", &GameObject::SetMesh,
 		"SetMaterial", &GameObject::SetMaterial,
-		"GetEvent", &GameObject::GetEvent
+		"GetEvent", &GameObject::GetEvent,
+		"IsOnFloor", &GameObject::IsOnFloor
 	);
 
 

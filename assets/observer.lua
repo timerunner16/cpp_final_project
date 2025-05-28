@@ -60,16 +60,15 @@ function process(delta)
 		input:SetMouseCaptured(false)
 	end
 
-	if (current.Transform.Position.y <= 0) then
-		current.Transform.Position.y = 0
+	if (current:IsOnFloor()) then
 		velocity.y = 0
+		local space = input:QueryKey(Keys.Space)
+		if (space.Pressed) then
+			velocity.y = velocity.y + jumppower
+		end
+	else
+		velocity.y = velocity.y - delta * gravity
 	end
-
-	local space = input:QueryKey(Keys.Space)
-	if (space.Pressed and current.Transform.Position.y == 0) then
-		velocity.y = velocity.y + jumppower
-	end
-	velocity.y = velocity.y - delta * gravity
 
 	velocity.x = 0
 	velocity.z = 0
@@ -98,6 +97,7 @@ function process(delta)
 	bobstrength = bobstrength + (target_bobstrength - bobstrength) * delta * 4.0
 	camera.Transform.Position.y = camera.Transform.Position.y + math.sin(timer * 8.0) * 0.05 * bobstrength + 1.0
 
-	Engine.Window:DrawString(0, 0,  255, 255, 0,   255,  "Look, I'm yellow!");
-	Engine.Window:DrawString(0, 8,  255, 255, 255, 255,  string.format("FPS: %.2f", tostring(1.0/delta)));
+	Engine.Window:DrawString(0, 0,  255, 255, 0, 255,  string.format("FPS: %.2f", tostring(1.0/delta)));
+	Engine.Window:DrawString(0, 8,  255, 255, 255, 255,  string.format("H: %.2f", tostring(current.Transform.Position.y)));
+	Engine.Window:DrawString(0,16,  255, 255, 255, 255,  string.format("V: %.2f", tostring(velocity.length)));
 end

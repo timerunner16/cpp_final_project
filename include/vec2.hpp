@@ -25,6 +25,7 @@ struct vec2 : public glm::vec2 {
 	vec2 divf(const float& other);
 
 	float length() const;
+	float length_squared() const;
 	float dot(const vec2& other) const;
 	vec2 unit() const;
 

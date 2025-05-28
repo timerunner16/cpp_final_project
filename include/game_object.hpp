@@ -48,6 +48,8 @@ public:
 	Event* GetEvent(std::string name);
 	void RemoveEvent(std::string name);
 	void AddEvent(Event* event, std::string name);
+	
+	bool IsOnFloor();
 private:
 	Game* m_game;
 
@@ -67,4 +69,6 @@ private:
 	std::map<std::string, GameObject*> m_children;
 
 	std::map<std::string, Event*> m_events;
+
+	bool m_on_floor;
 };

@@ -1,3 +1,4 @@
+#include <optional>
 #include <string>
 #include <memory>
 #include <vector>
@@ -16,6 +17,12 @@ struct MapSegmentRenderData {
 	std::shared_ptr<Material> material;
 };
 
+struct Sector {
+	float heightfloor;
+	float heightceiling;
+	std::vector<triangle> triangles;
+};
+
 class Map {
 public:
 	Map(Game* game, std::string mapname);
@@ -23,9 +30,11 @@ public:
 
 	std::vector<line> GetLines();
 	std::vector<MapSegmentRenderData> GetMapSegments();
+	std::optional<Sector> GetHighestOverlappingSector(Box& box);
 private:
 	std::vector<MapSegmentRenderData> m_map_segments;
 	std::vector<line> m_lines;
+	std::vector<Sector> m_sectors;
 
 	Game* m_game;
 };

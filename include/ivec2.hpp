@@ -25,6 +25,7 @@ struct ivec2 : public glm::ivec2 {
 	ivec2 divf(const float& other);
 
 	float length() const;
+	float length_squared() const;
 
 	std::string to_string() {
 		return "{" + std::to_string(x) + ", " + std::to_string(y) + "}";

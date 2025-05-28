@@ -18,6 +18,10 @@ struct line {
 	}
 };
 
+struct triangle {
+	vec2 a, b, c;
+};
+
 struct collision_result {
 	bool hit;
 	vec2 until_blocked;
@@ -29,3 +33,5 @@ vec2 closest_point_on_line(vec2 p, line l);
 
 collision_result sweep_box_line(Box a, line l, vec2 v);
 collision_result discrete_box_box(Box moving, Box unmoving, vec2 v);
+
+bool overlap_box_triangle(Box a, triangle b);

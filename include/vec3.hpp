@@ -27,6 +27,7 @@ struct vec3 : public glm::vec3 {
 	vec3 divf(const float& other);
 
 	float length() const;
+	float length_squared() const;
 	float dot(const vec3& other) const;
 	vec3 unit() const;
 	vec3 cross(const vec3& other) const;

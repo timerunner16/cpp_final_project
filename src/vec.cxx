@@ -27,6 +27,7 @@ vec2 vec2::mulf(const float& other) {return vec2(x*other, y*other);}
 vec2 vec2::divf(const float& other) {return vec2(x/other, y/other);}
 
 float vec2::length() const {return sqrt(x*x + y*y);}
+float vec2::length_squared() const {return x*x + y*y;}
 float vec2::dot(const vec2& other) const {return x*other.x + y*other.y;}
 vec2 vec2::unit() const {
 	float magnitude = length();
@@ -63,6 +64,7 @@ vec3 vec3::mulf(const float& other) {return vec3(x*other, y*other, z*other);}
 vec3 vec3::divf(const float& other) {return vec3(x/other, y/other, z/other);}
 
 float vec3::length() const {return sqrt(x*x + y*y + z*z);}
+float vec3::length_squared() const {return x*x + y*y + z*z;}
 float vec3::dot(const vec3& other) const {return x*other.x + y*other.y + z*other.z;}
 vec3 vec3::unit() const {
 	float magnitude = length();
@@ -98,6 +100,7 @@ ivec2 ivec2::mulf(const float& other) {return ivec2((int)(x*other), (int)(y*othe
 ivec2 ivec2::divf(const float& other) {return ivec2((int)(x/other), (int)(y/other));}
 
 float ivec2::length() const {return sqrt(x*x + y*y);}
+float ivec2::length_squared() const {return x*x + y*y;}
 
 
 ivec3::ivec3(const glm::ivec3& obj) {
@@ -128,3 +131,4 @@ ivec3 ivec3::mulf(const float& other) {return ivec3((int)(x*other), (int)(y*othe
 ivec3 ivec3::divf(const float& other) {return ivec3((int)(x/other), (int)(y/other), (int)(z/other));}
 
 float ivec3::length() const {return sqrt(x*x + y*y + z*z);}
+float ivec3::length_squared() const {return x*x + y*y + z*z;}

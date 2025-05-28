@@ -142,3 +142,100 @@ collision_result discrete_box_box(Box moving, Box unmoving, vec2 v) {
 		return collision_result{true, r_up, vec2{0,0}, vec2{0,-1}};
 	return collision_result{true, vec2{0,0}, vec2{0,0}, vec2{0,0}};
 }
+
+bool overlap_box_triangle(Box a, triangle b) {
+	std::vector<line> axes;
+	line tl0{b.a, b.b};
+	line tl1{b.b, b.c};
+	line tl2{b.a, b.c};
+	
+	line bl0{vec2(),vec2(0,1)};
+	line bl1{vec2(),vec2(1,0)};
+	line bl2{vec2(),vec2(0,-1)};
+	line bl3{vec2(),vec2(-1,0)};
+
+	axes.push_back(tl0);
+	axes.push_back(tl1);
+	axes.push_back(tl2);
+	axes.push_back(bl0);
+	axes.push_back(bl1);
+	axes.push_back(bl2);
+	axes.push_back(bl3);
+
+	vec2 a_min_pos = a.min();
+	vec2 a_max_pos = a.max();
+
+	for (line axis : axes) {
+		vec2 a_minxminy_projected = closest_point_on_line(a_min_pos, axis);
+		vec2 a_minxmaxy_projected = closest_point_on_line(vec2{a_min_pos.x, a_max_pos.y}, axis);
+		vec2 a_maxxminy_projected = closest_point_on_line(vec2{a_max_pos.x, a_min_pos.y}, axis);
+		vec2 a_maxxmaxy_projected = closest_point_on_line(a_max_pos, axis);
+
+		float a_min;
+		float a_max;
+		float b_min;
+		float b_max;
+
+		if (fabs(axis.b.x-axis.a.x) > fabs(axis.b.y-axis.a.y) || fabs(axis.b.y - axis.a.y) < EPSILON) {
+			a_min = glm::min(
+				a_minxminy_projected.x,
+				a_minxmaxy_projected.x,
+				a_maxxminy_projected.x,
+				a_maxxmaxy_projected.x
+			);
+			a_max = glm::max(
+				a_minxminy_projected.x,
+				a_minxmaxy_projected.x,
+				a_maxxminy_projected.x,
+				a_maxxmaxy_projected.x
+			);
+	
+			vec2 b_a_projected = closest_point_on_line(b.a, axis);
+			vec2 b_b_projected = closest_point_on_line(b.b, axis);
+			vec2 b_c_projected = closest_point_on_line(b.c, axis);
+	
+			b_min = glm::min(
+				b_a_projected.x,
+				b_b_projected.x,
+				b_c_projected.x
+			);
+			b_max = glm::max(
+				b_a_projected.x,
+				b_b_projected.x,
+				b_c_projected.x
+			);
+		} else {
+			a_min = glm::min(
+				a_minxminy_projected.y,
+				a_minxmaxy_projected.y,
+				a_maxxminy_projected.y,
+				a_maxxmaxy_projected.y
+			);
+			a_max = glm::max(
+				a_minxminy_projected.y,
+				a_minxmaxy_projected.y,
+				a_maxxminy_projected.y,
+				a_maxxmaxy_projected.y
+			);
+	
+			vec2 b_a_projected = closest_point_on_line(b.a, axis);
+			vec2 b_b_projected = closest_point_on_line(b.b, axis);
+			vec2 b_c_projected = closest_point_on_line(b.c, axis);
+	
+			b_min = glm::min(
+				b_a_projected.y,
+				b_b_projected.y,
+				b_c_projected.y
+			);
+			b_max = glm::max(
+				b_a_projected.y,
+				b_b_projected.y,
+				b_c_projected.y
+			);
+		}
+
+		if (b_max < a_min || b_min > a_max) return false;
+	}
+
+	return true;
+}

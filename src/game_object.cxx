@@ -6,6 +6,8 @@
 #include "map.hpp"
 #include "workspace.hpp"
 
+#define FLOOR_EPSILON 0.005f
+
 GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 		std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
 		const Transform& transform, const Box& box) {
@@ -79,6 +81,13 @@ void GameObject::Process(float delta) {
 	m_transform.position.y += m_velocity.y * delta;
 	m_transform.position.z += in_velocity.y;
 	m_box.center = vec2{m_transform.position.x, m_transform.position.z};
+
+	std::optional<Sector> highest_sector = m_game->GetMap()->GetHighestOverlappingSector(m_box);
+	if (highest_sector.has_value()) {
+		if (m_transform.position.y < highest_sector->heightfloor) m_transform.position.y = highest_sector->heightfloor;
+		if (abs(m_transform.position.y-highest_sector->heightfloor) < FLOOR_EPSILON) m_on_floor = true;
+		else m_on_floor = false;
+	}
 
 	for (auto& [key, val] : m_children) {val->Process(delta);}
 }
@@ -165,3 +174,5 @@ void GameObject::AddEvent(Event* event, std::string name) {
 	if (event == nullptr) return;
 	m_events[name] = event;
 }
+
+bool GameObject::IsOnFloor() {return m_on_floor;}

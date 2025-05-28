@@ -4,6 +4,7 @@
 #include "map.hpp"
 #include "game.hpp"
 #include "material.hpp"
+#include "physics.hpp"
 #include "resource_manager.hpp"
 #include "parse_wad.hpp"
 #include "tpp_iterators.hpp"
@@ -347,6 +348,8 @@ enum editing {
 Map::Map(Game* game, std::string mapname) {
 	m_game = game;
 	std::string wad_path = m_game->GetWADPath();
+
+	m_sectors = std::vector<Sector>(0);
 	
 	lumpdata mapdata = extract_lump_from_wad(wad_path, mapname, "", false, 1);
 	if (!mapdata.successful) return;
@@ -465,6 +468,8 @@ Map::Map(Game* game, std::string mapname) {
 	
 	m_map_segments = std::vector<MapSegmentRenderData>();
 	m_lines = std::vector<line>();
+
+	m_sectors = std::vector<Sector>();
 
 	for (size_t i = 0; i < sectors.size(); i++) {
 		udmf_sector current_sector = sectors[i];
@@ -602,6 +607,19 @@ Map::Map(Game* game, std::string mapname) {
 		}
 		
 		std::vector<tri_triangle> floor_triangles = edges_to_faces(floor_edges);
+		std::vector<triangle> phys_triangles(floor_triangles.size());
+		for (size_t i = 0; i < floor_triangles.size(); i++)
+			phys_triangles[i] = triangle{
+				vec2{floor_triangles[i].v0.x/SCALE, floor_triangles[i].v0.y/SCALE},
+				vec2{floor_triangles[i].v1.x/SCALE, floor_triangles[i].v1.y/SCALE},
+				vec2{floor_triangles[i].v2.x/SCALE, floor_triangles[i].v2.y/SCALE}
+			};
+
+		m_sectors.push_back(Sector{
+			current_sector.heightfloor/SCALE,
+			current_sector.heightceiling/SCALE,
+			phys_triangles
+		});
 
 		mesh_vertex* floor_vertex_data = new mesh_vertex[floor_triangles.size()*3];
 		mesh_vertex* ceiling_vertex_data = new mesh_vertex[floor_triangles.size()*3];
@@ -689,4 +707,18 @@ std::vector<MapSegmentRenderData> Map::GetMapSegments() {
 
 std::vector<line> Map::GetLines() {
 	return m_lines;
+}
+
+std::optional<Sector> Map::GetHighestOverlappingSector(Box& box) {
+	if (m_sectors.size() == 0) return std::optional<Sector>();
+	Sector highest = m_sectors[0];
+	for (Sector sector : m_sectors) {
+		if (sector.heightfloor < highest.heightfloor) continue;
+		bool overlapping = false;
+		for (triangle t : sector.triangles) {
+			if (overlap_box_triangle(box, t)) {overlapping = true; break;}
+		}
+		if (overlapping) highest = sector;
+	}
+	return highest;
 }
