@@ -46,7 +46,7 @@ float InputManager::GetAxis(int scancode_n, int scancode_p) {
 	return (QueryKey(scancode_p).pressed ? 1.0f : 0.0f) - (QueryKey(scancode_n).pressed ? 1.0f : 0.0f);
 }
 vec2 InputManager::GetVector(int scancode_nx, int scancode_px, int scancode_ny, int scancode_py) {
-	return vec2(GetAxis(scancode_nx, scancode_px), GetAxis(scancode_ny, scancode_py));
+	return vec2(GetAxis(scancode_nx, scancode_px), GetAxis(scancode_ny, scancode_py)).unit();
 }
 
 ivec2 InputManager::GetMousePos() {

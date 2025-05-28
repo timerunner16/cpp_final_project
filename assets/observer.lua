@@ -1,11 +1,16 @@
 -- constants
-local lean = 0.15
-local leanspeed = 8.0
-local speed = 5.0
-local jumppower = 6.0
-local gravity = 20.0
-local k_sensitivity = 2.0
-local m_sensitivity = 3.14
+local LEAN = 0.15
+local LEANSPEED = 8.0
+local MAX_GROUND_SPEED = 8.0
+local MAX_AIR_SPEED = 3.0
+local FRICTION = 8
+local MAX_ACCEL = MAX_GROUND_SPEED * 10
+local JUMPPOWER = 10.0
+local GRAVITY = -30.0
+local K_SENSITIVITY = 2.0
+local M_SENSITIVITY = 3.14
+local COYOTE_TIME_BASE = 0.2
+local INPUT_BUFFER_BASE = 0.2
 
 -- properties
 local timer = 0.0
@@ -13,12 +18,33 @@ local velocity = Vector3.new(0.0)
 local bobstrength = 0.0
 local x = 0.0
 local wireframe = false
+local coyote_time = 0.0
+local input_buffer = 0.0
 
 -- object references
 local current
 local camera
 local input
 local window
+
+local function friction(delta)
+	local mag = Vector2.new(velocity.x, velocity.z).length
+	if (mag > 0) then
+		local drop = mag * FRICTION * delta
+		velocity.x = velocity.x * math.max(mag-drop, 0) / mag
+		velocity.z = velocity.z * math.max(mag-drop, 0) / mag
+	end
+end
+
+local function add_velocity(new_velocity)
+	velocity = velocity:plus(new_velocity)
+end
+
+local function clamp(n, min, max)
+	if (n < min) then n = min end
+	if (n > max) then n = max end
+	return n
+end
 
 function init()
 	current = Engine.CurrentGameObject
@@ -28,6 +54,9 @@ function init()
 end
 
 function process(delta)
+	input_buffer = input_buffer - delta
+	coyote_time = coyote_time - delta
+
 	timer = timer + delta
 
 	for i,v in pairs(Keys) do
@@ -42,52 +71,62 @@ function process(delta)
 		Engine.Window:SetWireframeEnabled(wireframe)
 	end
 
-	local input_vector = input:GetVector(Keys.A, Keys.D, Keys.W, Keys.S)
-
-	local key_Rotation_vector = input:GetVector(Keys.Left, Keys.Right, Keys.Up, Keys.Down)
-	key_Rotation_vector = key_Rotation_vector:times(delta):times(k_sensitivity)
-	current.Transform.Rotation.y = current.Transform.Rotation.y + key_Rotation_vector.x
-	camera.Transform.Rotation.x = camera.Transform.Rotation.x + key_Rotation_vector.y
+	local key_rotation_vector = input:GetVector(Keys.Left, Keys.Right, Keys.Up, Keys.Down)
+	key_rotation_vector = key_rotation_vector:times(delta):times(K_SENSITIVITY)
+	current.Transform.Rotation.y = current.Transform.Rotation.y + key_rotation_vector.x
+	camera.Transform.Rotation.x = camera.Transform.Rotation.x + key_rotation_vector.y
 
 	if (window.Focused) then
 		local mouse_delta = Vector2.new(input:GetMouseDelta())
 		local window_size = Vector2.new(window.Width, window.Height)
 		mouse_delta = mouse_delta:div(window_size)
-		current.Transform.Rotation.y = current.Transform.Rotation.y + mouse_delta.x * m_sensitivity	
-		camera.Transform.Rotation.x = camera.Transform.Rotation.x + mouse_delta.y * m_sensitivity
+		current.Transform.Rotation.y = current.Transform.Rotation.y + mouse_delta.x * M_SENSITIVITY	
+		camera.Transform.Rotation.x = camera.Transform.Rotation.x + mouse_delta.y * M_SENSITIVITY
 		camera.Transform.Rotation.x = math.min(math.max(camera.Transform.Rotation.x, -math.pi/2), math.pi/2)
 	else
 		input:SetMouseCaptured(false)
 	end
 
-	if (current:IsOnFloor()) then
-		velocity.y = 0
-		local space = input:QueryKey(Keys.Space)
-		if (space.Pressed) then
-			velocity.y = velocity.y + jumppower
-		end
-	else
-		velocity.y = velocity.y - delta * gravity
-	end
-
-	velocity.x = 0
-	velocity.z = 0
+	local input_vector = input:GetVector(Keys.A, Keys.D, Keys.W, Keys.S)
 	local lookvec = current.Transform.LookVector
 	local rightvec = current.Transform.RightVector
-	velocity = velocity:plus(rightvec:times(input_vector.x):times(speed))
-	velocity = velocity:plus(lookvec:times(input_vector.y):times(speed))
+	local wishdir = lookvec:times(input_vector.y):plus(rightvec:times(input_vector.x))
+	local current_speed = velocity:dot(wishdir)
 
-	if (not wireframe) then
-		current.Velocity = velocity
+	local space = input:QueryKey(Keys.Space)
+	if (current:IsOnFloor()) then
+		if (space.Pressed or input_buffer > 0) then
+			velocity.y = JUMPPOWER
+			input_buffer = 0
+			coyote_time = 0
+		else
+			friction(delta)
+			coyote_time = COYOTE_TIME_BASE
+			velocity.y = 0
+		end
+
+		local add_speed = clamp(MAX_GROUND_SPEED - current_speed,  0, MAX_ACCEL * delta)
+		add_velocity(wishdir:times(add_speed))
 	else
-		current.Velocity = Vector3.new(0,0,0)
-		current.Transform.Position = current.Transform.Position:plus(velocity:times(delta))
+		if (space.Pressed) then
+			if (coyote_time > 0) then
+				velocity.Y = JUMPPOWER
+				coyote_time = 0
+			else
+				input_buffer = INPUT_BUFFER_BASE
+			end
+		end
+		
+		local add_speed = clamp(MAX_AIR_SPEED - current_speed,  0, MAX_ACCEL * delta)
+		add_velocity(wishdir:times(add_speed):plus(Vector3.new(0,1,0):times(GRAVITY):times(delta)))
 	end
 
-	x = x + (input_vector.x - x) * delta * leanspeed
+	current.Velocity = velocity
+
+	x = x + (input_vector.x - x) * delta * LEANSPEED
 	camera.Transform.Position = current.Transform.Position
 	camera.Transform.Rotation.y = current.Transform.Rotation.y
-	camera.Transform.Rotation.z = x * lean
+	camera.Transform.Rotation.z = x * LEAN
 
 	local target_bobstrength = math.min(math.max(Vector2.new(velocity.x, velocity.z).length,0.0),1.0)
 	local velocity_flat = Vector2.new(velocity.x, velocity.z).unit
