@@ -483,7 +483,7 @@ Map::Map(Game* game, std::string mapname) {
 			}
 		}
 		std::vector<udmf_linedef> connected_linedefs;
-		for (size_t j = 0; j < sidedefs.size(); j++) {
+		for (size_t j = 0; j < connected_sidedefs.size(); j++) {
 			size_t id = connected_sidedef_ids[j];
 			for (auto potential_linedef : linedefs) {
 				if (potential_linedef.sidefront == id || potential_linedef.sideback == id)
