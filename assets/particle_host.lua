@@ -25,8 +25,8 @@ function process(delta)
 	local q = input:QueryKey(Keys.Q)
 	if (q.Pressed and timer > timer_delay) then
 		timer = 0
-		local position = camera.Transform.Position:plus(camera.Transform.LookVector:times(-1))
-		local direction = camera.Transform.LookVector:times(-1)
+		local position = camera.Transform.Position + camera.Transform.LookVector * -1
+		local direction = camera.Transform.LookVector * -1
 		event:SetValue("position", position)
 		event:SetValue("direction", direction)
 		event:Fire()

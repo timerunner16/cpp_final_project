@@ -21,7 +21,7 @@ end
 function create_particles()
 	local position = event:GetValue("position")
 	local direction = event:GetValue("direction")
-	position = position:times(2) -- WHY DO I NEED TO DO THIS?!?!
+	position = position * 2 -- WHY DO I NEED TO DO THIS?!?!
 
 	local particle_info = ParticleSystemCreateInfo.new()
 	particle_info.Position = position

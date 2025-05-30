@@ -37,7 +37,7 @@ local function friction(delta)
 end
 
 local function add_velocity(new_velocity)
-	velocity = velocity:plus(new_velocity)
+	velocity = velocity + new_velocity
 end
 
 local function clamp(n, min, max)
@@ -51,6 +51,7 @@ function init()
 	camera = Engine.Workspace:GetCamera()
 	input = Engine.InputManager
 	window = Engine.Window
+	for _=1,1 do end
 end
 
 function process(delta)
@@ -58,10 +59,6 @@ function process(delta)
 	coyote_time = coyote_time - delta
 
 	timer = timer + delta
-
-	for i,v in pairs(Keys) do
-		print(i,v)
-	end
 
 	if (input:SomethingPressed()) then input:SetMouseCaptured(true) end
 
@@ -72,15 +69,15 @@ function process(delta)
 	end
 
 	local key_rotation_vector = input:GetVector(Keys.Left, Keys.Right, Keys.Up, Keys.Down)
-	key_rotation_vector = key_rotation_vector:times(delta):times(K_SENSITIVITY)
+	key_rotation_vector = key_rotation_vector * delta * K_SENSITIVITY
 	current.Transform.Rotation.y = current.Transform.Rotation.y + key_rotation_vector.x
 	camera.Transform.Rotation.x = camera.Transform.Rotation.x + key_rotation_vector.y
 
 	if (window.Focused) then
 		local mouse_delta = Vector2.new(input:GetMouseDelta())
 		local window_size = Vector2.new(window.Width, window.Height)
-		mouse_delta = mouse_delta:div(window_size)
-		current.Transform.Rotation.y = current.Transform.Rotation.y + mouse_delta.x * M_SENSITIVITY	
+		mouse_delta = mouse_delta / window_size
+		current.Transform.Rotation.y = current.Transform.Rotation.y + mouse_delta.x * M_SENSITIVITY
 		camera.Transform.Rotation.x = camera.Transform.Rotation.x + mouse_delta.y * M_SENSITIVITY
 		camera.Transform.Rotation.x = math.min(math.max(camera.Transform.Rotation.x, -math.pi/2), math.pi/2)
 	else
@@ -90,12 +87,12 @@ function process(delta)
 	local input_vector = input:GetVector(Keys.A, Keys.D, Keys.W, Keys.S)
 	local lookvec = current.Transform.LookVector
 	local rightvec = current.Transform.RightVector
-	local wishdir = lookvec:times(input_vector.y):plus(rightvec:times(input_vector.x))
+	local wishdir = lookvec * input_vector.y + rightvec * input_vector.x
 	local current_speed = velocity:dot(wishdir)
 
 	local space = input:QueryKey(Keys.Space)
 	if (current:IsOnFloor()) then
-		if (space.Pressed or input_buffer > 0) then
+		if ((space.Pressed and space.OnEdge) or input_buffer > 0) then
 			velocity.y = JUMPPOWER
 			input_buffer = 0
 			coyote_time = 0
@@ -106,19 +103,21 @@ function process(delta)
 		end
 
 		local add_speed = clamp(MAX_GROUND_SPEED - current_speed,  0, MAX_ACCEL * delta)
-		add_velocity(wishdir:times(add_speed))
+		local new_velocity = wishdir * add_speed
+		add_velocity(new_velocity)
 	else
-		if (space.Pressed) then
+		if (space.Pressed and space.OnEdge) then
 			if (coyote_time > 0) then
-				velocity.Y = JUMPPOWER
+				velocity.y = JUMPPOWER
 				coyote_time = 0
 			else
 				input_buffer = INPUT_BUFFER_BASE
 			end
 		end
-		
+
 		local add_speed = clamp(MAX_AIR_SPEED - current_speed,  0, MAX_ACCEL * delta)
-		add_velocity(wishdir:times(add_speed):plus(Vector3.new(0,1,0):times(GRAVITY):times(delta)))
+		local new_velocity = wishdir * add_speed + Vector3.new(0,1,0) * GRAVITY * delta
+		add_velocity(new_velocity)
 	end
 
 	current.Velocity = velocity
@@ -136,7 +135,7 @@ function process(delta)
 	bobstrength = bobstrength + (target_bobstrength - bobstrength) * delta * 4.0
 	camera.Transform.Position.y = camera.Transform.Position.y + math.sin(timer * 8.0) * 0.05 * bobstrength + 1.0
 
-	Engine.Window:DrawString(0, 0,  255, 255, 0, 255,  string.format("FPS: %.2f", tostring(1.0/delta)));
-	Engine.Window:DrawString(0, 8,  255, 255, 255, 255,  string.format("H: %.2f", tostring(current.Transform.Position.y)));
-	Engine.Window:DrawString(0,16,  255, 255, 255, 255,  string.format("V: %.2f", tostring(velocity.length)));
+	window:DrawString(0, 0,  255, 255, 0, 255,  string.format("FPS: %.2f", tostring(1.0/delta)));
+	window:DrawString(0, 8,  255, 255, 255, 255,  string.format("H: %.2f", tostring(current.Transform.Position.y)));
+	window:DrawString(0,16,  255, 255, 255, 255,  string.format("V: %.2f", tostring(velocity.length)));
 end
