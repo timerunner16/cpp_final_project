@@ -5,6 +5,10 @@
 #include <iostream>
 #include "parse_wad.hpp"
 
+#define MACROPRINT
+#define VERBOSE_DBPRINTF
+#include "macroprint.h"
+
 std::string _8xU8tostr(uint8_t a, uint8_t b, uint8_t c, uint8_t d,
 					   uint8_t e, uint8_t f, uint8_t g, uint8_t h) {
 	std::string i("");
@@ -32,11 +36,11 @@ lumpdata extract_lump_from_wad(std::string wad_path, std::string lumpname, std::
 
 	std::ifstream file(wad_path, std::ios::binary);
 	if (!file.is_open()) {
-		printf("Error: couldn't open wad file \"%s\"\n", wad_path.c_str());
+		DBPRINTF("Error: couldn't open wad file \"%s\"\n", wad_path.c_str());
 		return BAD_LUMP_DATA;
 	}
 	if (lumpname.size() > 8) {
-		printf("Error: invalid lumpname \"%s\", lumpname must be at most 8 characters\n", lumpname.c_str());
+		DBPRINTF("Error: invalid lumpname \"%s\", lumpname must be at most 8 characters\n", lumpname.c_str());
 		return BAD_LUMP_DATA;
 	}
 
@@ -56,11 +60,11 @@ lumpdata extract_lump_from_wad(std::string wad_path, std::string lumpname, std::
 	uint32_t lumpnumber = _4xU8to1xU32(buf[0x4], buf[0x5], buf[0x6], buf[0x7]);
 	uint32_t dirpointer = _4xU8to1xU32(buf[0x8], buf[0x9], buf[0xA], buf[0xB]);
 	if (identifier != _4xU8to1xU32('P','W','A','D')) {
-		printf("Error: wad file \"%s\" is not a valid PWAD\n", wad_path.c_str());
+		DBPRINTF("Error: wad file \"%s\" is not a valid PWAD\n", wad_path.c_str());
 		return BAD_LUMP_DATA;
 	}
 	if (lumpnumber == 0) {
-		printf("Error: wad file \"%s\" doesn't have any lumps\n", wad_path.c_str());
+		DBPRINTF("Error: wad file \"%s\" doesn't have any lumps\n", wad_path.c_str());
 		return BAD_LUMP_DATA;
 	}
 	
@@ -88,7 +92,7 @@ lumpdata extract_lump_from_wad(std::string wad_path, std::string lumpname, std::
 		}
 	}
 	if (found.filepos == 0) {
-		if (!ignore_not_found) printf("Error: couldn't find lump \"%s\" in wad file \"%s\"\n", lumpname.c_str(), wad_path.c_str());
+		if (!ignore_not_found) DBPRINTF("Error: couldn't find lump \"%s\" in wad file \"%s\"\n", lumpname.c_str(), wad_path.c_str());
 		return BAD_LUMP_DATA;
 	}
 

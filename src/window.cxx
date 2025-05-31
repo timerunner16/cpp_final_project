@@ -12,6 +12,10 @@
 #include "gltexture.hpp"
 #include "engine_font.hpp"
 
+#define MACROPRINT
+#define VERBOSE_DBPRINTF
+#include "macroprint.h"
+
 Window::Window(Game* game, int width, int height, int downscale, bool resizable) {
 	SDL_Init(SDL_INIT_VIDEO);
 	
@@ -25,7 +29,7 @@ Window::Window(Game* game, int width, int height, int downscale, bool resizable)
 
 	m_context = SDL_GL_CreateContext(m_window);
 	glewExperimental = true;
-	GLenum glewError = glewInit();
+	glewInit();
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
@@ -148,7 +152,7 @@ void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 	}
 	
 	if (game_object->GetMesh() == nullptr) return;
-	if (game_object->GetMaterial() == nullptr) {printf("Can't render a mesh without a material!\n"); return;}
+	if (game_object->GetMaterial() == nullptr) {DBPRINTF("Can't render a mesh without a material!\n"); return;}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 	glViewport(0,0,m_width/m_downscale,m_height/m_downscale);
@@ -255,7 +259,7 @@ void Window::DrawString(int x, int y, uint8_t r, uint8_t g, uint8_t b, uint8_t a
 
 		uint8_t row = ((c&0xf0) >> 4) - 2;
 		uint8_t col = c&0x0f;
-		if (row < 0 || row > 5) row = 0;
+		if (row > 5) row = 0;
 
 		float t_minx = (float)(col*8)/m_text_texture->GetWidth();
 		float t_miny = (float)(row*8)/m_text_texture->GetHeight();

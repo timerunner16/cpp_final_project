@@ -16,6 +16,10 @@
 #include "workspace.hpp"
 using namespace tpp;
 
+#define MACROPRINT
+#define VERBOSE_DBPRINTF
+#include "macroprint.h"
+
 #define SCALE (32.0f)
 
 struct udmf_vertex {
@@ -190,6 +194,22 @@ struct vertexloop_t {
 std::vector<tri_triangle> edges_to_faces(std::vector<tri_edge> edges) {
 	if (edges.size() <= 2) return std::vector<tri_triangle>();
 	
+	DBPRINTF("edges:\n");
+	std::string check;
+	for (auto i : edges) {
+		DBPRINTF("\t{%f,%f}, {%f,%f}\n", i.v0.x, i.v0.y, i.v1.x, i.v1.y);
+		char c0[24];
+		char c1[24];
+		char c2[24];
+		char c3[24];
+		sprintf(c0, "%zu", std::hash<float>()(i.v0.x));
+		sprintf(c1, "%zu", std::hash<float>()(i.v0.y));
+		sprintf(c2, "%zu", std::hash<float>()(i.v1.x));
+		sprintf(c3, "%zu", std::hash<float>()(i.v1.y));
+		check += std::string(c0) + std::string(c1) + std::string(c2) + std::string(c3);
+	}
+	DBPRINTF("edge hash: %zu\n", std::hash<std::string>()(check));
+
 	std::vector<vertexloop_t> vertexloops(1);
 	bool clear = false;
 	while (!clear) {
@@ -370,6 +390,7 @@ Map::Map(Game* game, std::string mapname) {
 
 	const char* data_char = (const char*)mapdata.data;
 	std::string data_str(data_char);
+	DBPRINTF("map hash: %zu\n", std::hash<std::string>()(data_str));
 	std::vector<std::string> data = split_string(data_str, "\n");
 	for (auto i : data) {
 		i = trim_trailing_comment(i);
@@ -472,12 +493,14 @@ Map::Map(Game* game, std::string mapname) {
 	m_sectors = std::vector<Sector>();
 
 	for (size_t i = 0; i < sectors.size(); i++) {
+		DBPRINTF("beginning sector: %zu\n", i);
 		udmf_sector current_sector = sectors[i];
 		std::vector<udmf_sidedef> connected_sidedefs;
 		std::vector<size_t> connected_sidedef_ids;
 		for (size_t j = 0; j < sidedefs.size(); j++) {
 			udmf_sidedef potential_sidedef = sidedefs[j];
 			if (potential_sidedef.sector == i) {
+				DBPRINTF("\tconnecting sidedef: %zu\n", j);
 				connected_sidedefs.push_back(potential_sidedef);
 				connected_sidedef_ids.push_back(j);
 			}
@@ -485,9 +508,12 @@ Map::Map(Game* game, std::string mapname) {
 		std::vector<udmf_linedef> connected_linedefs;
 		for (size_t j = 0; j < connected_sidedefs.size(); j++) {
 			size_t id = connected_sidedef_ids[j];
-			for (auto potential_linedef : linedefs) {
-				if (potential_linedef.sidefront == id || potential_linedef.sideback == id)
+			for (size_t k = 0; k < linedefs.size(); k++) {
+				udmf_linedef potential_linedef = linedefs[k];
+				if (potential_linedef.sidefront == id || potential_linedef.sideback == id) {
+					DBPRINTF("\tconnecting linedef: %zu to sidedef: %zu\n", k, id);
 					connected_linedefs.push_back(potential_linedef);
+				}
 			}
 		}
 
@@ -497,6 +523,7 @@ Map::Map(Game* game, std::string mapname) {
 		int realceiling = current_sector.heightceiling;
 
 		for (auto current_linedef : connected_linedefs) {
+			DBPRINTF("\tcreating edge: %d - %d\n", current_linedef.v1, current_linedef.v2);
 			udmf_vertex v1 = vertices[current_linedef.v1];
 			udmf_vertex v2 = vertices[current_linedef.v2];
 			tri_edge new_edge(tri_vertex(v1.x, v1.y), tri_vertex(v2.x, v2.y));
@@ -666,8 +693,8 @@ Map::Map(Game* game, std::string mapname) {
 			else if (thing_tag == "bb") bbvalue = trim_whitespace(thing_value);
 		}
 		if (name.empty()) {
-			printf("Error: all game objects in the map must at least have a name.\n");
-			printf("Errored thing: %s\n", thing.data.c_str());
+			DBPRINTF("Error: all game objects in the map must at least have a name.\n");
+			DBPRINTF("Errored thing: %s\n", thing.data.c_str());
 			continue;
 		}
 		std::shared_ptr<Mesh> mesh = nullptr;

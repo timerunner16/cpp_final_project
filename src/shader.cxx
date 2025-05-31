@@ -1,5 +1,9 @@
 #include "shader.hpp"
 
+#define MACROPRINT
+#define VERBOSE_DBPRINTF
+#include "macroprint.h"
+
 std::string default_shader_source = "#ifdef VERTEX_SHADER\n\
 \n\
 layout (location=0) in vec3 i_vertex_position;\n\
@@ -66,7 +70,7 @@ Shader::Shader(uint8_t* data, uint32_t size) {
 	if (vertex_shader_compiled != GL_TRUE) {
 		char info_log[512];
 		glGetShaderInfoLog(vertex_shader, 512, NULL, info_log);
-		printf("Unable to compile vertex shader!\n%s", info_log);
+		DBPRINTF("Unable to compile vertex shader!\n%s", info_log);
 	} else glAttachShader(m_program_id, vertex_shader);
 
 	GLint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -78,7 +82,7 @@ Shader::Shader(uint8_t* data, uint32_t size) {
 	if (fragment_shader_compiled != GL_TRUE) {
 		char info_log[512];
 		glGetShaderInfoLog(fragment_shader, 512, NULL, info_log);
-		printf("Unable to compile fragment shader!\n%s", info_log);
+		DBPRINTF("Unable to compile fragment shader!\n%s", info_log);
 	} else glAttachShader(m_program_id, fragment_shader);
 
 	glLinkProgram(m_program_id);
@@ -88,7 +92,7 @@ Shader::Shader(uint8_t* data, uint32_t size) {
 	if (program_linked != GL_TRUE) {
 		char info_log[512];
 		glGetProgramInfoLog(m_program_id, 512, NULL, info_log);
-		printf("Unable to link program!\n%s", info_log);
+		DBPRINTF("Unable to link program!\n%s", info_log);
 	}
 
 	glDeleteShader(vertex_shader);

@@ -37,7 +37,7 @@ GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 	sol::protected_function_result result = init();
 	if (!result.valid()) {
 		sol::error error = result;
-		printf("[Lua Error]: %s\n", error.what());
+		printf("[LUA ERROR]: %s\n", error.what());
 	}
 
 	m_lua_process = m_lua_state->get<sol::function>("process");

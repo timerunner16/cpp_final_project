@@ -85,3 +85,6 @@ add_dependencies(cpp_final_project copy_assets)
 
 add_compile_options(-fsanitize=address)
 add_link_options(-fsanitize=address)
+
+string(LENGTH "{CMAKE_SOURCE_DIR}/" SOURCE_PATH_SIZE)
+add_definitions("-DSOURCE_PATH_SIZE=${SOURCE_PATH_SIZE}")

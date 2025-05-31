@@ -4,6 +4,10 @@
 #include "mesh.hpp"
 #include "util.hpp"
 
+#define MACROPRINT
+#define VERBOSE_DBPRINTF
+#include "macroprint.h"
+
 enum value_types {
 	UNDEFINED,
 	VERTEX,
@@ -38,7 +42,7 @@ Mesh::Mesh(std::vector<std::string> mesh_source) {
 
 		switch (value_type) {
 			case (VERTEX): {
-				if (values.size() != 3) {printf("OBJ loader only supports three dimensional vertices. Issue: %s\n", line.c_str()); break;}
+				if (values.size() != 3) {DBPRINTF("OBJ loader only supports three dimensional vertices. Issue: %s\n", line.c_str()); break;}
 				float x = 0.0f;
 				float y = 0.0f;
 				float z = 0.0f;
@@ -49,7 +53,7 @@ Mesh::Mesh(std::vector<std::string> mesh_source) {
 				break;
 			}
 			case (VERTEX_TEXTURE_COORDINATE): {
-				if (values.size() != 2) {printf("OBJ loader only supports two dimensional texture coordinates. Issue: %s\nNext: %s\n", line.c_str(), mesh_source[i+1].c_str()); break;}
+				if (values.size() != 2) {DBPRINTF("OBJ loader only supports two dimensional texture coordinates. Issue: %s\nNext: %s\n", line.c_str(), mesh_source[i+1].c_str()); break;}
 				float u = 0.0f;
 				float v = 0.0f;
 				u = stof(values[0]);
@@ -58,7 +62,7 @@ Mesh::Mesh(std::vector<std::string> mesh_source) {
 				break;
 			}
 			case (VERTEX_NORMAL): {
-				if (values.size() != 3) {printf("OBJ loader only supports three dimensional vertices. Issue: %s\nNext: %s\n", line.c_str(), mesh_source[i+1].c_str()); break;}
+				if (values.size() != 3) {DBPRINTF("OBJ loader only supports three dimensional vertices. Issue: %s\nNext: %s\n", line.c_str(), mesh_source[i+1].c_str()); break;}
 				float x = 0.0f;
 				float y = 0.0f;
 				float z = 0.0f;
@@ -69,7 +73,7 @@ Mesh::Mesh(std::vector<std::string> mesh_source) {
 				break;
 			}
 			case (FACE): {
-				if (values.size() != 3) {printf("OBJ loader only supports triangles. Issue: %s\nNext: %s\n", line.c_str(), mesh_source[i+1].c_str()); break;}
+				if (values.size() != 3) {DBPRINTF("OBJ loader only supports triangles. Issue: %s\nNext: %s\n", line.c_str(), mesh_source[i+1].c_str()); break;}
 				std::vector<std::string> index_group_a = split_string(values[0], "/");
 				std::vector<std::string> index_group_b = split_string(values[1], "/");
 				std::vector<std::string> index_group_c = split_string(values[2], "/");
@@ -114,8 +118,6 @@ Mesh::Mesh(std::vector<std::string> mesh_source) {
 
 	glGenVertexArrays(1, &m_vertex_array_object);
 	glBindVertexArray(m_vertex_array_object);
-
-	GLuint vertex_buffer_object, index_buffer_object;
 
 	glGenBuffers(1, &m_vertex_buffer_object);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertex_buffer_object);
