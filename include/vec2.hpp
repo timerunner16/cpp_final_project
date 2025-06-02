@@ -24,6 +24,8 @@ struct vec2 : public glm::vec2 {
 	vec2 mulf(const float& other);
 	vec2 divf(const float& other);
 
+	vec2 unary_minus();
+
 	float length() const;
 	float length_squared() const;
 	float dot(const vec2& other) const;

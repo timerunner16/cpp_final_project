@@ -26,8 +26,9 @@ void Event::Connect(std::shared_ptr<sol::state> state, std::string function_name
 }
 
 void Event::Disconnect(std::shared_ptr<sol::state> state, std::string function_name) {
-	std::erase_if(m_event_connections, [&state](const event_connection& connection) -> bool {
-		return connection.state.expired() || connection.state.lock() == state;
+	std::erase_if(m_event_connections, [&function_name, &state](const event_connection& connection) -> bool {
+		return connection.state.expired() ||
+			   (connection.state.lock() == state && connection.function_name == function_name);
 	});
 }
 

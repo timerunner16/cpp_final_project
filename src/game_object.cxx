@@ -176,3 +176,54 @@ void GameObject::AddEvent(Event* event, std::string name) {
 }
 
 bool GameObject::IsOnFloor() {return m_on_floor;}
+
+collision_result GameObject::Raycast(vec2 origin, vec2 endpoint) {
+	std::vector<collision_result> results(0);
+	line ray{origin, endpoint};
+	for (line segment : m_game->GetMap()->GetLines()) {
+		collision_result result = discrete_line_line(ray, segment);
+		if (result.hit) results.push_back(result);
+	}
+	for (auto& [key, val] : m_game->GetWorkspace()->GetGameObjects()) {
+		
+		collision_result result = val->RaycastBox(this, ray);
+		if (result.hit) results.push_back(result);
+	}
+
+	if (results.size() == 0) return collision_result{false, vec2(), vec2(), vec2()};
+
+	collision_result shortest = results[0];
+	float distance = vec2(shortest.until_blocked - origin).length_squared();
+	for (size_t i = 0; i < results.size(); i++) {
+		float new_distance = vec2(results[i].until_blocked - origin).length_squared();
+		if (new_distance < distance) {
+			shortest = results[i];
+			distance = new_distance;
+		}
+	}
+	return shortest;
+}
+
+collision_result GameObject::RaycastBox(GameObject* original, line ray) {
+	std::vector<collision_result> results(0);
+	if (original != this) {
+		for (auto& [key, val] : m_children) {
+			collision_result result = val->RaycastBox(original, ray);
+			if (result.hit) results.push_back(result);
+		}
+		collision_result result = discrete_line_box(m_box, ray);
+		if (result.hit) results.push_back(result);
+	}
+	if (results.size() == 0) return collision_result{false, vec2(), vec2(), vec2()};
+
+	collision_result shortest = results[0];
+	float distance = vec2(shortest.until_blocked - ray.a).length_squared();
+	for (size_t i = 0; i < results.size(); i++) {
+		float new_distance = vec2(results[i].until_blocked - ray.a).length_squared();
+		if (new_distance < distance) {
+			shortest = results[i];
+			distance = new_distance;
+		}
+	}
+	return shortest;
+}

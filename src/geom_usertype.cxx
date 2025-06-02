@@ -30,6 +30,7 @@ void geom_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game
 		sol::meta_function::subtraction, &vec2::sub,
 		sol::meta_function::multiplication, sol::overload(&vec2::mul, &vec2::mulf),
 		sol::meta_function::division, sol::overload(&vec2::div, &vec2::divf),
+		sol::meta_function::unary_minus, &vec2::unary_minus,
 		"plus", &vec2::add,
 		"minus", &vec2::sub,
 		"times", sol::overload(&vec2::mul, &vec2::mulf),
@@ -63,6 +64,7 @@ void geom_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game
 		sol::meta_function::subtraction, &vec3::sub,
 		sol::meta_function::multiplication, sol::overload(&vec3::mul, &vec3::mulf),
 		sol::meta_function::division, sol::overload(&vec3::div, &vec3::divf),
+		sol::meta_function::unary_minus, &vec3::unary_minus,
 		"plus", &vec3::add,
 		"minus", &vec3::sub,
 		"times", sol::overload(&vec3::mul, &vec3::mulf),
@@ -95,6 +97,7 @@ void geom_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game
 		sol::meta_function::subtraction, &ivec2::sub,
 		sol::meta_function::multiplication, sol::overload(&ivec2::mul, &ivec2::mulf),
 		sol::meta_function::division, sol::overload(&ivec2::div, &ivec2::divf),
+		sol::meta_function::unary_minus, &ivec2::unary_minus,
 		"plus", &ivec2::add,
 		"minus", &ivec2::sub,
 		"times", sol::overload(&ivec2::mul, &ivec2::mulf),
@@ -126,6 +129,7 @@ void geom_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game
 		sol::meta_function::subtraction, &ivec3::sub,
 		sol::meta_function::multiplication, &ivec3::mul,
 		sol::meta_function::division, &ivec3::div,
+		sol::meta_function::unary_minus, &ivec3::unary_minus,
 		"plus", &ivec3::add,
 		"minus", &ivec3::sub,
 		"times", sol::overload(&ivec3::mul, &ivec3::mulf),
@@ -151,5 +155,12 @@ void geom_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game
 		"LookVector", sol::readonly_property(&Transform::GetLookVector),
 		"RightVector", sol::readonly_property(&Transform::GetRightVector),
 		"UpVector", sol::readonly_property(&Transform::GetUpVector)
+	);
+
+	sol::usertype<collision_result> collision_result_data_type = lua_state->new_usertype<collision_result>(
+		"CollisionResult", sol::no_constructor,
+		"Hit", sol::readonly_property(&collision_result::hit),
+		"Position", sol::readonly_property(&collision_result::until_blocked),
+		"Normal", sol::readonly_property(&collision_result::hit_normal)
 	);
 }

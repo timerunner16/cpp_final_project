@@ -33,5 +33,7 @@ vec2 closest_point_on_line(vec2 p, line l);
 
 collision_result sweep_box_line(Box a, line l, vec2 v);
 collision_result discrete_box_box(Box moving, Box unmoving, vec2 v);
+collision_result discrete_line_box(Box a, line ray);
+collision_result discrete_line_line(line ray, line segment);
 
 bool overlap_box_triangle(Box a, triangle b);

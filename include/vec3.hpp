@@ -26,6 +26,8 @@ struct vec3 : public glm::vec3 {
 	vec3 mulf(const float& other);
 	vec3 divf(const float& other);
 
+	vec3 unary_minus();
+
 	float length() const;
 	float length_squared() const;
 	float dot(const vec3& other) const;

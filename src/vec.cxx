@@ -26,6 +26,8 @@ vec2 vec2::div(const vec2& other) {return vec2(x/other.x, y/other.y);}
 vec2 vec2::mulf(const float& other) {return vec2(x*other, y*other);}
 vec2 vec2::divf(const float& other) {return vec2(x/other, y/other);}
 
+vec2 vec2::unary_minus() {return vec2(-x, -y);}
+
 float vec2::length() const {return sqrt(x*x + y*y);}
 float vec2::length_squared() const {return x*x + y*y;}
 float vec2::dot(const vec2& other) const {return x*other.x + y*other.y;}
@@ -63,6 +65,8 @@ vec3 vec3::div(const vec3& other) {return vec3(x/other.x, y/other.y, z/other.z);
 vec3 vec3::mulf(const float& other) {return vec3(x*other, y*other, z*other);}
 vec3 vec3::divf(const float& other) {return vec3(x/other, y/other, z/other);}
 
+vec3 vec3::unary_minus() {return vec3(-x, -y, -z);}
+
 float vec3::length() const {return sqrt(x*x + y*y + z*z);}
 float vec3::length_squared() const {return x*x + y*y + z*z;}
 float vec3::dot(const vec3& other) const {return x*other.x + y*other.y + z*other.z;}
@@ -99,6 +103,8 @@ ivec2 ivec2::div(const ivec2& other) {return ivec2(x/other.x, y/other.y);}
 ivec2 ivec2::mulf(const float& other) {return ivec2((int)(x*other), (int)(y*other));}
 ivec2 ivec2::divf(const float& other) {return ivec2((int)(x/other), (int)(y/other));}
 
+ivec2 ivec2::unary_minus() {return ivec2(-x, -y);}
+
 float ivec2::length() const {return sqrt(x*x + y*y);}
 float ivec2::length_squared() const {return x*x + y*y;}
 
@@ -129,6 +135,8 @@ ivec3 ivec3::div(const ivec3& other) {return ivec3(x/other.x, y/other.y, z/other
 
 ivec3 ivec3::mulf(const float& other) {return ivec3((int)(x*other), (int)(y*other), (int)(z*other));}
 ivec3 ivec3::divf(const float& other) {return ivec3((int)(x/other), (int)(y/other), (int)(z/other));}
+
+ivec3 ivec3::unary_minus() {return ivec3(-x, -y, -z);}
 
 float ivec3::length() const {return sqrt(x*x + y*y + z*z);}
 float ivec3::length_squared() const {return x*x + y*y + z*z;}

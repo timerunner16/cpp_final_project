@@ -26,6 +26,8 @@ struct ivec3 : public glm::ivec3 {
 	ivec3 mulf(const float& other);
 	ivec3 divf(const float& other);
 
+	ivec3 unary_minus();
+
 	float length() const;
 	float length_squared() const;
 

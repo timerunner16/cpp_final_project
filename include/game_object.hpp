@@ -50,6 +50,9 @@ public:
 	void AddEvent(Event* event, std::string name);
 	
 	bool IsOnFloor();
+
+	collision_result Raycast(vec2 origin, vec2 endpoint);
+	collision_result RaycastBox(GameObject* original, line l);
 private:
 	Game* m_game;
 
