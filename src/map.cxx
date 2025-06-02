@@ -701,8 +701,8 @@ Map::Map(Game* game, std::string mapname) {
 		std::shared_ptr<Material> mat = nullptr;
 		if (!meshname.empty() && meshname != "NULL") mesh = m_game->GetResourceManager()->GetMesh(meshname);
 		if (!matname.empty() && matname != "NULL") mat = m_game->GetResourceManager()->GetMaterial(matname);
-		float bbx;
-		float bby;
+		float bbx = 0;
+		float bby = 0;
 		if (!bbvalue.empty()) {
 			std::vector<std::string> bbsplit = split_string(bbvalue, ",");
 			bbx = atof(bbsplit[0].c_str());
@@ -712,7 +712,7 @@ Map::Map(Game* game, std::string mapname) {
 			name, nullptr, scriptname,
 			mesh, mat,
 			Transform{vec3{thing.x/SCALE, thing.height/SCALE, thing.y/SCALE}, vec3{0,M_PI_2+thing.angle/180.0*M_PI,0}, vec3{1,1,1}},
-			Box{vec2{bbx,bby},vec2{thing.x/SCALE,thing.y/SCALE}}
+			vec2{bbx,bby}
 		);
 	}
 }

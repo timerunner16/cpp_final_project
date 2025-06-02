@@ -5,7 +5,7 @@
 #include "shader.hpp"
 #include "material.hpp"
 
-void rsmgr_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject *game_object) {
+void rsmgr_usertype_setup(std::shared_ptr<sol::state> lua_state) {
 	sol::usertype<ResourceManager> resource_manager_data_type = lua_state->new_usertype<ResourceManager>(
 		"ResourceManager", sol::no_constructor,
 		"GetMesh", &ResourceManager::GetMesh,

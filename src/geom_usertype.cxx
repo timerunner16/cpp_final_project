@@ -4,6 +4,7 @@
 #include "ivec2.hpp"
 #include "ivec3.hpp"
 #include "transform.hpp"
+#include "physics.hpp"
 
 void geom_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game_object) {
 	sol::usertype<vec2> vec2_data_type = lua_state->new_usertype<vec2>(

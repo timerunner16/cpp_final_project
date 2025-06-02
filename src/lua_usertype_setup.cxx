@@ -16,8 +16,8 @@ void lua_usertype_setup(Game* game, std::shared_ptr<sol::state> lua_state, GameO
 	vdata_usertype_setup(lua_state, game_object);
 	input_usertype_setup(lua_state, game_object);
 	prtcl_usertype_setup(lua_state, game_object);
-	rsmgr_usertype_setup(lua_state, game_object);
-	win_usertype_setup(lua_state, game_object);
-	wkspc_usertype_setup(lua_state, game_object);
+	rsmgr_usertype_setup(lua_state);
+	win_usertype_setup(lua_state);
+	wkspc_usertype_setup(lua_state);
 	engine_globals(game, lua_state, game_object);
 }
