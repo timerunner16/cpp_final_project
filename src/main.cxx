@@ -31,8 +31,8 @@ int main(int argc, char* argv[]) {
 
 	char* wad_path_c = getOption(argv, argv+argc, "-p");
 	if (wad_path_c != nullptr) wad_path = std::string(wad_path_c);
-	else wad_path = "assets/testmap.wad";
+	else wad_path = std::string("assets/GAME.wad");
 
-	Game game = Game(wad_path_c, width, height, downscale, resizable);
+	Game game = Game(wad_path, width, height, downscale, resizable);
 	return 0;
 }
