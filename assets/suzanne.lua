@@ -1,12 +1,10 @@
 local timer = 0.0
 
 local models = {
-	"CUBE",
-	"SUZANNE"
+	"ORB",
 }
 local materials = {
-	"TEST0",
-	"TEST1"
+	"ORB",
 }
 
 local current
@@ -21,6 +19,7 @@ function init()
 end
 
 function process(delta)
+	current.Transform.Position.y = 1.0 + math.sin(timer * math.pi * 2.0) * 0.2
 	timer = timer + delta
 	if (timer >= 1.0) then
 		timer = 0.0
