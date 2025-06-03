@@ -19,7 +19,7 @@ class Mesh;
 class GLTexture;
 class Shader;
 class Material;
-class Uniform;
+struct Uniform;
 
 typedef std::variant<
 	int, bool, float,

@@ -12,6 +12,7 @@ add_executable(
 	src/window.cxx
 	src/workspace.cxx
 	src/resource_manager.cxx
+	src/pdata_manager.cxx
 	src/game_object.cxx
 	src/mesh.cxx
 	src/shader.cxx
@@ -28,6 +29,7 @@ add_executable(
 	src/rsmgr_usertype.cxx
 	src/win_usertype.cxx
 	src/wkspc_usertype.cxx
+	src/pdmgr_usertype.cxx
 	src/engine_globals.cxx
 	src/input.cxx
 	src/vec.cxx

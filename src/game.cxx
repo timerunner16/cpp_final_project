@@ -4,6 +4,7 @@
 #include "workspace.hpp"
 #include "resource_manager.hpp"
 #include "input.hpp"
+#include "pdata_manager.hpp"
 #include "map.hpp"
 
 Game::Game(std::string wad_path, int width, int height, int downscale, bool resizable) {
@@ -12,6 +13,7 @@ Game::Game(std::string wad_path, int width, int height, int downscale, bool resi
 	m_workspace = new Workspace(this);
 	m_resource_manager = new ResourceManager(this);
 	m_input_manager = new InputManager(this);
+	m_pdata_manager = new PDataManager();
 	m_map = new Map(this, "MAP01");
 	m_should_shutdown = false;
 
@@ -93,6 +95,7 @@ Window* Game::GetWindow() {return m_window;}
 Workspace* Game::GetWorkspace() {return m_workspace;}
 ResourceManager* Game::GetResourceManager() {return m_resource_manager;}
 InputManager* Game::GetInputManager() {return m_input_manager;}
+PDataManager* Game::GetPDataManager() {return m_pdata_manager;}
 Map* Game::GetMap() {return m_map;}
 std::map<std::string, Uniform>* Game::GetGlobalUniforms() {
 	return &m_global_uniforms;

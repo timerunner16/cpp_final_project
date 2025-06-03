@@ -1,8 +1,11 @@
 local workspace
+local pdata
+
 local event
 
 function init()
 	workspace = Engine.Workspace
+	pdata = Engine.PDataManager
 	event = nil
 end
 
@@ -21,6 +24,7 @@ end
 function create_particles()
 	local position = event:GetValue("position")
 	local direction = event:GetValue("direction")
+	local color = pdata:GetValue("particle_color")
 	position = position * 2 -- WHY DO I NEED TO DO THIS?!?!
 
 	local particle_info = ParticleSystemCreateInfo.new()
@@ -31,8 +35,8 @@ function create_particles()
 	particle_info.LaunchInterval = 0.2/8
 	particle_info.NumLaunches = 8
 	particle_info.NumParticles = 8
-	particle_info.R = 255
-	particle_info.G = 200
-	particle_info.B = 0
+	particle_info.R = math.floor(color.x)
+	particle_info.G = math.floor(color.y)
+	particle_info.B = math.floor(color.z)
 	workspace:CreateParticleSystem(particle_info)
 end

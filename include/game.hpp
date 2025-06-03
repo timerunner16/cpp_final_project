@@ -7,6 +7,7 @@ class Window;
 class Workspace;
 class ResourceManager;
 class InputManager;
+class PDataManager;
 class Map;
 
 class Game {
@@ -23,6 +24,7 @@ public:
 	Workspace* GetWorkspace();
 	ResourceManager* GetResourceManager();
 	InputManager* GetInputManager();
+	PDataManager* GetPDataManager();
 	Map* GetMap();
 	std::map<std::string, Uniform>* GetGlobalUniforms();
 	std::string GetWADPath();
@@ -31,6 +33,7 @@ private:
 	Workspace* m_workspace;
 	ResourceManager* m_resource_manager;
 	InputManager* m_input_manager;
+	PDataManager* m_pdata_manager;
 	Map* m_map;
 	std::string m_wad_path;
 	

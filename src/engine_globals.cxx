@@ -2,8 +2,9 @@
 #include "game.hpp"
 #include "window.hpp"
 #include "workspace.hpp"
-#include "input.hpp"
 #include "resource_manager.hpp"
+#include "input.hpp"
+#include "pdata_manager.hpp"
 #include "game_object.hpp"
 
 int engine_globals_deny(lua_State* L) {
@@ -16,8 +17,9 @@ void engine_globals(Game* game, std::shared_ptr<sol::state> lua_state, GameObjec
 	sol::table engine_globals_metatable = lua_state->create_table_with();
 	engine_globals_metatable["Window"] = game->GetWindow();
 	engine_globals_metatable["Workspace"] = game->GetWorkspace();
-	engine_globals_metatable["InputManager"] = game->GetInputManager();
 	engine_globals_metatable["ResourceManager"] = game->GetResourceManager();
+	engine_globals_metatable["InputManager"] = game->GetInputManager();
+	engine_globals_metatable["PDataManager"] = game->GetPDataManager();
 	engine_globals_metatable["CurrentGameObject"] = game_object;
 
 	engine_globals_metatable[sol::meta_function::new_index] = engine_globals_deny;
