@@ -18,14 +18,28 @@ GLTexture::GLTexture(uint8_t* data, uint32_t size, IMAGE_FORMAT format) {
 			break;
 	}
 	delete rw;
-	SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGBA8888, 0);
+	GLenum texture_format = GL_RGBA;
+	GLint num_colors;
+
+	num_colors = surface->format->BytesPerPixel;
+	if (num_colors == 4) {
+		if (surface->format->Rmask == 0x000000ff)
+			texture_format = GL_RGBA;
+		else
+			texture_format = GL_BGRA;
+	} else if (num_colors == 3) {
+		if (surface->format->Rmask == 0x000000ff)
+			texture_format = GL_RGB;
+		else
+			texture_format = GL_BGR;
+	}
 	
 	glGenTextures(1, &m_texture_id);
 	glBindTexture(GL_TEXTURE_2D, m_texture_id);
 	glTexImage2D(
-		GL_TEXTURE_2D, 0, 4,
+		GL_TEXTURE_2D, 0, num_colors,
 		surface->w, surface->h,
-		0, GL_RGBA, GL_UNSIGNED_BYTE,
+		0, texture_format, GL_UNSIGNED_BYTE,
 		surface->pixels
 	);
 

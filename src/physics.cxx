@@ -294,7 +294,6 @@ collision_result discrete_line_line(line ray, line segment) {
 	r3 = a1 * x3 + b1 * y3 + c1;
 	r4 = a1 * x4 + b1 * y4 + c1;
 
-	printf("r3 %f r4 %f\n", r3, r4);
 	if (r3 != 0 && r4 != 0 && ((r3 >= 0 && r4 >= 0) || (r3 < 0 && r4 < 0)))
 		return BAD_RESULT;
 
@@ -305,13 +304,11 @@ collision_result discrete_line_line(line ray, line segment) {
 	r1 = a2 * x1 + b2 * y1 + c2;
 	r2 = a2 * x2 + b2 * y2 + c2;
 
-	printf("r1 %f r2 %f\n", r1, r2);
 	if (r1 != 0 && r2 != 0 && ((r1 >= 0 && r2 >= 0) | (r1 < 0 && r2 < 0)))
 		return BAD_RESULT;
 
 	denom = a1 * b2 - a2 * b1;
 
-	printf("denom %f\n", denom);
 	if (denom == 0)
 		return BAD_RESULT;
 
@@ -326,55 +323,4 @@ collision_result discrete_line_line(line ray, line segment) {
 	vec2 hit_normal = segment.n();
 
 	return collision_result{true, until_blocked, vec2(), hit_normal};
-
-	/*float dx1 = x2 - x1; float dy1 = y2 - y1;
-	float dx2 = x4 - x3; float dy2 = y4 - y3;
-	float dx3 = x1 - x3; float dy3 = y1 - y3;
-
-	float d = dx1*dy2 - dy1*dx2;
-	if (d == 0) return BAD_RESULT;
-
-	float t1 = (dx2*dy3 - dy2*dx3)/d;
-	if (t1 < 0 || t1 > 1) return BAD_RESULT;
-
-	float t2 = (dx1*dy3 - dy1*dx3)/d;
-	if (t2 < 0 || t2 > 1) return BAD_RESULT;
-
-	vec2 until_blocked{
-		x1 + t1*dx1,
-		y1 + t1*dy1
-	};
-
-	vec2 hit_normal = segment.n();
-	return collision_result{true, until_blocked, vec2(), hit_normal};*/
-
-	/*vec2 d1{
-		ray.b.x - ray.a.x,
-		ray.b.y - ray.a.y
-	};
-	vec2 d2{
-		segment.b.x - segment.a.x,
-		segment.b.y - segment.a.y
-	};
-	vec2 d3{
-		ray.a.x - segment.a.x,
-		ray.a.y - segment.a.y
-	};
-	float d = d1.x*d2.y - d1.y*d2.x;
-	if (d == 0) return BAD_RESULT;
-
-	float t1 = (d2.x*d3.y - d2.y*d3.x)/d;
-	if (t1 < 0 || t1 > 1) return BAD_RESULT;
-
-	float t2 = (d1.x*d3.y - d1.y*d3.x)/d;
-	printf("t1 %f t2 %f\n", t1, t2);
-	if (t2 < 0 || t2 > 1) return BAD_RESULT;
-
-	vec2 until_blocked = {
-		ray.a.x + t1*d1.x,
-		ray.a.y + t1*d1.y
-	};
-
-	vec2 hit_normal = segment.n();
-	return collision_result{true, until_blocked, vec2(), hit_normal};*/
 }

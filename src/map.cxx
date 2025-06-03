@@ -4,6 +4,7 @@
 #include "map.hpp"
 #include "game.hpp"
 #include "material.hpp"
+#include "gltexture.hpp"
 #include "physics.hpp"
 #include "resource_manager.hpp"
 #include "parse_wad.hpp"
@@ -566,10 +567,10 @@ Map::Map(Game* game, std::string mapname) {
 				}
 				m_lines.push_back(l);
 
-				float v1u = current_sidedef.offsetx_mid/SCALE;
-				float v2u = length/SCALE + current_sidedef.offsetx_mid/SCALE;
-				float lowv = (midfloor+current_sidedef.offsety_mid)/SCALE;
-				float highv = (midceiling+current_sidedef.offsety_mid)/SCALE;
+				float v1u = (float)(current_sidedef.offsetx_mid)/material->GetTexture()->GetWidth();
+				float v2u = (float)(length + current_sidedef.offsetx_mid)/material->GetTexture()->GetWidth();
+				float lowv = (float)(midfloor+current_sidedef.offsety_mid)/material->GetTexture()->GetHeight();
+				float highv = (float)(midceiling+current_sidedef.offsety_mid)/material->GetTexture()->GetHeight();
 				
 				mesh_vertex vertex_data[6] = {
 					{glm::vec3{v1.x/SCALE,midfloor/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,lowv}},
