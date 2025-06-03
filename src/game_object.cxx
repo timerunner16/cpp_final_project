@@ -23,6 +23,7 @@ GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 	m_transform = transform;
 	m_box = box;
 	m_box.center = vec2{m_transform.position.x, m_transform.position.z};
+	m_velocity = vec3{0,0,0};
 
 	m_height = height;
 

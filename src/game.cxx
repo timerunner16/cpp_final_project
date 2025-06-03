@@ -17,10 +17,13 @@ Game::Game(std::string wad_path, int width, int height, int downscale, bool resi
 	m_map = new Map(this, "MAP01");
 	m_should_shutdown = false;
 
+	m_time = 0;
+
 	m_pp_material = m_resource_manager->GetMaterial("PPDITHER");
 
 	m_global_uniforms["window_resolution"] = Uniform{"window_resolution", IVEC2, (void*)new glm::ivec2{m_window->GetWidth(), m_window->GetHeight()}};
 	m_global_uniforms["window_downscale"] = Uniform{"window_downscale", INT, (void *)new int{m_window->GetDownscale()}};
+	m_global_uniforms["time"] = Uniform{"time", FLOAT, (void *)new float{m_time}};
 
 	m_tp_a = std::chrono::high_resolution_clock::now();
 	m_tp_b = std::chrono::high_resolution_clock::now();
@@ -35,6 +38,7 @@ Game::Game(std::string wad_path, int width, int height, int downscale, bool resi
 Game::~Game() {
 	delete (glm::ivec2*)m_global_uniforms["window_resolution"].data;
 	delete (int*)m_global_uniforms["window_downscale"].data;
+	delete (float*)m_global_uniforms["time"].data;
 	delete m_window;
 	delete m_workspace;
 	delete m_resource_manager;
@@ -50,11 +54,14 @@ Game::~Game() {
 void Game::Process() {
 	m_tp_a = std::chrono::high_resolution_clock::now();
 	m_delta = (m_tp_a-m_tp_b).count()/(1e9);
+	m_time += m_delta;
 
 	delete (glm::ivec2*)m_global_uniforms["window_resolution"].data;
 	delete (int*)m_global_uniforms["window_downscale"].data;
+	delete (float*)m_global_uniforms["time"].data;
 	m_global_uniforms["window_resolution"] = Uniform{"window_resolution", IVEC2, (void*)new glm::ivec2{m_window->GetWidth(), m_window->GetHeight()}};
 	m_global_uniforms["window_downscale"] = Uniform{"window_downscale", INT, (void *)new int{m_window->GetDownscale()}};
+	m_global_uniforms["time"] = Uniform{"time", FLOAT, (void *)new float{m_time}};
 	
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {

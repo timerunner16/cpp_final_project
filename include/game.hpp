@@ -44,6 +44,7 @@ private:
 	bool m_should_shutdown;
 
 	float m_delta;
+	float m_time;
 	std::chrono::high_resolution_clock::time_point m_tp_a;
 	std::chrono::high_resolution_clock::time_point m_tp_b;
 };

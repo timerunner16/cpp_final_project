@@ -35,7 +35,7 @@ std::shared_ptr<Material> ResourceManager::GetMaterial(std::string lumpname) {
 	
 	lumpdata data = extract_lump_from_wad(m_game->GetWADPath(), lumpname, "M");
 	if (!data.successful) return nullptr;
-	std::string data_str((char*)data.data);
+	std::string data_str((char*)data.data, data.size);
 	std::vector<std::string> data_vec = split_string(data_str, "\n");
 	Material* resource = new Material(m_game, m_game->GetWADPath(), data_vec);
 	m_material_map.emplace(std::make_pair(lumpname, resource));

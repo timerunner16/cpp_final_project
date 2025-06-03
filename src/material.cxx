@@ -39,7 +39,7 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 			std::string name = path.substr(0, path.find(" "));
 			std::string info = path.substr(path.find(" ")+1, path.size());
 			std::string type_s = info.substr(0, info.find(" "));
-			std::string data_s = info.substr(info.find(" ")+1,info.size());
+			std::string data_s = trim_nonalphanum(info.substr(info.find(" ")+1,info.size()));
 
 			if (type_s == "bool") {
 				bool data = data_s == "true";

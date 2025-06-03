@@ -46,3 +46,18 @@ std::string trim_double(std::string input, char character) {
 	}
 	return input;
 }
+
+std::string trim_nonalphanum(std::string input) {
+	while (true) {
+		bool found = false;
+		for (size_t i = 0; i < input.size();) {
+			if (i < input.size() && !(isalpha(input[i]) || isdigit(input[i]))) {
+				input.erase(i, 1);
+				found = true;
+			}
+			else i++;
+		}
+		if (!found) break;
+	}
+	return input;
+}

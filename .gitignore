@@ -41,3 +41,6 @@ build/
 # Doombuilder save files
 *.dbs
 *.wad.*
+
+# Blender backup save files
+*.blend*
