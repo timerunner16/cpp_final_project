@@ -19,9 +19,6 @@ Game::Game(std::string wad_path, int width, int height, int downscale, bool resi
 
 	m_pp_material = m_resource_manager->GetMaterial("PPDITHER");
 
-	m_resource_manager->GetMaterial("TEST0")->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
-	m_resource_manager->GetMaterial("TEST1")->SetUniform(Uniform{"snap_scale", INT, (void *)new int{4}});
-
 	m_global_uniforms["window_resolution"] = Uniform{"window_resolution", IVEC2, (void*)new glm::ivec2{m_window->GetWidth(), m_window->GetHeight()}};
 	m_global_uniforms["window_downscale"] = Uniform{"window_downscale", INT, (void *)new int{m_window->GetDownscale()}};
 
@@ -36,6 +33,8 @@ Game::Game(std::string wad_path, int width, int height, int downscale, bool resi
 }
 
 Game::~Game() {
+	delete (glm::ivec2*)m_global_uniforms["window_resolution"].data;
+	delete (int*)m_global_uniforms["window_downscale"].data;
 	delete m_window;
 	delete m_workspace;
 	delete m_resource_manager;
@@ -51,6 +50,11 @@ Game::~Game() {
 void Game::Process() {
 	m_tp_a = std::chrono::high_resolution_clock::now();
 	m_delta = (m_tp_a-m_tp_b).count()/(1e9);
+
+	delete (glm::ivec2*)m_global_uniforms["window_resolution"].data;
+	delete (int*)m_global_uniforms["window_downscale"].data;
+	m_global_uniforms["window_resolution"] = Uniform{"window_resolution", IVEC2, (void*)new glm::ivec2{m_window->GetWidth(), m_window->GetHeight()}};
+	m_global_uniforms["window_downscale"] = Uniform{"window_downscale", INT, (void *)new int{m_window->GetDownscale()}};
 	
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {

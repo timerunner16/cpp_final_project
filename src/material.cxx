@@ -6,6 +6,23 @@
 #include "game.hpp"
 #include "resource_manager.hpp"
 #include "parse_wad.hpp"
+#include "util.hpp"
+
+size_t get_uniform_data_size(UniformType type) {
+	switch (type) {
+		case BOOL: return sizeof(bool);
+		case INT: return sizeof(int);
+		case FLOAT: return sizeof(float);
+		case VEC2: return sizeof(glm::vec2);
+		case VEC3: return sizeof(glm::vec3);
+		case VEC4: return sizeof(glm::vec4);
+		case MAT4: return sizeof(glm::mat4);
+		case IVEC2: return sizeof(glm::ivec2);
+		case IVEC3: return sizeof(glm::ivec3);
+		case IVEC4: return sizeof(glm::ivec4);
+		default: return 1;
+	}
+}
 
 Material::Material(Game* game, std::string wad_path, std::vector<std::string> data) {
 	m_uniforms = std::map<std::string, Uniform>();
@@ -18,6 +35,102 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 			m_shader = game->GetResourceManager()->GetShader(path);
 		} else if (identifier == "texture") {
 			m_texture = game->GetResourceManager()->GetGLTexture(path);
+		} else if (identifier == "uniform") {
+			std::string name = path.substr(0, path.find(" "));
+			std::string info = path.substr(path.find(" ")+1, path.size());
+			std::string type_s = info.substr(0, info.find(" "));
+			std::string data_s = info.substr(info.find(" ")+1,info.size());
+
+			if (type_s == "bool") {
+				bool data = data_s == "true";
+				SetUniform(Uniform{
+					name,
+					BOOL,
+					(void*)&data
+				});
+			} else if (type_s == "int") {
+				int data = std::stoi(data_s);
+				SetUniform(Uniform{
+					name,
+					INT,
+					(void*)&data
+				});
+			} else if (type_s == "float") {
+				float data = std::stof(data_s);
+				SetUniform(Uniform{
+					name,
+					FLOAT,
+					(void*)&data
+				});
+			} else if (type_s == "vec2") {
+				float x = std::stof(data_s.substr(0, data_s.find(",")));
+				float y = std::stof(data_s.substr(data_s.find(",")+1, data_s.size()));
+				glm::vec2 data{x,y};
+				SetUniform(Uniform{
+					name,
+					VEC2,
+					(void*)&data
+				});
+			} else if (type_s == "vec3") {
+				std::vector<std::string> components = split_string(data_s, ",");
+				glm::vec3 data{
+					std::stof(components[0]),
+					std::stof(components[1]),
+					std::stof(components[2])
+				};
+				SetUniform(Uniform{
+					name,
+					VEC3,
+					(void*)&data
+				});
+			} else if (type_s == "vec4") {
+				std::vector<std::string> components = split_string(data_s, ",");
+				glm::vec4 data{
+					std::stof(components[0]),
+					std::stof(components[1]),
+					std::stof(components[2]),
+					std::stof(components[3])
+				};
+				SetUniform(Uniform{
+					name,
+					VEC4,
+					(void*)&data
+				});
+			} else if (type_s == "ivec2") {
+				int x = std::stof(data_s.substr(0, data_s.find(",")));
+				int y = std::stof(data_s.substr(data_s.find(",")+1, data_s.size()));
+				glm::ivec2 data{x,y};
+				SetUniform(Uniform{
+					name,
+					IVEC2,
+					(void*)&data
+				});
+			} else if (type_s == "ivec3") {
+				std::vector<std::string> components = split_string(data_s, ",");
+				glm::ivec3 data{
+					std::stoi(components[0]),
+					std::stoi(components[1]),
+					std::stoi(components[2])
+				};
+				SetUniform(Uniform{
+					name,
+					IVEC3,
+					(void*)&data
+				});
+			} else if (type_s == "ivec4") {
+				std::vector<std::string> components = split_string(data_s, ",");
+				glm::ivec4 data{
+					std::stoi(components[0]),
+					std::stoi(components[1]),
+					std::stoi(components[2]),
+					std::stoi(components[3])
+				};
+				SetUniform(Uniform{
+					name,
+					IVEC4,
+					(void*)&data
+				});
+			}
 		}
 	}
 }
@@ -32,7 +145,13 @@ void Material::Cleanup() {}
 
 void Material::SetTexture(std::shared_ptr<GLTexture> texture) {m_texture = texture;}
 void Material::SetShader(std::shared_ptr<Shader> shader) {m_shader = shader;}
-void Material::SetUniform(Uniform uniform) {m_uniforms[uniform.name] = uniform;}
+void Material::SetUniform(Uniform uniform) {
+	size_t size = get_uniform_data_size(uniform.type);
+	void* data = malloc(size);
+	memcpy(data, uniform.data, size);
+	Uniform n_uniform{uniform.name, uniform.type, data};
+	m_uniforms[uniform.name] = n_uniform;
+}
 
 void Material::Bind(Game* game) {
 	if (m_texture != nullptr) glBindTexture(GL_TEXTURE_2D, m_texture->GetTextureID());
