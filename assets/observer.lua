@@ -68,18 +68,15 @@ function process(delta)
 		Engine.Window:SetWireframeEnabled(wireframe)
 	end
 
-	local key_rotation_vector = input:GetVector(Keys.Left, Keys.Right, Keys.Up, Keys.Down)
-	key_rotation_vector = key_rotation_vector * delta * K_SENSITIVITY
-	current.Transform.Rotation.y = current.Transform.Rotation.y + key_rotation_vector.x
-	camera.Transform.Rotation.x = camera.Transform.Rotation.x + key_rotation_vector.y
+	local key_rotation_axis = input:GetAxis(Keys.Left, Keys.Right)
+	key_rotation_axis = key_rotation_axis * delta * K_SENSITIVITY
+	current.Transform.Rotation.y = current.Transform.Rotation.y + key_rotation_axis
 
 	if (window.Focused) then
 		local mouse_delta = Vector2.new(input:GetMouseDelta())
 		local window_size = Vector2.new(window.Width, window.Height)
 		mouse_delta = mouse_delta / window_size
 		current.Transform.Rotation.y = current.Transform.Rotation.y + mouse_delta.x * M_SENSITIVITY
-		camera.Transform.Rotation.x = camera.Transform.Rotation.x + mouse_delta.y * M_SENSITIVITY
-		camera.Transform.Rotation.x = math.min(math.max(camera.Transform.Rotation.x, -math.pi/2), math.pi/2)
 	else
 		input:SetMouseCaptured(false)
 	end
