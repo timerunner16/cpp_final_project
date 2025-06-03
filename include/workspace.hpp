@@ -19,7 +19,7 @@ public:
 	
 	GameObject* CreateGameObject(std::string name, GameObject* parent,
 		std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
-		const Transform& transform, const vec2& box_bounds);
+		const Transform& transform, const vec2& box_bounds, const float& height);
 	void CreateParticleSystem(particle_system_create_info info);
 	Event* CreateEvent(std::string name, GameObject* parent);
 

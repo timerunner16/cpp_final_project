@@ -21,8 +21,6 @@ using namespace tpp;
 #define VERBOSE_DBPRINTF
 #include "macroprint.h"
 
-#define SCALE (32.0f)
-
 struct udmf_vertex {
 	float x;
 	float y;
@@ -556,16 +554,13 @@ Map::Map(Game* game, std::string mapname) {
 			float norm_x = -(v2.y-v1.y)/length;
 			float norm_y =  (v2.x-v1.x)/length;
 
+			bool lower_l = false;
+			bool mid_l = false;
+			bool higher_l = false;
+
 			if (!current_sidedef.texturemiddle.empty()) {
+				mid_l = true;
 				std::shared_ptr<Material> material = m_game->GetResourceManager()->GetMaterial(current_sidedef.texturemiddle);
-				line l = line{vec2{v1.x,v1.y}/SCALE, vec2{v2.x,v2.y}/SCALE};
-				vec2 ln = l.n();
-				if (ln.dot(vec2{norm_x, norm_y}) < 0) {
-					vec2 tmp = l.a;
-					l.a = l.b;
-					l.b = tmp;
-				}
-				m_lines.push_back(l);
 
 				float v1u = (float)(current_sidedef.offsetx_mid)/material->GetTexture()->GetWidth();
 				float v2u = (float)(length + current_sidedef.offsetx_mid)/material->GetTexture()->GetWidth();
@@ -588,6 +583,7 @@ Map::Map(Game* game, std::string mapname) {
 				addmapsegment(m_map_segments, vertex_data, index_data, 6, material);
 			}
 			if (!current_sidedef.texturebottom.empty() && midfloor > realfloor) {
+				lower_l = true;
 				std::shared_ptr<Material> material = m_game->GetResourceManager()->GetMaterial(current_sidedef.texturebottom);
 
 				float v1u = current_sidedef.offsetx_bottom/SCALE;
@@ -610,6 +606,7 @@ Map::Map(Game* game, std::string mapname) {
 				addmapsegment(m_map_segments, vertex_data, index_data, 6, material);
 			}
 			if (!current_sidedef.texturetop.empty() && midceiling < realceiling) {
+				higher_l = true;
 				std::shared_ptr<Material> material = m_game->GetResourceManager()->GetMaterial(current_sidedef.texturetop);
 
 				float v1u = current_sidedef.offsetx_top/SCALE;
@@ -632,6 +629,25 @@ Map::Map(Game* game, std::string mapname) {
 				};
 				addmapsegment(m_map_segments, vertex_data, index_data, 6, material);
 			}
+			
+			line l = line{
+				vec2{v1.x,v1.y}/SCALE,
+				vec2{v2.x,v2.y}/SCALE,
+				current_sector.heightfloor/SCALE,
+				midfloor/SCALE,
+				midceiling/SCALE,
+				current_sector.heightceiling/SCALE,
+				lower_l,
+				mid_l,
+				higher_l
+			};
+			vec2 ln = l.n();
+			if (ln.dot(vec2{norm_x, norm_y}) < 0) {
+				vec2 tmp = l.a;
+				l.a = l.b;
+				l.b = tmp;
+			}
+			m_lines.push_back(l);
 		}
 		
 		std::vector<tri_triangle> floor_triangles = edges_to_faces(floor_edges);
@@ -680,6 +696,7 @@ Map::Map(Game* game, std::string mapname) {
 		std::string meshname;
 		std::string matname;
 		std::string bbvalue;
+		std::string heightvalue;
 		thing.data = trim_double(thing.data);
 		std::vector<std::string> values = split_string(thing.data, " ");
 		for (std::string i : values) {
@@ -692,6 +709,7 @@ Map::Map(Game* game, std::string mapname) {
 			else if (thing_tag == "mesh") meshname = trim_whitespace(thing_value);
 			else if (thing_tag == "mat") matname = trim_whitespace(thing_value);
 			else if (thing_tag == "bb") bbvalue = trim_whitespace(thing_value);
+			else if (thing_tag == "height") heightvalue = trim_whitespace(thing_value);
 		}
 		if (name.empty()) {
 			DBPRINTF("Error: all game objects in the map must at least have a name.\n");
@@ -709,11 +727,13 @@ Map::Map(Game* game, std::string mapname) {
 			bbx = atof(bbsplit[0].c_str());
 			bby = atof(bbsplit[1].c_str());
 		}
+		float height = 0;
+		if (!heightvalue.empty()) height = atof(heightvalue.c_str());
 		m_game->GetWorkspace()->CreateGameObject(
 			name, nullptr, scriptname,
 			mesh, mat,
 			Transform{vec3{thing.x/SCALE, thing.height/SCALE, thing.y/SCALE}, vec3{0,M_PI_2+thing.angle/180.0*M_PI,0}, vec3{1,1,1}},
-			vec2{bbx,bby}
+			vec2{bbx,bby}, height
 		);
 	}
 }

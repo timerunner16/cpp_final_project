@@ -27,11 +27,10 @@ function process(delta)
 	local q = input:QueryKey(Keys.Q)
 	if (q.Pressed and timer > timer_delay) then
 		timer = 0
-		local origin_v3 = camera.Transform.Position;
+		local origin = camera.Transform.Position;
 		local direction_v3 = -camera.Transform.LookVector;
-		local origin = Vector2.new(origin_v3.x, origin_v3.z);
 		local direction = Vector2.new(direction_v3.x, direction_v3.z).unit;
-		local result = player:Raycast(origin, origin + direction * 32)
+		local result = player:Raycast(origin, Vector2.new(origin.x, origin.z) + direction * 32)
 		if (result.Hit) then
 			local position_v2 = result.Position
 			local direction_v2 = result.Normal

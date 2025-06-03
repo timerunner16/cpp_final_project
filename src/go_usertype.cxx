@@ -18,6 +18,7 @@ void go_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game_o
 		"GameObject", sol::no_constructor,
 		"Transform", sol::property(&GameObject::GetTransform, &GameObject::SetTransform),
 		"Velocity", sol::property(&GameObject::GetVelocity, &GameObject::SetVelocity),
+		"Height", sol::property(&GameObject::GetHeight, &GameObject::SetHeight),
 		"GlobalTransform", sol::readonly_property(&GameObject::GetGlobalTransform),
 		"GetChild", &GameObject::GetChild,
 		"GetChildren", &GameObject::GetChildren_Lua,

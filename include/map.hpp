@@ -6,6 +6,9 @@
 #include "GL/gl.h"
 #include "physics.hpp"
 
+#define SCALE (32.0f)
+#define STEP_SIZE (12.0f/SCALE)
+
 class Material;
 class Game;
 

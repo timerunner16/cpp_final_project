@@ -10,7 +10,7 @@
 
 GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 		std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
-		const Transform& transform, const Box& box) {
+		const Transform& transform, const Box& box, const float& height) {
 	m_game = game;
 
 	m_name = name;
@@ -23,6 +23,8 @@ GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 	m_transform = transform;
 	m_box = box;
 	m_box.center = vec2{m_transform.position.x, m_transform.position.z};
+
+	m_height = height;
 
 	m_lua_loaded = !script_path.empty();
 	if (!m_lua_loaded) return;
@@ -60,11 +62,19 @@ void GameObject::Process(float delta) {
 	m_box.center = vec2{m_transform.position.x, m_transform.position.z};
 	vec2 in_velocity = vec2{m_velocity.x, m_velocity.z} * delta;
 
-	if (m_box.bound.x > 0 && m_box.bound.y > 0) {
+	if (m_box.bound.x > EPSILON && m_box.bound.y > EPSILON) {
 		std::vector<vec2> forces(0);
+		float min = m_transform.position.y;
+		float max = m_transform.position.y + m_height;
 		for (line segment : m_game->GetMap()->GetLines()) {
-			collision_result result = sweep_box_line(m_box, segment, in_velocity);
-			if (result.hit) forces.push_back(result.until_blocked + result.out_velocity - in_velocity);
+			if ((max > segment.floor && min < segment.midfloor && segment.lower && !(segment.midfloor - min < STEP_SIZE)) ||
+				(max > segment.midfloor && min < segment.midceiling && segment.mid) ||
+				(max > segment.midceiling && min < segment.ceiling && segment.higher)) {
+				collision_result result = sweep_box_line(m_box, segment, in_velocity);
+				if (result.hit) {
+					forces.push_back(result.until_blocked + result.out_velocity - in_velocity);
+				}
+			}
 		}
 		for (auto& [key, val] : m_game->GetWorkspace()->GetGameObjects()) {
 			std::vector<collision_result> results = val->CollideBox(m_box, in_velocity);
@@ -109,6 +119,7 @@ void GameObject::SetMaterial(std::shared_ptr<Material> material) {m_material = m
 void GameObject::SetTransform(const Transform& transform) {m_transform = transform;}
 void GameObject::SetBox(const Box& box) {m_box = box;}
 void GameObject::SetVelocity(const vec3& velocity) {m_velocity = velocity;}
+void GameObject::SetHeight(const float& height) {m_height = height;}
 
 std::string GameObject::GetName() {return m_name;}
 std::shared_ptr<Mesh> GameObject::GetMesh() {return m_mesh;}
@@ -133,6 +144,7 @@ Transform GameObject::GetGlobalTransform() {
 	return Transform{position, rotation, scale};
 }
 vec3& GameObject::GetVelocity() {return m_velocity;}
+float GameObject::GetHeight() {return m_height;}
 
 GameObject* GameObject::GetParent() {return m_parent;}
 GameObject* GameObject::GetChild(std::string name) {
@@ -177,12 +189,17 @@ void GameObject::AddEvent(Event* event, std::string name) {
 
 bool GameObject::IsOnFloor() {return m_on_floor;}
 
-collision_result GameObject::Raycast(vec2 origin, vec2 endpoint) {
+collision_result GameObject::Raycast(vec3 origin, vec2 endpoint) {
 	std::vector<collision_result> results(0);
-	line ray{origin, endpoint};
+	vec2 origin2d{origin.x, origin.z};
+	line ray{origin2d, endpoint};
 	for (line segment : m_game->GetMap()->GetLines()) {
-		collision_result result = discrete_line_line(ray, segment);
-		if (result.hit) results.push_back(result);
+		if ((origin.y > segment.floor && origin.y < segment.midfloor && segment.lower) ||
+			(origin.y > segment.midfloor && origin.y < segment.midceiling && segment.mid) ||
+			(origin.y > segment.midceiling && origin.y < segment.ceiling && segment.higher)) {
+			collision_result result = discrete_line_line(ray, segment);
+			if (result.hit) results.push_back(result);
+		}
 	}
 	for (auto& [key, val] : m_game->GetWorkspace()->GetGameObjects()) {
 		
@@ -193,9 +210,9 @@ collision_result GameObject::Raycast(vec2 origin, vec2 endpoint) {
 	if (results.size() == 0) return collision_result{false, vec2(), vec2(), vec2()};
 
 	collision_result shortest = results[0];
-	float distance = vec2(shortest.until_blocked - origin).length_squared();
+	float distance = vec2(shortest.until_blocked - origin2d).length_squared();
 	for (size_t i = 0; i < results.size(); i++) {
-		float new_distance = vec2(results[i].until_blocked - origin).length_squared();
+		float new_distance = vec2(results[i].until_blocked - origin2d).length_squared();
 		if (new_distance < distance) {
 			shortest = results[i];
 			distance = new_distance;

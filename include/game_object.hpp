@@ -16,7 +16,7 @@ class GameObject {
 public:
 	GameObject(Game* game, std::string name, GameObject* parent,
 			std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
-			const Transform& transform, const Box& box);
+			const Transform& transform, const Box& box, const float& height);
 	~GameObject();
 
 	void Process(float delta);
@@ -26,6 +26,7 @@ public:
 	void SetTransform(const Transform& transform);
 	void SetBox(const Box& box);
 	void SetVelocity(const vec3& velocity);
+	void SetHeight(const float& height);
 
 	std::string GetName();
 	std::shared_ptr<Mesh> GetMesh();
@@ -34,6 +35,7 @@ public:
 	Box& GetBox();
 	Transform GetGlobalTransform();
 	vec3& GetVelocity();
+	float GetHeight();
 
 	std::vector<collision_result> CollideBox(const Box& moving, vec2 v);
 
@@ -51,7 +53,7 @@ public:
 	
 	bool IsOnFloor();
 
-	collision_result Raycast(vec2 origin, vec2 endpoint);
+	collision_result Raycast(vec3 origin, vec2 endpoint);
 	collision_result RaycastBox(GameObject* original, line l);
 private:
 	Game* m_game;
@@ -62,6 +64,7 @@ private:
 	std::shared_ptr<Material> m_material;
 	Transform m_transform;
 	Box m_box;
+	float m_height;
 	vec3 m_velocity;
 
 	bool m_lua_loaded;

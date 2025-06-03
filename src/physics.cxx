@@ -1,9 +1,6 @@
 #include "physics.hpp"
 #include <cstdio>
 
-#define EPSILON 0.005f
-#define SIDE_EPSILON 0.05f
-
 #define BAD_RESULT collision_result{false, vec2(), vec2(), vec2()}
 
 vec2 closest_point_on_line(vec2 p, line l) {
@@ -164,8 +161,8 @@ bool overlap_box_triangle(Box a, triangle b) {
 	axes.push_back(bl2);
 	axes.push_back(bl3);
 
-	vec2 a_min_pos = a.min();
-	vec2 a_max_pos = a.max();
+	vec2 a_min_pos = a.min()+vec2(SIDE_EPSILON);
+	vec2 a_max_pos = a.max()-vec2(SIDE_EPSILON);
 
 	for (line axis : axes) {
 		vec2 a_minxminy_projected = closest_point_on_line(a_min_pos, axis);
