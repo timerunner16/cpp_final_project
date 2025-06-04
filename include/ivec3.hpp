@@ -31,6 +31,10 @@ struct ivec3 : public glm::ivec3 {
 	float length() const;
 	float length_squared() const;
 
+	ivec3 withX(int x);
+	ivec3 withY(int y);
+	ivec3 withZ(int z);
+
 	std::string to_string() {
 		return "{" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + "}";
 	}

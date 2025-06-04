@@ -31,6 +31,9 @@ struct vec2 : public glm::vec2 {
 	float dot(const vec2& other) const;
 	vec2 unit() const;
 
+	vec2 withX(float x);
+	vec2 withY(float y);
+
 	std::string to_string() {
 		return "{" + std::to_string(x) + ", " + std::to_string(y) + "}";
 	}

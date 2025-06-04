@@ -34,6 +34,10 @@ struct vec3 : public glm::vec3 {
 	vec3 unit() const;
 	vec3 cross(const vec3& other) const;
 
+	vec3 withX(float x);
+	vec3 withY(float y);
+	vec3 withZ(float z);
+
 	std::string to_string() {
 		return "{" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + "}";
 	}

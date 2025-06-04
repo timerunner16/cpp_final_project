@@ -54,7 +54,8 @@ function process(delta)
 		return
 	end
 
-	local wishdir = (player.Transform.Position - current.Transform.Position).unit
+	local offset = player.Transform.Position - current.Transform.Position
+	local wishdir = Vector3.new(offset.x, 0, offset.z).unit
 	local current_speed = velocity:dot(wishdir)
 
 	if (current:IsOnFloor()) then

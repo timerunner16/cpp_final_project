@@ -16,6 +16,8 @@ GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 
 	m_name = name;
 
+	m_queued_for_freedom = false;
+
 	m_parent = nullptr;
 	SetParent(parent);
 
@@ -102,6 +104,10 @@ void GameObject::Process(float delta) {
 	}
 
 	for (auto& [key, val] : m_children) {val->Process(delta);}
+	std::erase_if(m_children, [](const auto& item) -> bool {
+		const auto& [key, val] = item;
+		return val->IsQueuedForFreedom();
+	});
 }
 
 std::vector<collision_result> GameObject::CollideBox(const Box& moving, vec2 v) {
@@ -245,3 +251,6 @@ collision_result GameObject::RaycastBox(std::vector<GameObject*> filter, line ra
 	}
 	return shortest;
 }
+
+void GameObject::QueueFree() {m_queued_for_freedom = true;}
+bool GameObject::IsQueuedForFreedom() {return m_queued_for_freedom;}

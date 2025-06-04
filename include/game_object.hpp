@@ -55,6 +55,9 @@ public:
 
 	collision_result Raycast(vec3 origin, vec2 endpoint, std::vector<GameObject*> filter);
 	collision_result RaycastBox(std::vector<GameObject*> filter, line l);
+
+	void QueueFree();
+	bool IsQueuedForFreedom();
 private:
 	Game* m_game;
 
@@ -77,4 +80,6 @@ private:
 	std::map<std::string, Event*> m_events;
 
 	bool m_on_floor;
+
+	bool m_queued_for_freedom;
 };

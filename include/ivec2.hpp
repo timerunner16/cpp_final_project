@@ -29,6 +29,9 @@ struct ivec2 : public glm::ivec2 {
 	float length() const;
 	float length_squared() const;
 
+	ivec2 withX(int x);
+	ivec2 withY(int x);
+
 	std::string to_string() {
 		return "{" + std::to_string(x) + ", " + std::to_string(y) + "}";
 	}

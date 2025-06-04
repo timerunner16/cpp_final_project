@@ -37,7 +37,9 @@ void geom_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game
 		"div", sol::overload(&vec2::div, &vec2::divf),
 		"length", sol::readonly_property(&vec2::length),
 		"unit", sol::readonly_property(&vec2::unit),
-		"dot", &vec2::dot
+		"dot", &vec2::dot,
+		"withX", &vec2::withX,
+		"withY", &vec2::withY
 	);
 
 	sol::usertype<vec3> vec3_data_type = lua_state->new_usertype<vec3>(
@@ -71,7 +73,10 @@ void geom_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game
 		"div", sol::overload(&vec3::div, &vec3::divf),
 		"length", sol::readonly_property(&vec3::length),
 		"unit", sol::readonly_property(&vec3::unit),
-		"dot", &vec3::dot
+		"dot", &vec3::dot,
+		"withX", &vec3::withX,
+		"withY", &vec3::withY,
+		"withZ", &vec3::withZ
 	);
 
 	sol::usertype<ivec2> ivec2_data_type = lua_state->new_usertype<ivec2>(
@@ -102,7 +107,9 @@ void geom_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game
 		"minus", &ivec2::sub,
 		"times", sol::overload(&ivec2::mul, &ivec2::mulf),
 		"div", sol::overload(&ivec2::div, &ivec2::divf),
-		"length", &ivec2::length
+		"length", &ivec2::length,
+		"withX", &ivec2::withX,
+		"withY", &ivec2::withY
 	);
 
 	sol::usertype<ivec3> ivec3_data_type = lua_state->new_usertype<ivec3>(
@@ -134,7 +141,10 @@ void geom_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game
 		"minus", &ivec3::sub,
 		"times", sol::overload(&ivec3::mul, &ivec3::mulf),
 		"div", sol::overload(&ivec3::div, &ivec3::divf),
-		"length", &ivec3::length
+		"length", &ivec3::length,
+		"withX", &ivec3::withX,
+		"withY", &ivec3::withY,
+		"withZ", &ivec3::withZ
 	);
 
 	sol::usertype<Transform> transform_data_type = lua_state->new_usertype<Transform>(

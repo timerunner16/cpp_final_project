@@ -37,6 +37,9 @@ vec2 vec2::unit() const {
 	return vec2(x,y).divf(magnitude);
 }
 
+vec2 vec2::withX(float x) {return vec2(x, this->y);}
+vec2 vec2::withY(float y) {return vec2(this->x, y);}
+
 
 vec3::vec3(const glm::vec3& obj) {
 	this->x = obj.x;
@@ -79,6 +82,10 @@ vec3 vec3::cross(const vec3& other) const {
 	return glm::cross(*this, other);
 }
 
+vec3 vec3::withX(float x) {return vec3(x, this->y, this->z);}
+vec3 vec3::withY(float y) {return vec3(this->x, y, this->z);}
+vec3 vec3::withZ(float z) {return vec3(this->x, this->y, z);}
+
 
 ivec2::ivec2(const glm::ivec2& obj) {
 	this->x = obj.x;
@@ -107,6 +114,9 @@ ivec2 ivec2::unary_minus() {return ivec2(-x, -y);}
 
 float ivec2::length() const {return sqrt(x*x + y*y);}
 float ivec2::length_squared() const {return x*x + y*y;}
+
+ivec2 ivec2::withX(int x) {return ivec2(x, this->y);}
+ivec2 ivec2::withY(int y) {return ivec2(this->x, y);}
 
 
 ivec3::ivec3(const glm::ivec3& obj) {
@@ -140,3 +150,7 @@ ivec3 ivec3::unary_minus() {return ivec3(-x, -y, -z);}
 
 float ivec3::length() const {return sqrt(x*x + y*y + z*z);}
 float ivec3::length_squared() const {return x*x + y*y + z*z;}
+
+ivec3 ivec3::withX(int x) {return ivec3(x, this->y, this->z);}
+ivec3 ivec3::withY(int y) {return ivec3(this->x, y, this->z);}
+ivec3 ivec3::withZ(int z) {return ivec3(this->x, this->y, z);}
