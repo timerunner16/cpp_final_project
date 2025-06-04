@@ -174,14 +174,20 @@ void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 	glm::mat4 view_matrix = camera->GetViewMatrix();
 	glm::mat4 model_view_matrix = view_matrix * model_matrix;
 	glm::mat4 normal_matrix = glm::transpose(glm::inverse(model_matrix));
+	glm::mat4 inv_model_view_matrix = glm::transpose(glm::inverse(model_view_matrix));
+	glm::mat4 inv_view_matrix = glm::transpose(glm::inverse(view_matrix));
 	glm::mat4 projection_matrix = camera->GetProjectionMatrix();
 
 	Uniform u_model_view_matrix = Uniform{"model_view_matrix", MAT4, &model_view_matrix};
 	Uniform u_normal_matrix = Uniform{"normal_matrix", MAT4, &normal_matrix};
+	Uniform u_inv_model_view_matrix = Uniform{"inv_model_view_matrix", MAT4, &inv_model_view_matrix};
+	Uniform u_inv_view_matrix = Uniform{"inv_view_matrix", MAT4, &inv_view_matrix};
 	Uniform u_projection_matrix = Uniform{"projection_matrix", MAT4, &projection_matrix};
 	
 	game_object->GetMaterial()->SetUniform(u_model_view_matrix);
 	game_object->GetMaterial()->SetUniform(u_normal_matrix);
+	game_object->GetMaterial()->SetUniform(u_inv_model_view_matrix);
+	game_object->GetMaterial()->SetUniform(u_inv_view_matrix);
 	game_object->GetMaterial()->SetUniform(u_projection_matrix);
 
 	game_object->GetMaterial()->Bind(m_game);
@@ -208,10 +214,14 @@ void Window::DrawMap(Camera* camera) {
 	glm::mat4 view_matrix = camera->GetViewMatrix();
 	glm::mat4 model_view_matrix = view_matrix * glm::mat4(1.0f);
 	glm::mat4 normal_matrix = glm::transpose(glm::inverse(glm::mat4(1.0f)));
+	glm::mat4 inv_model_view_matrix = glm::transpose(glm::inverse(model_view_matrix));
+	glm::mat4 inv_view_matrix = glm::transpose(glm::inverse(view_matrix));
 	glm::mat4 projection_matrix = camera->GetProjectionMatrix();
 
 	Uniform u_model_view_matrix = Uniform{"model_view_matrix", MAT4, &model_view_matrix};
 	Uniform u_normal_matrix = Uniform{"normal_matrix", MAT4, &normal_matrix};
+	Uniform u_inv_model_view_matrix = Uniform{"inv_model_view_matrix", MAT4, &inv_model_view_matrix};
+	Uniform u_inv_view_matrix = Uniform{"inv_view_matrix", MAT4, &inv_view_matrix};
 	Uniform u_projection_matrix = Uniform{"projection_matrix", MAT4, &projection_matrix};
 	
 	if (m_wireframe) {
@@ -226,6 +236,8 @@ void Window::DrawMap(Camera* camera) {
 
 		map_segment.material->SetUniform(u_model_view_matrix);
 		map_segment.material->SetUniform(u_normal_matrix);
+		map_segment.material->SetUniform(u_inv_model_view_matrix);
+		map_segment.material->SetUniform(u_inv_view_matrix);
 		map_segment.material->SetUniform(u_projection_matrix);
 		
 		map_segment.material->Bind(m_game);

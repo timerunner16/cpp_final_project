@@ -39,7 +39,9 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 			std::string name = path.substr(0, path.find(" "));
 			std::string info = path.substr(path.find(" ")+1, path.size());
 			std::string type_s = info.substr(0, info.find(" "));
-			std::string data_s = trim_nonalphanum(info.substr(info.find(" ")+1,info.size()));
+			std::string data_s = (!type_s.starts_with("iv") && !type_s.starts_with("v")) ?
+				trim_nonstandard(info.substr(info.find(" ")+1,info.size())) :
+				info.substr(info.find(" ")+1,info.size());
 
 			if (type_s == "bool") {
 				bool data = data_s == "true";
@@ -63,9 +65,12 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 					(void*)&data
 				});
 			} else if (type_s == "vec2") {
-				float x = std::stof(data_s.substr(0, data_s.find(",")));
-				float y = std::stof(data_s.substr(data_s.find(",")+1, data_s.size()));
-				glm::vec2 data{x,y};
+				std::vector<std::string> components = split_string(data_s, ",");
+				for (auto& i : components) i = trim_nonstandard(i);
+				glm::vec2 data{
+					stof(components[0]),
+					stof(components[1])
+				};
 				SetUniform(Uniform{
 					name,
 					VEC2,
@@ -73,6 +78,7 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 				});
 			} else if (type_s == "vec3") {
 				std::vector<std::string> components = split_string(data_s, ",");
+				for (auto& i : components) i = trim_nonstandard(i);
 				glm::vec3 data{
 					std::stof(components[0]),
 					std::stof(components[1]),
@@ -85,6 +91,7 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 				});
 			} else if (type_s == "vec4") {
 				std::vector<std::string> components = split_string(data_s, ",");
+				for (auto& i : components) i = trim_nonstandard(i);
 				glm::vec4 data{
 					std::stof(components[0]),
 					std::stof(components[1]),
@@ -97,9 +104,12 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 					(void*)&data
 				});
 			} else if (type_s == "ivec2") {
-				int x = std::stof(data_s.substr(0, data_s.find(",")));
-				int y = std::stof(data_s.substr(data_s.find(",")+1, data_s.size()));
-				glm::ivec2 data{x,y};
+				std::vector<std::string> components = split_string(data_s, ",");
+				for (auto& i : components) i = trim_nonstandard(i);
+				glm::ivec2 data{
+					stoi(components[0]),
+					stoi(components[1])
+				};
 				SetUniform(Uniform{
 					name,
 					IVEC2,
@@ -107,6 +117,7 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 				});
 			} else if (type_s == "ivec3") {
 				std::vector<std::string> components = split_string(data_s, ",");
+				for (auto& i : components) i = trim_nonstandard(i);
 				glm::ivec3 data{
 					std::stoi(components[0]),
 					std::stoi(components[1]),
@@ -119,6 +130,7 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 				});
 			} else if (type_s == "ivec4") {
 				std::vector<std::string> components = split_string(data_s, ",");
+				for (auto& i : components) i = trim_nonstandard(i);
 				glm::ivec4 data{
 					std::stoi(components[0]),
 					std::stoi(components[1]),
