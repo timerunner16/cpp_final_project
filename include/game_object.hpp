@@ -53,8 +53,8 @@ public:
 	
 	bool IsOnFloor();
 
-	collision_result Raycast(vec3 origin, vec2 endpoint);
-	collision_result RaycastBox(GameObject* original, line l);
+	collision_result Raycast(vec3 origin, vec2 endpoint, std::vector<GameObject*> filter);
+	collision_result RaycastBox(std::vector<GameObject*> filter, line l);
 private:
 	Game* m_game;
 

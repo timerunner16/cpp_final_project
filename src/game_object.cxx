@@ -5,6 +5,7 @@
 #include "mesh.hpp"
 #include "map.hpp"
 #include "workspace.hpp"
+#include <algorithm>
 
 #define FLOOR_EPSILON 0.005f
 
@@ -30,7 +31,7 @@ GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 	m_lua_loaded = !script_path.empty();
 	if (!m_lua_loaded) return;
 	m_lua_state = std::make_shared<sol::state>();
-	m_lua_state->open_libraries(sol::lib::base, sol::lib::math, sol::lib::string);
+	m_lua_state->open_libraries(sol::lib::base, sol::lib::math, sol::lib::string, sol::lib::table);
 
 	lua_usertype_setup(m_game, m_lua_state, this);
 
@@ -190,7 +191,7 @@ void GameObject::AddEvent(Event* event, std::string name) {
 
 bool GameObject::IsOnFloor() {return m_on_floor;}
 
-collision_result GameObject::Raycast(vec3 origin, vec2 endpoint) {
+collision_result GameObject::Raycast(vec3 origin, vec2 endpoint, std::vector<GameObject*> filter) {
 	std::vector<collision_result> results(0);
 	vec2 origin2d{origin.x, origin.z};
 	line ray{origin2d, endpoint};
@@ -203,8 +204,7 @@ collision_result GameObject::Raycast(vec3 origin, vec2 endpoint) {
 		}
 	}
 	for (auto& [key, val] : m_game->GetWorkspace()->GetGameObjects()) {
-		
-		collision_result result = val->RaycastBox(this, ray);
+		collision_result result = val->RaycastBox(filter, ray);
 		if (result.hit) results.push_back(result);
 	}
 
@@ -222,11 +222,11 @@ collision_result GameObject::Raycast(vec3 origin, vec2 endpoint) {
 	return shortest;
 }
 
-collision_result GameObject::RaycastBox(GameObject* original, line ray) {
+collision_result GameObject::RaycastBox(std::vector<GameObject*> filter, line ray) {
 	std::vector<collision_result> results(0);
-	if (original != this) {
+	if (std::find(filter.begin(), filter.end(), this) == filter.end()) {
 		for (auto& [key, val] : m_children) {
-			collision_result result = val->RaycastBox(original, ray);
+			collision_result result = val->RaycastBox(filter, ray);
 			if (result.hit) results.push_back(result);
 		}
 		collision_result result = discrete_line_box(m_box, ray);

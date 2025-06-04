@@ -51,7 +51,6 @@ function init()
 	camera = Engine.Workspace:GetCamera()
 	input = Engine.InputManager
 	window = Engine.Window
-	for _=1,1 do end
 end
 
 function process(delta)
@@ -131,8 +130,4 @@ function process(delta)
 	target_bobstrength = target_bobstrength * alignment
 	bobstrength = bobstrength + (target_bobstrength - bobstrength) * delta * 4.0
 	camera.Transform.Position.y = camera.Transform.Position.y + math.sin(timer * 8.0) * 0.05 * bobstrength + 1.0
-
-	window:DrawString(0, 0,  255, 255, 0, 255,  string.format("FPS: %.2f", tostring(1.0/delta)));
-	window:DrawString(0, 8,  255, 255, 255, 255,  string.format("H: %.2f", tostring(current.Transform.Position.y)));
-	window:DrawString(0,16,  255, 255, 255, 255,  string.format("V: %.2f", tostring(velocity.length)));
 end
