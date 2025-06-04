@@ -7,7 +7,17 @@ local spells = {
 		name = "Damage",
 		material = "ORB",
 		mesh = "ORB",
-		color = Vector3.new(255,0,0),
+		color = Vector3.new(255,120,20),
+		damage = 60,
+		speed = 16,
+		size = 0.2,
+		spread = math.pi/4
+	},
+	{
+		name = "Other Damage",
+		material = "ORB",
+		mesh = "ORB",
+		color = Vector3.new(20,120,255),
 		damage = 60,
 		speed = 16,
 		size = 0.1,
@@ -44,8 +54,15 @@ local function create_spell()
 		transform, Vector2.new(), 0
 	)
 	spell.Velocity = direction:withY(0) + lookvec:withY(0).unit * current_spell.speed
+	spell:SetUniform(Uniform.new("modulate", Vector4.new(current_spell.color.x/255.0, current_spell.color.y/255.0, current_spell.color.z/255.0, 1)))
 
-	table.insert(active_spells, spell)
+	local active_spell = {
+		color = current_spell.color,
+		size = current_spell.size,
+		speed = current_spell.speed,
+		object = spell
+	}
+	table.insert(active_spells, active_spell)
 end
 
 function init()
@@ -62,22 +79,26 @@ function process(delta)
 		return
 	end
 
+	local switch = input:QueryKey(Keys.Q)
+	if (switch.Pressed and switch.OnEdge) then
+		current_spell_i = (current_spell_i + 1)%(#spells)
+	end
+
 	local fire = input:QueryKey(Keys.F)
 	if (fire.Pressed and fire.OnEdge) then
-		current_spell_i = (current_spell_i + 1)%(#spells)
 		create_spell()
 	end
 
 	for i,v in pairs(active_spells) do
-		local origin = v.Transform.Position
-		local endpoint_v3 = origin + v.Velocity.unit
+		local origin = v.object.Transform.Position
+		local endpoint_v3 = origin + v.object.Velocity.unit
 		local endpoint = Vector2.new(endpoint_v3.x, endpoint_v3.z)
-		local filter = {v, player}
-		for _,w in pairs(active_spells) do table.insert(filter, w) end
-		local result = v:Raycast(origin, endpoint, filter)
+		local filter = {v.object, player}
+		for _,w in pairs(active_spells) do table.insert(filter, w.object) end
+		local result = v.object:Raycast(origin, endpoint, filter)
 		if (result.Hit) then
 			print("Hit!", result.Position * 2)
-			v:QueueFree()
+			v.object:QueueFree()
 			table.remove(active_spells, i)
 
 			local particle_info = ParticleSystemCreateInfo.new()
@@ -87,7 +108,12 @@ function process(delta)
 			particle_info.NumParticles = 32
 			particle_info.LaunchInterval = 1
 			particle_info.Lifetime = 0.2
-			particle_info.Size = Vector2.new(0.1,0.1)
+			particle_info.Speed = v.speed
+			particle_info.Size = Vector2.new(v.size,v.size)
+			particle_info.R = math.floor(v.color.x)
+			particle_info.G = math.floor(v.color.y)
+			particle_info.B = math.floor(v.color.z)
+			particle_info.FadeOut = true
 			workspace:CreateParticleSystem(particle_info)
 		end
 	end

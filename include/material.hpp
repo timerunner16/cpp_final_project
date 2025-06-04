@@ -27,6 +27,8 @@ struct Uniform {
 	void* data;
 };
 
+size_t get_uniform_data_size(UniformType type);
+
 class Material : public GenericResource {
 public:
 	Material(Game* game, std::string wad_path, std::vector<std::string> data);
@@ -42,9 +44,8 @@ public:
 	std::shared_ptr<Shader> GetShader();
 
 	void Bind(Game* game);
-private:
 	void ApplyUniform(const Uniform& uniform);
-
+private:
 	std::map<std::string, Uniform> m_uniforms;
 	std::shared_ptr<GLTexture> m_texture;
 	std::shared_ptr<Shader> m_shader;

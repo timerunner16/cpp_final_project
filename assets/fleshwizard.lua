@@ -60,6 +60,7 @@ function process(delta)
 
 	if (current:IsOnFloor()) then
 		friction(delta)
+		velocity.y = 0
 
 		local add_speed = clamp(MAX_GROUND_SPEED - current_speed,  0, MAX_ACCEL * delta)
 		local new_velocity = wishdir * add_speed

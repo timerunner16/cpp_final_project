@@ -22,6 +22,7 @@ void prtcl_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject *gam
 		"R", &particle_system_create_info::r,
 		"G", &particle_system_create_info::g,
 		"B", &particle_system_create_info::b,
-		"A", &particle_system_create_info::a
+		"A", &particle_system_create_info::a,
+		"FadeOut", &particle_system_create_info::fadeout
 	);
 }

@@ -254,3 +254,15 @@ collision_result GameObject::RaycastBox(std::vector<GameObject*> filter, line ra
 
 void GameObject::QueueFree() {m_queued_for_freedom = true;}
 bool GameObject::IsQueuedForFreedom() {return m_queued_for_freedom;}
+
+void GameObject::SetUniform(Uniform uniform) {
+	size_t size = get_uniform_data_size(uniform.type);
+	void* data = malloc(size);
+	memcpy(data, uniform.data, size);
+	Uniform n_uniform{uniform.name, uniform.type, data};
+	m_uniforms[uniform.name] = n_uniform;
+}
+
+std::map<std::string, Uniform> GameObject::GetUniforms() {
+	return m_uniforms;
+}

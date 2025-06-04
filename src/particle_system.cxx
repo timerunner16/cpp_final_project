@@ -17,6 +17,8 @@ ParticleSystem::ParticleSystem(particle_system_create_info info) {
 	m_launch_interval = info.launch_interval;
 	m_remaining_life = info.lifetime+m_launch_interval*m_remaining_launches;
 	m_lifetime = info.lifetime;
+	
+	m_fadeout = info.fadeout;
 
 	AddParticles();
 
@@ -42,7 +44,7 @@ ParticleSystem::ParticleSystem(particle_system_create_info info) {
 	glBindVertexArray(0);
 
 	m_material = std::make_shared<Material>(std::make_shared<Shader>((uint8_t*)particle_shader_source.c_str(), (uint32_t)particle_shader_source.size()), nullptr);
-	m_color = glm::vec4{(float)info.r/255.0f, (float)info.g/255.0f, (float)info.b/255.0f, (float)info.a/255.0f};
+	m_color = glm::vec4{info.r/255.0f, info.g/255.0f, info.b/255.0f, info.a/255.0f};
 	m_material->SetUniform({"color", VEC4, &m_color});
 
 	Update(0);
@@ -65,8 +67,11 @@ void ParticleSystem::Update(float delta) {
 	std::erase_if(m_particles, [](const particle& p) -> bool {
 		return p.remaining_life <= 0;
 	});
-	for (size_t i = 0; i < m_particles.size(); i++)
+	for (size_t i = 0; i < m_particles.size(); i++) {
+		float transparency = m_particles[i].remaining_life/m_lifetime;
 		m_material->SetUniform({"offsets[" + std::to_string(i) + "]", VEC3, &m_particles[i].position});
+		m_material->SetUniform({"transparencies[" + std::to_string(i) + "]", FLOAT, &transparency});
+	}
 }
 
 void ParticleSystem::AddParticles() {

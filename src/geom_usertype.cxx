@@ -1,6 +1,7 @@
 #include "geom_usertype.hpp"
 #include "vec2.hpp"
 #include "vec3.hpp"
+#include "vec4.hpp"
 #include "ivec2.hpp"
 #include "ivec3.hpp"
 #include "transform.hpp"
@@ -77,6 +78,25 @@ void geom_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game
 		"withX", &vec3::withX,
 		"withY", &vec3::withY,
 		"withZ", &vec3::withZ
+	);
+	sol::usertype<vec4> vec4_data_type = lua_state->new_usertype<vec4>(
+		"Vector4",
+		sol::meta_function::construct,
+		sol::factories(
+			[]() {
+				return std::make_shared<vec4>();
+			},
+			[](const float& value) {
+				return std::make_shared<vec4>(value);
+			},
+			[](const float& x, const float& y, const float& z, const float& w) {
+				return std::make_shared<vec4>(x, y, z, w);
+			}
+		),
+		"x", sol::property(&vec4::get_x, &vec4::set_x),
+		"y", sol::property(&vec4::get_y, &vec4::set_y),
+		"z", sol::property(&vec4::get_z, &vec4::set_z),
+		"w", sol::property(&vec4::get_w, &vec4::set_w)
 	);
 
 	sol::usertype<ivec2> ivec2_data_type = lua_state->new_usertype<ivec2>(

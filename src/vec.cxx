@@ -1,7 +1,8 @@
-#include "vec3.hpp"
-#include "ivec3.hpp"
 #include "vec2.hpp"
+#include "vec3.hpp"
+#include "vec4.hpp"
 #include "ivec2.hpp"
+#include "ivec3.hpp"
 
 vec2::vec2(const glm::vec2& obj) {
 	this->x = obj.x;
@@ -85,6 +86,23 @@ vec3 vec3::cross(const vec3& other) const {
 vec3 vec3::withX(float x) {return vec3(x, this->y, this->z);}
 vec3 vec3::withY(float y) {return vec3(this->x, y, this->z);}
 vec3 vec3::withZ(float z) {return vec3(this->x, this->y, z);}
+
+
+vec4::vec4(const glm::vec4& obj) {
+	this->x = obj.x;
+	this->y = obj.y;
+	this->z = obj.z;
+}
+
+void vec4::set_x(float x) {this->x = x;}
+void vec4::set_y(float y) {this->y = y;}
+void vec4::set_z(float z) {this->z = z;}
+void vec4::set_w(float w) {this->w = w;}
+
+float vec4::get_x() {return x;}
+float vec4::get_y() {return y;}
+float vec4::get_z() {return z;}
+float vec4::get_w() {return w;}
 
 
 ivec2::ivec2(const glm::ivec2& obj) {

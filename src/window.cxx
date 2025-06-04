@@ -192,6 +192,10 @@ void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 
 	game_object->GetMaterial()->Bind(m_game);
 
+	for (const auto& [key, val] : game_object->GetUniforms()) {
+		game_object->GetMaterial()->ApplyUniform(val);
+	}
+
 	if (m_wireframe) {
 		glDisable(GL_CULL_FACE);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

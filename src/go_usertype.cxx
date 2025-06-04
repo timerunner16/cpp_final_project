@@ -29,7 +29,8 @@ void go_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game_o
 		"GetEvent", &GameObject::GetEvent,
 		"IsOnFloor", &GameObject::IsOnFloor,
 		"Raycast", &GameObject::Raycast,
-		"QueueFree", &GameObject::QueueFree
+		"QueueFree", &GameObject::QueueFree,
+		"SetUniform", &GameObject::SetUniform
 	);
 
 

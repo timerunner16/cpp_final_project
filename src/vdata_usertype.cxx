@@ -5,6 +5,7 @@
 #include "material.hpp"
 #include "vec2.hpp"
 #include "vec3.hpp"
+#include "vec4.hpp"
 #include "ivec2.hpp"
 #include "ivec3.hpp"
 
@@ -29,6 +30,9 @@ void vdata_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject *gam
 			},
 			[](const std::string& name, const vec3& data) {
 				return std::make_shared<Uniform>(name, VEC3, (void*)(&data));
+			},
+			[](const std::string& name, const vec4& data) {
+				return std::make_shared<Uniform>(name, VEC4, (void*)(&data));
 			},
 			[](const std::string& name, const ivec2& data) {
 				return std::make_shared<Uniform>(name, IVEC2, (void*)(&data));

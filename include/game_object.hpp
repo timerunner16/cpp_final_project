@@ -6,6 +6,7 @@
 #include <map>
 #include "transform.hpp"
 #include "physics.hpp"
+#include "material.hpp"
 
 class Game;
 class Event;
@@ -58,6 +59,9 @@ public:
 
 	void QueueFree();
 	bool IsQueuedForFreedom();
+
+	void SetUniform(Uniform uniform);
+	std::map<std::string, Uniform> GetUniforms();
 private:
 	Game* m_game;
 
@@ -82,4 +86,6 @@ private:
 	bool m_on_floor;
 
 	bool m_queued_for_freedom;
+
+	std::map<std::string, Uniform> m_uniforms;
 };

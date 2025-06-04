@@ -23,6 +23,7 @@ struct particle_system_create_info {
 	uint8_t g=255;
 	uint8_t b=255;
 	uint8_t a=255;
+	bool fadeout=false;
 };
 
 struct particle {
@@ -59,4 +60,5 @@ private:
 	float m_randomization;
 	vec3 m_position;
 	vec3 m_direction;
+	bool m_fadeout;
 };
