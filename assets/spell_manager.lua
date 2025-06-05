@@ -12,7 +12,8 @@ local spells = {
 		speed = 16,
 		size = 0.2,
 		force = 16.0,
-		spread = math.pi/4
+		spread = math.pi/4,
+		manacost = 20
 	},
 	{
 		name = "Light Damage",
@@ -23,7 +24,8 @@ local spells = {
 		speed = 16,
 		size = 0.1,
 		force = 8.0,
-		spread = math.pi/4
+		spread = math.pi/4,
+		manacost = 5
 	}
 }
 local current_spell_i = 0
@@ -37,9 +39,16 @@ local workspace
 local window
 local input
 local resource_manager
+local pdata
 
 local function create_spell()
 	local current_spell = spells[current_spell_i + 1]
+
+	if (pdata:GetValue("mana") < current_spell.manacost) then
+		return
+	end
+
+	pdata:SetValue("mana", pdata:GetValue("mana") - current_spell.manacost)
 
 	local lookvec = -camera.Transform.LookVector
 
@@ -74,6 +83,10 @@ function init()
 	window = Engine.Window
 	input = Engine.InputManager
 	resource_manager = Engine.ResourceManager
+	pdata = Engine.PDataManager
+	if (not pdata:GetValue("mana")) then
+		pdata:SetValue("mana", 100)
+	end
 	camera = workspace:GetCamera()
 end
 
@@ -132,6 +145,27 @@ function process(delta)
 	end
 
 	local current_spell = spells[current_spell_i + 1]
-	window:DrawString(1, 1,  80, 80, 0, 255,  "Spell: " .. current_spell.name);
-	window:DrawString(0, 0,  255, 255, 0, 255,  "Spell: " .. current_spell.name);
+	local spelltext = "Spell: " .. current_spell.name
+	window:DrawString(math.floor(window.Width/window.Downscale)-1-string.len(spelltext)*8, 2,
+					  80, 80, 0, 255,
+					  spelltext)
+	window:DrawString(math.floor(window.Width/window.Downscale)-2-string.len(spelltext)*8, 1,
+					  255, 255, 0, 255,
+					  spelltext)
+	local costtext = "Cost: " .. tostring(current_spell.manacost)
+	window:DrawString(math.floor(window.Width/window.Downscale)-1-string.len(costtext)*8, 10,
+					  80, 80, 0, 255,
+					  costtext)
+	window:DrawString(math.floor(window.Width/window.Downscale)-2-string.len(costtext)*8, 9,
+					  255, 255, 0, 255,
+					  costtext)
+	local manatext = "X: " .. pdata:GetValue("mana")
+	window:DrawString(math.floor(window.Width/window.Downscale)-1-string.len(manatext)*8,
+					  math.floor(window.Height/window.Downscale)-9,
+					  80, 10, 80, 255,
+					  manatext)
+	window:DrawString(math.floor(window.Width/window.Downscale)-2-string.len(manatext)*8,
+					  math.floor(window.Height/window.Downscale)-10,
+					  255, 30, 255, 255,
+					  manatext)
 end
