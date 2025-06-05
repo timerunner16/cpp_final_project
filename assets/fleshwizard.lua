@@ -9,7 +9,7 @@ local DAMAGE_FLASH_TIME = 0.2
 local ATTACK_RANGE = 2.0
 local ATTACK_COOLDOWN = 1.0
 local ATTACK_DAMAGE = 45
-local ATTACK_FORCE = 6.0
+local ATTACK_FORCE = 16.0
 local ACTIVATION_RANGE = 16.0
 local STATES = {
 	IDLE = "idle",
@@ -22,7 +22,7 @@ local STATES = {
 local velocity = Vector3.new()
 local health = 100
 local timer = 0
-local last_hit_time = 0
+local last_hit_time = -DAMAGE_FLASH_TIME
 local last_attack_time = 0
 local state = STATES.IDLE
 

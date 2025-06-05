@@ -11,6 +11,8 @@ local K_SENSITIVITY = 2.0
 local M_SENSITIVITY = 3.14
 local COYOTE_TIME_BASE = 0.2
 local INPUT_BUFFER_BASE = 0.2
+local DAMAGE_FLASH_COLOR = Vector4.new(1.0, 0.2, 0.2, 1.0)
+local DAMAGE_FLASH_TIME = 0.2
 
 -- properties
 local timer = 0.0
@@ -21,12 +23,14 @@ local wireframe = false
 local coyote_time = 0.0
 local input_buffer = 0.0
 local health = 100
+local last_hit_time = -DAMAGE_FLASH_TIME
 
 -- object references
 local current
 local camera
 local workspace
 local input
+local resource_manager
 local window
 local event
 
@@ -50,6 +54,7 @@ local function clamp(n, min, max)
 end
 
 function takedamage()
+	last_hit_time = timer
 	health = health - event:GetValue("damage")
 	add_velocity(event:GetValue("force"))
 	if (health <= 0) then
@@ -62,6 +67,7 @@ function init()
 	current = Engine.CurrentGameObject
 	camera = workspace:GetCamera()
 	input = Engine.InputManager
+	resource_manager = Engine.ResourceManager
 	window = Engine.Window
 	event = workspace:CreateEvent("TakeDamage", current)
 	event:Connect("takedamage")
@@ -144,4 +150,10 @@ function process(delta)
 	target_bobstrength = target_bobstrength * alignment
 	bobstrength = bobstrength + (target_bobstrength - bobstrength) * delta * 4.0
 	camera.Transform.Position.y = camera.Transform.Position.y + math.sin(timer * 8.0) * 0.05 * bobstrength + 1.0
+
+	if (timer - last_hit_time < DAMAGE_FLASH_TIME) then
+		resource_manager:GetMaterial("PPDITHER"):SetUniform(Uniform.new("modulate", DAMAGE_FLASH_COLOR))
+	else
+		resource_manager:GetMaterial("PPDITHER"):SetUniform(Uniform.new("modulate", Vector4.new(1.0)))
+	end
 end
