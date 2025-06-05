@@ -57,9 +57,6 @@ function takedamage()
 	last_hit_time = timer
 	health = health - event:GetValue("damage")
 	add_velocity(event:GetValue("force"))
-	if (health <= 0) then
-		Engine.Shutdown()
-	end
 end
 
 function init()
@@ -151,9 +148,22 @@ function process(delta)
 	bobstrength = bobstrength + (target_bobstrength - bobstrength) * delta * 4.0
 	camera.Transform.Position.y = camera.Transform.Position.y + math.sin(timer * 8.0) * 0.05 * bobstrength + 1.0
 
-	if (timer - last_hit_time < DAMAGE_FLASH_TIME) then
+	if (timer - last_hit_time < DAMAGE_FLASH_TIME or health <= 0) then
 		resource_manager:GetMaterial("PPDITHER"):SetUniform(Uniform.new("modulate", DAMAGE_FLASH_COLOR))
 	else
 		resource_manager:GetMaterial("PPDITHER"):SetUniform(Uniform.new("modulate", Vector4.new(1.0)))
 	end
+
+	if (health <= 0) then
+		current:QueueFree()
+		camera.Transform.Position = current.Transform.Position:withY(current.Transform.Position.y + 0.1)
+		--Engine.Shutdown()
+	end
+
+	window:DrawString(3, math.floor(window.Height/window.Downscale)-9,
+					  10, 80, 10, 255,
+					  "+ " .. tostring(math.ceil(health)));
+	window:DrawString(2, math.floor(window.Height/window.Downscale)-10,
+					  30, 255, 30, 255,
+					  "+ " .. tostring(math.ceil(health)));
 end

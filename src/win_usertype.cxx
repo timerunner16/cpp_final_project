@@ -6,6 +6,7 @@ void win_usertype_setup(std::shared_ptr<sol::state> lua_state) {
 		"Window", sol::no_constructor,
 		"Width", sol::readonly_property(&Window::GetWidth),
 		"Height", sol::readonly_property(&Window::GetHeight),
+		"Downscale", sol::readonly_property(&Window::GetDownscale),
 		"Focused", sol::readonly_property(&Window::GetFocused),
 		"SetWireframeEnabled", &Window::SetWireframeEnabled,
 		"DrawString", &Window::DrawString

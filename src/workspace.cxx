@@ -60,7 +60,11 @@ void Workspace::Process(float delta) {
 	}
 	std::erase_if(m_game_objects, [](const auto& item) -> bool {
 		const auto& [key, val] = item;
-		return val->IsQueuedForFreedom();
+		if (val->IsQueuedForFreedom()) {
+			delete val;
+			return true;
+		}
+		return false;
 	});
 	std::erase_if(m_particle_systems, [](const auto& particle_system) -> bool {
 		return particle_system->GetDead();

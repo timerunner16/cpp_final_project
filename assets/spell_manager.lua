@@ -78,8 +78,8 @@ function init()
 end
 
 function process(delta)
+	player = workspace:GetGameObject("Observer")
 	if (not player) then
-		player = workspace:GetGameObject("Observer")
 		return
 	end
 
@@ -132,5 +132,6 @@ function process(delta)
 	end
 
 	local current_spell = spells[current_spell_i + 1]
-	window:DrawString(0, 0,  255, 255, 0,   255,  "Spell: " .. current_spell.name);
+	window:DrawString(1, 1,  80, 80, 0, 255,  "Spell: " .. current_spell.name);
+	window:DrawString(0, 0,  255, 255, 0, 255,  "Spell: " .. current_spell.name);
 end

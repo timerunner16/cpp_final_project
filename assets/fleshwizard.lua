@@ -6,10 +6,14 @@ local MAX_ACCEL = MAX_GROUND_SPEED * 10
 local GRAVITY = -30.0
 local DAMAGE_FLASH_COLOR = Vector4.new(1.0, 0.2, 0.2, 1.0)
 local DAMAGE_FLASH_TIME = 0.2
-local ATTACK_RANGE = 2.0
-local ATTACK_COOLDOWN = 1.0
+local ATTACK_RANGE = 3.0
+local HIT_RANGE = 2.0
+local ATTACK_COOLDOWN = 1.5
+local ATTACK_DELAY = 1.0
 local ATTACK_DAMAGE = 45
-local ATTACK_FORCE = 16.0
+local ATTACK_FORCE = 20.0
+local LUNGE_DELAY = 0.4
+local LUNGE_FLASH_COLOR = Vector4.new(0.9, 1.0, 0.2, 0.7)
 local ACTIVATION_RANGE = 16.0
 local STATES = {
 	IDLE = "idle",
@@ -21,22 +25,22 @@ local STATES = {
 -- properties
 local velocity = Vector3.new()
 local health = 100
-local timer = 0
+local state_timer = 0
+local global_timer = 0
 local last_hit_time = -DAMAGE_FLASH_TIME
-local last_attack_time = 0
 local state = STATES.IDLE
+local hit_player_in_lunge = false
+local friction_mod = 1.0
 
 -- object references
 local workspace
-
 local current
-local player
 local event
 
 local function friction(delta)
 	local mag = Vector2.new(velocity.x, velocity.z).length
 	if (mag > 0) then
-		local drop = mag * FRICTION * delta
+		local drop = mag * FRICTION * friction_mod * delta
 		velocity.x = velocity.x * math.max(mag-drop, 0) / mag
 		velocity.z = velocity.z * math.max(mag-drop, 0) / mag
 	end
@@ -80,7 +84,9 @@ local function process_movement(delta, wishdir)
 end
 
 function takedamage()
-	last_hit_time = timer
+	state = STATES.MOVING
+	state_timer = 0
+	last_hit_time = global_timer
 	local damage = event:GetValue("damage")
 	local force = event:GetValue("force")
 	add_velocity(force)
@@ -132,40 +138,67 @@ function init()
 end
 
 function process(delta)
+	local player = workspace:GetGameObject("Observer")
 	if (not player) then
-		player = workspace:GetGameObject("Observer")
 		return
 	end
 
-	timer = timer + delta
+	state_timer = state_timer + delta
+	global_timer = global_timer + delta
 
 	if (state == STATES.IDLE) then
 		wishdir = Vector3.new(0,0,0)
 		if ((player.Transform.Position - current.Transform.Position).length < ACTIVATION_RANGE) then
 			state = STATES.MOVING
+			state_timer = 0
 		end
 	elseif (state == STATES.MOVING) then
 		local offset = player.Transform.Position - current.Transform.Position
 		wishdir = Vector3.new(offset.x, 0, offset.z).unit
 
-		if ((current.Transform.Position - player.Transform.Position).length < ATTACK_RANGE and timer - last_attack_time > ATTACK_COOLDOWN) then
-			last_attack_time = timer
+		if ((current.Transform.Position - player.Transform.Position).length < ATTACK_RANGE and state_timer > ATTACK_COOLDOWN) then
+			state = STATES.ATTACKING
+			state_timer = 0
+		end
+	elseif (state == STATES.ATTACKING) then
+		wishdir = Vector3.new(0,0,0)
+
+		if (state_timer > ATTACK_DELAY) then
+			local offset = (player.Transform.Position:withY(current.Transform.Position.y) - current.Transform.Position)
+			local force = offset.unit * ATTACK_FORCE
+			add_velocity(force)
+
+			state = STATES.LUNGING
+			state_timer = 0
+			hit_player_in_lunge = false
+		end
+	elseif (state == STATES.LUNGING) then
+		friction_mod = 0.35
+		local offset = player.Transform.Position - current.Transform.Position
+		if (not hit_player_in_lunge and offset.length < HIT_RANGE and offset.unit:dot(velocity.unit) > 0.5) then
 			local attack_event = player:GetEvent("TakeDamage")
-			local force = (player.Transform.Position:withY(current.Transform.Position.y) - current.Transform.Position).unit * ATTACK_FORCE
+			local force = offset.unit * ATTACK_FORCE
 			attack_event:SetValue("damage", ATTACK_DAMAGE)
 			attack_event:SetValue("force", force)
 			attack_event:Fire()
-			add_velocity(force)
+			hit_player_in_lunge = true
+		end
+		if (state_timer > LUNGE_DELAY) then
+			state = STATES.IDLE
+			state_timer = 0
+			friction_mod = 1.0
 		end
 	end
 
 	process_movement(delta, wishdir)
 
-	current.Transform.Rotation.y = -math.pi/2 + math.pi - atan2(velocity.z, velocity.x)
+	current.Transform.Rotation.y = math.pi/2 - atan2(velocity.z, velocity.x)
 	current.Velocity = velocity
 
-	if (timer - last_hit_time < DAMAGE_FLASH_TIME) then
+	if (global_timer - last_hit_time < DAMAGE_FLASH_TIME) then
 		current:SetUniform(Uniform.new("modulate", DAMAGE_FLASH_COLOR))
+	elseif (state == STATES.LUNGING) then
+		current:SetUniform(Uniform.new("modulate", LUNGE_FLASH_COLOR))
 	else
 		current:RemoveUniform("modulate")
 	end
