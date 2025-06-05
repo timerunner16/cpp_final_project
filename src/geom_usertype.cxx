@@ -6,6 +6,7 @@
 #include "ivec3.hpp"
 #include "transform.hpp"
 #include "physics.hpp"
+#include "game_object.hpp"
 
 void geom_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game_object) {
 	sol::usertype<vec2> vec2_data_type = lua_state->new_usertype<vec2>(
@@ -191,6 +192,7 @@ void geom_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game
 		"CollisionResult", sol::no_constructor,
 		"Hit", sol::readonly_property(&collision_result::hit),
 		"Position", sol::readonly_property(&collision_result::until_blocked),
-		"Normal", sol::readonly_property(&collision_result::hit_normal)
+		"Normal", sol::readonly_property(&collision_result::hit_normal),
+		"Instance", sol::readonly_property(&collision_result::game_object)
 	);
 }

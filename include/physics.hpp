@@ -4,6 +4,8 @@
 #define EPSILON 0.005f
 #define SIDE_EPSILON 0.05f
 
+class GameObject;
+
 struct Box {
 	vec2 bound;
 	vec2 center;
@@ -37,6 +39,7 @@ struct collision_result {
 	vec2 until_blocked;
 	vec2 out_velocity;
 	vec2 hit_normal;
+	GameObject* game_object;
 };
 
 vec2 closest_point_on_line(vec2 p, line l);

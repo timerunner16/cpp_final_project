@@ -7,12 +7,14 @@ local GRAVITY = -30.0
 
 -- properties
 local velocity = Vector3.new()
+local health = 100
 
 -- object references
 local workspace
 
 local current
 local player
+local event
 
 local function friction(delta)
 	local mag = Vector2.new(velocity.x, velocity.z).length
@@ -43,9 +45,18 @@ local function atan2(y, x)
 	return angle
 end
 
+function takedamage()
+	health = health - event:GetValue("damage")
+	if (health <= 0) then
+		current:QueueFree()
+	end
+end
+
 function init()
 	workspace = Engine.Workspace
 	current = Engine.CurrentGameObject
+	event = workspace:CreateEvent("TakeDamage", current)
+	event:Connect("takedamage")
 end
 
 function process(delta)

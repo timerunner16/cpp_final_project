@@ -1,7 +1,7 @@
 #include "physics.hpp"
 #include <cstdio>
 
-#define BAD_RESULT collision_result{false, vec2(), vec2(), vec2()}
+#define BAD_RESULT collision_result{false, vec2(), vec2(), vec2(), nullptr}
 
 vec2 closest_point_on_line(vec2 p, line l) {
 	vec2 delta = (l.b - l.a);
@@ -109,7 +109,7 @@ collision_result sweep_box_line(Box a, line l, vec2 v) {
 		out_velocity.x = v.x;
 	}
 
-	return collision_result{true, until_blocked, out_velocity, hit_normal};
+	return collision_result{true, until_blocked, out_velocity, hit_normal, nullptr};
 }
 
 collision_result discrete_box_box(Box moving, Box unmoving, vec2 v) {
@@ -132,14 +132,14 @@ collision_result discrete_box_box(Box moving, Box unmoving, vec2 v) {
 	float l_r_up = r_up.length();
 
 	if (l_r_left < l_r_right && l_r_left < l_r_down && l_r_left < l_r_up)
-		return collision_result{true, r_left, vec2{0,0}, vec2{1,0}};
+		return collision_result{true, r_left, vec2{0,0}, vec2{1,0}, nullptr};
 	else if (l_r_right < l_r_left && l_r_right < l_r_down && l_r_right < l_r_up)
-		return collision_result{true, r_right, vec2{0,0}, vec2{-1,0}};
+		return collision_result{true, r_right, vec2{0,0}, vec2{-1,0}, nullptr};
 	else if (l_r_down < l_r_left && l_r_down < l_r_right && l_r_down < l_r_up)
-		return collision_result{true, r_down, vec2{0,0}, vec2{0,1}};
+		return collision_result{true, r_down, vec2{0,0}, vec2{0,1}, nullptr};
 	else
-		return collision_result{true, r_up, vec2{0,0}, vec2{0,-1}};
-	return collision_result{true, vec2{0,0}, vec2{0,0}, vec2{0,0}};
+		return collision_result{true, r_up, vec2{0,0}, vec2{0,-1}, nullptr};
+	return collision_result{true, vec2{0,0}, vec2{0,0}, vec2{0,0}, nullptr};
 }
 
 bool overlap_box_triangle(Box a, triangle b) {
@@ -270,7 +270,7 @@ collision_result discrete_line_box(Box a, line l) {
 	}
 	vec2 until_blocked = l.a + delta * glm::clamp(near_t_f, 0.f, 1.f);
 
-	return collision_result{true, until_blocked, vec2(), hit_normal};
+	return collision_result{true, until_blocked, vec2(), hit_normal, nullptr};
 }
 
 collision_result discrete_line_line(line ray, line segment) {
@@ -319,5 +319,5 @@ collision_result discrete_line_line(line ray, line segment) {
 
 	vec2 hit_normal = segment.n();
 
-	return collision_result{true, until_blocked, vec2(), hit_normal};
+	return collision_result{true, until_blocked, vec2(), hit_normal, nullptr};
 }

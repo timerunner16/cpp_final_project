@@ -211,10 +211,11 @@ collision_result GameObject::Raycast(vec3 origin, vec2 endpoint, std::vector<Gam
 	}
 	for (auto& [key, val] : m_game->GetWorkspace()->GetGameObjects()) {
 		collision_result result = val->RaycastBox(filter, ray);
+		result.game_object = val;
 		if (result.hit) results.push_back(result);
 	}
 
-	if (results.size() == 0) return collision_result{false, vec2(), vec2(), vec2()};
+	if (results.size() == 0) return collision_result{false, vec2(), vec2(), vec2(), nullptr};
 
 	collision_result shortest = results[0];
 	float distance = vec2(shortest.until_blocked - origin2d).length_squared();

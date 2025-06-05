@@ -60,6 +60,7 @@ local function create_spell()
 		color = current_spell.color,
 		size = current_spell.size,
 		speed = current_spell.speed,
+		damage = current_spell.damage,
 		object = spell
 	}
 	table.insert(active_spells, active_spell)
@@ -115,6 +116,12 @@ function process(delta)
 			particle_info.B = math.floor(v.color.z)
 			particle_info.FadeOut = true
 			workspace:CreateParticleSystem(particle_info)
+
+			if ((result.Instance ~= nil) and (string.find(result.Instance:GetName(), "E_"))) then
+				local event = result.Instance:GetEvent("TakeDamage")
+				event:SetValue("damage", v.damage)
+				event:Fire()
+			end
 		end
 	end
 
