@@ -158,6 +158,10 @@ void Material::Cleanup() {}
 void Material::SetTexture(std::shared_ptr<GLTexture> texture) {m_texture = texture;}
 void Material::SetShader(std::shared_ptr<Shader> shader) {m_shader = shader;}
 void Material::SetUniform(Uniform uniform) {
+	if (m_uniforms.contains(uniform.name)) {
+		free(m_uniforms[uniform.name].data);
+		m_uniforms.erase(uniform.name);
+	}
 	size_t size = get_uniform_data_size(uniform.type);
 	void* data = malloc(size);
 	memcpy(data, uniform.data, size);

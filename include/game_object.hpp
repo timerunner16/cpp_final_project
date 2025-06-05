@@ -62,6 +62,7 @@ public:
 
 	void SetUniform(Uniform uniform);
 	std::map<std::string, Uniform> GetUniforms();
+	void RemoveUniform(std::string name);
 private:
 	Game* m_game;
 

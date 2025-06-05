@@ -30,7 +30,8 @@ void go_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game_o
 		"IsOnFloor", &GameObject::IsOnFloor,
 		"Raycast", &GameObject::Raycast,
 		"QueueFree", &GameObject::QueueFree,
-		"SetUniform", &GameObject::SetUniform
+		"SetUniform", &GameObject::SetUniform,
+		"RemoveUniform", &GameObject::RemoveUniform
 	);
 
 

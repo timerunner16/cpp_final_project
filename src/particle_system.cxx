@@ -77,11 +77,25 @@ void ParticleSystem::Update(float delta) {
 void ParticleSystem::AddParticles() {
 	for (size_t i = 0; i < m_particles_per_launch; i++) {
 		vec3 direction = m_direction;
-		vec3 right = direction.cross(vec3{0,1,0}).unit();
-		vec3 up = direction.cross(right).unit();
-		direction += right * glm::linearRand(-m_randomization, m_randomization);
-		direction += up * glm::linearRand(-m_randomization, m_randomization);
-		direction = direction.unit();
+		if (direction == vec3{0,1,0}) {
+			direction = vec3{
+				glm::linearRand(-m_randomization, m_randomization),
+				1.0f,
+				glm::linearRand(-m_randomization, m_randomization)
+			}.unit();
+		} else if (direction == vec3{0,-1,0}) {
+			direction = vec3{
+				glm::linearRand(-m_randomization, m_randomization),
+				-1.0f,
+				glm::linearRand(-m_randomization, m_randomization)
+			}.unit();
+		} else {
+			vec3 right = direction.cross(vec3{0,1,0}).unit();
+			vec3 up = direction.cross(right).unit();
+			direction += right * glm::linearRand(-m_randomization, m_randomization);
+			direction += up * glm::linearRand(-m_randomization, m_randomization);
+			direction = direction.unit();
+		}
 
 		vec3 position = m_position;
 		vec3 velocity = direction.unit() * m_speed;

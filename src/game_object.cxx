@@ -257,6 +257,7 @@ void GameObject::QueueFree() {m_queued_for_freedom = true;}
 bool GameObject::IsQueuedForFreedom() {return m_queued_for_freedom;}
 
 void GameObject::SetUniform(Uniform uniform) {
+	if (m_uniforms.contains(uniform.name)) RemoveUniform(uniform.name);
 	size_t size = get_uniform_data_size(uniform.type);
 	void* data = malloc(size);
 	memcpy(data, uniform.data, size);
@@ -266,4 +267,10 @@ void GameObject::SetUniform(Uniform uniform) {
 
 std::map<std::string, Uniform> GameObject::GetUniforms() {
 	return m_uniforms;
+}
+
+void GameObject::RemoveUniform(std::string name) {
+	if (!m_uniforms.contains(name)) return;
+	free(m_uniforms[name].data);
+	m_uniforms.erase(name);
 }

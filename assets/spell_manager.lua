@@ -11,16 +11,18 @@ local spells = {
 		damage = 60,
 		speed = 16,
 		size = 0.2,
+		force = 16.0,
 		spread = math.pi/4
 	},
 	{
-		name = "Other Damage",
+		name = "Light Damage",
 		material = "ORB",
 		mesh = "ORB",
 		color = Vector3.new(20,120,255),
-		damage = 60,
+		damage = 20,
 		speed = 16,
 		size = 0.1,
+		force = 8.0,
 		spread = math.pi/4
 	}
 }
@@ -61,6 +63,7 @@ local function create_spell()
 		size = current_spell.size,
 		speed = current_spell.speed,
 		damage = current_spell.damage,
+		force = current_spell.force,
 		object = spell
 	}
 	table.insert(active_spells, active_spell)
@@ -98,7 +101,6 @@ function process(delta)
 		for _,w in pairs(active_spells) do table.insert(filter, w.object) end
 		local result = v.object:Raycast(origin, endpoint, filter)
 		if (result.Hit) then
-			print("Hit!", result.Position * 2)
 			v.object:QueueFree()
 			table.remove(active_spells, i)
 
@@ -119,12 +121,16 @@ function process(delta)
 
 			if ((result.Instance ~= nil) and (string.find(result.Instance:GetName(), "E_"))) then
 				local event = result.Instance:GetEvent("TakeDamage")
+				local hit = Vector3.new(result.Position.x, origin.y, result.Position.y)
 				event:SetValue("damage", v.damage)
+				event:SetValue("position", hit)
+				event:SetValue("direction", (hit:withY(result.Instance.Transform.Position.y) - result.Instance.Transform.Position).unit)
+				event:SetValue("force", (result.Instance.Transform.Position - hit:withY(result.Instance.Transform.Position.y)).unit * v.force)
 				event:Fire()
 			end
 		end
 	end
 
-	--local current_spell = spells[current_spell_i + 1]
-	--window:DrawString(0, 0,  255, 255, 0,   255,  "Spell: " .. current_spell.name);
+	local current_spell = spells[current_spell_i + 1]
+	window:DrawString(0, 0,  255, 255, 0,   255,  "Spell: " .. current_spell.name);
 end
