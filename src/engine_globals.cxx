@@ -21,6 +21,7 @@ void engine_globals(Game* game, std::shared_ptr<sol::state> lua_state, GameObjec
 	engine_globals_metatable["InputManager"] = game->GetInputManager();
 	engine_globals_metatable["PDataManager"] = game->GetPDataManager();
 	engine_globals_metatable["CurrentGameObject"] = game_object;
+	engine_globals_metatable["Shutdown"] = [game]() -> void {game->SetShutdown(true);};
 
 	engine_globals_metatable[sol::meta_function::new_index] = engine_globals_deny;
 	engine_globals_metatable[sol::meta_function::index] = engine_globals_metatable;

@@ -6,12 +6,25 @@ local MAX_ACCEL = MAX_GROUND_SPEED * 10
 local GRAVITY = -30.0
 local DAMAGE_FLASH_COLOR = Vector4.new(1.0, 0.2, 0.2, 1.0)
 local DAMAGE_FLASH_TIME = 0.2
+local ATTACK_RANGE = 2.0
+local ATTACK_COOLDOWN = 1.0
+local ATTACK_DAMAGE = 45
+local ATTACK_FORCE = 6.0
+local ACTIVATION_RANGE = 16.0
+local STATES = {
+	IDLE = "idle",
+	MOVING = "moving",
+	ATTACKING = "attacking",
+	LUNGING = "lunging"
+}
 
 -- properties
 local velocity = Vector3.new()
 local health = 100
 local timer = 0
 local last_hit_time = 0
+local last_attack_time = 0
+local state = STATES.IDLE
 
 -- object references
 local workspace
@@ -49,12 +62,30 @@ local function atan2(y, x)
 	return angle
 end
 
+local function process_movement(delta, wishdir)
+	local current_speed = velocity:dot(wishdir)
+
+	if (current:IsOnFloor()) then
+		friction(delta)
+		velocity.y = 0
+
+		local add_speed = clamp(MAX_GROUND_SPEED - current_speed,  0, MAX_ACCEL * delta)
+		local new_velocity = wishdir * add_speed
+		add_velocity(new_velocity)
+	else
+		local add_speed = clamp(MAX_AIR_SPEED - current_speed,  0, MAX_ACCEL * delta)
+		local new_velocity = wishdir * add_speed + Vector3.new(0,1,0) * GRAVITY * delta
+		add_velocity(new_velocity)
+	end
+end
+
 function takedamage()
 	last_hit_time = timer
 	local damage = event:GetValue("damage")
 	local force = event:GetValue("force")
 	add_velocity(force)
 	health = health - damage
+
 	local position = event:GetValue("position")
 	local direction = event:GetValue("direction")
 	local hit_particle_info = ParticleSystemCreateInfo.new()
@@ -88,6 +119,7 @@ function takedamage()
 		dead_particle_info.B = 150
 		dead_particle_info.FadeOut = true
 		workspace:CreateParticleSystem(dead_particle_info)
+
 		current:QueueFree()
 	end
 end
@@ -107,22 +139,27 @@ function process(delta)
 
 	timer = timer + delta
 
-	local offset = player.Transform.Position - current.Transform.Position
-	local wishdir = Vector3.new(offset.x, 0, offset.z).unit
-	local current_speed = velocity:dot(wishdir)
+	if (state == STATES.IDLE) then
+		wishdir = Vector3.new(0,0,0)
+		if ((player.Transform.Position - current.Transform.Position).length < ACTIVATION_RANGE) then
+			state = STATES.MOVING
+		end
+	elseif (state == STATES.MOVING) then
+		local offset = player.Transform.Position - current.Transform.Position
+		wishdir = Vector3.new(offset.x, 0, offset.z).unit
 
-	if (current:IsOnFloor()) then
-		friction(delta)
-		velocity.y = 0
-
-		local add_speed = clamp(MAX_GROUND_SPEED - current_speed,  0, MAX_ACCEL * delta)
-		local new_velocity = wishdir * add_speed
-		add_velocity(new_velocity)
-	else
-		local add_speed = clamp(MAX_AIR_SPEED - current_speed,  0, MAX_ACCEL * delta)
-		local new_velocity = wishdir * add_speed + Vector3.new(0,1,0) * GRAVITY * delta
-		add_velocity(new_velocity)
+		if ((current.Transform.Position - player.Transform.Position).length < ATTACK_RANGE and timer - last_attack_time > ATTACK_COOLDOWN) then
+			last_attack_time = timer
+			local attack_event = player:GetEvent("TakeDamage")
+			local force = (player.Transform.Position:withY(current.Transform.Position.y) - current.Transform.Position).unit * ATTACK_FORCE
+			attack_event:SetValue("damage", ATTACK_DAMAGE)
+			attack_event:SetValue("force", force)
+			attack_event:Fire()
+			add_velocity(force)
+		end
 	end
+
+	process_movement(delta, wishdir)
 
 	current.Transform.Rotation.y = -math.pi/2 + math.pi - atan2(velocity.z, velocity.x)
 	current.Velocity = velocity

@@ -28,6 +28,7 @@ public:
 	Map* GetMap();
 	std::map<std::string, Uniform>* GetGlobalUniforms();
 	std::string GetWADPath();
+	void SetShutdown(bool shutdown);
 private:
 	Window* m_window;
 	Workspace* m_workspace;

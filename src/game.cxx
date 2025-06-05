@@ -112,3 +112,6 @@ std::map<std::string, Uniform>* Game::GetGlobalUniforms() {
 	return &m_global_uniforms;
 }
 std::string Game::GetWADPath() {return m_wad_path;}
+void Game::SetShutdown(bool shutdown) {
+	m_should_shutdown = shutdown;
+}

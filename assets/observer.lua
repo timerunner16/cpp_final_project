@@ -20,12 +20,15 @@ local x = 0.0
 local wireframe = false
 local coyote_time = 0.0
 local input_buffer = 0.0
+local health = 100
 
 -- object references
 local current
 local camera
+local workspace
 local input
 local window
+local event
 
 local function friction(delta)
 	local mag = Vector2.new(velocity.x, velocity.z).length
@@ -46,11 +49,22 @@ local function clamp(n, min, max)
 	return n
 end
 
+function takedamage()
+	health = health - event:GetValue("damage")
+	add_velocity(event:GetValue("force"))
+	if (health <= 0) then
+		Engine.Shutdown()
+	end
+end
+
 function init()
+	workspace = Engine.Workspace
 	current = Engine.CurrentGameObject
-	camera = Engine.Workspace:GetCamera()
+	camera = workspace:GetCamera()
 	input = Engine.InputManager
 	window = Engine.Window
+	event = workspace:CreateEvent("TakeDamage", current)
+	event:Connect("takedamage")
 end
 
 function process(delta)
