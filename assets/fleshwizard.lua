@@ -36,6 +36,7 @@ local friction_mod = 1.0
 local workspace
 local current
 local event
+local destroyed
 
 local function friction(delta)
 	local mag = Vector2.new(velocity.x, velocity.z).length
@@ -97,8 +98,8 @@ function takedamage()
 	local hit_particle_info = ParticleSystemCreateInfo.new()
 	hit_particle_info.Position = position * 2
 	hit_particle_info.Direction = direction
-	hit_particle_info.Size = Vector2.new(0.1, 0.1)
-	hit_particle_info.Lifetime = 1.0
+	hit_particle_info.Size = Vector2.new(0.05, 0.05)
+	hit_particle_info.Lifetime = 0.4
 	hit_particle_info.Gravity = -9.81
 	hit_particle_info.Randomization = math.pi/8
 	hit_particle_info.NumParticles = 64
@@ -111,12 +112,12 @@ function takedamage()
 
 	if (health <= 0) then
 		local dead_particle_info = ParticleSystemCreateInfo.new()
-		dead_particle_info.Position = current.Transform.Position * 2
+		dead_particle_info.Position = current.Transform.Position * 2 + Vector3.new(0,1,0)
 		dead_particle_info.Direction = Vector3.new(0,1,0)
-		dead_particle_info.Size = Vector2.new(0.15, 0.15)
-		dead_particle_info.Lifetime = 1.0
+		dead_particle_info.Size = Vector2.new(0.05, 0.05)
+		dead_particle_info.Lifetime = 0.6
 		dead_particle_info.Gravity = -9.81
-		dead_particle_info.Randomization = math.pi
+		dead_particle_info.Randomization = math.pi/4
 		dead_particle_info.NumParticles = 32
 		dead_particle_info.NumLaunches = 4
 		dead_particle_info.LaunchInterval = 0.05
@@ -135,6 +136,7 @@ function init()
 	current = Engine.CurrentGameObject
 	event = workspace:CreateEvent("TakeDamage", current)
 	event:Connect("takedamage")
+	destroyed = workspace:CreateEvent("Destroyed", current)
 end
 
 function process(delta)
@@ -202,4 +204,8 @@ function process(delta)
 	else
 		current:RemoveUniform("modulate")
 	end
+end
+
+function on_destruct()
+	destroyed:Fire()
 end

@@ -78,6 +78,7 @@ private:
 	bool m_lua_loaded;
 	std::shared_ptr<sol::state> m_lua_state;
 	sol::safe_function m_lua_process;
+	sol::safe_function m_lua_on_destruct;
 
 	GameObject* m_parent;
 	std::map<std::string, GameObject*> m_children;

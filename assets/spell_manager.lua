@@ -60,7 +60,7 @@ local function create_spell()
 	local scale = Vector3.new(current_spell.size)
 	local transform = Transform.new(position, Vector3.new(), scale)
 	local spell = workspace:CreateGameObject(
-		"_SPELL_" .. current_spell.name .. "_" .. tostring(math.random(0,2147483647)), nil,
+		"SPELL_" .. current_spell.name .. "_" .. tostring(math.random(0,2147483647)), nil,
 		"", resource_manager:GetMesh(current_spell.mesh), resource_manager:GetMaterial(current_spell.material),
 		transform, Vector2.new(), 0
 	)

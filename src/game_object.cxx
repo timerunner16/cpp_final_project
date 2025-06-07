@@ -5,6 +5,7 @@
 #include "mesh.hpp"
 #include "map.hpp"
 #include "workspace.hpp"
+#include "event.hpp"
 #include <algorithm>
 
 #define FLOOR_EPSILON 0.005f
@@ -30,6 +31,8 @@ GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 
 	m_height = height;
 
+	m_events = std::map<std::string, Event*>();
+
 	m_lua_loaded = !script_path.empty();
 	if (!m_lua_loaded) return;
 	m_lua_state = std::make_shared<sol::state>();
@@ -40,26 +43,40 @@ GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 	m_lua_state->script_file(script_path, sol::load_mode::text);
 
 	sol::safe_function init = m_lua_state->get<sol::function>("init");
-	sol::protected_function_result result = init();
-	if (!result.valid()) {
-		sol::error error = result;
-		printf("[LUA ERROR]: %s\n", error.what());
+	if (init.valid()) {
+		sol::protected_function_result result = init();
+		if (!result.valid()) {
+			sol::error error = result;
+			printf("[LUA ERROR]: %s\n", error.what());
+		}
 	}
 
 	m_lua_process = m_lua_state->get<sol::function>("process");
+	m_lua_on_destruct = m_lua_state->get<sol::function>("on_destruct");
 }
 
 GameObject::~GameObject() {
+	if (m_lua_on_destruct.valid()) {
+		sol::protected_function_result result = m_lua_on_destruct();
+		if (!result.valid()) {
+			sol::error error = result;
+			printf("[LUA ERROR]: %s\n", error.what());
+		}
+	}
+
 	if (m_parent != nullptr) m_parent->RemoveChild(m_name);
+	for (auto& [key, val] : m_events) {delete val;}
 	for (auto& [key, val] : m_children) {delete val;}
 }
 
 void GameObject::Process(float delta) {
 	if (m_lua_loaded) {
-		sol::protected_function_result result = m_lua_process(delta);
-		if (!result.valid()) {
-			sol::error error = result;
-			printf("[LUA_ERROR]: %s\n", error.what());
+		if (m_lua_process.valid()) {
+			sol::protected_function_result result = m_lua_process(delta);
+			if (!result.valid()) {
+				sol::error error = result;
+				printf("[LUA_ERROR]: %s\n", error.what());
+			}
 		}
 	}
 
@@ -192,7 +209,10 @@ Event* GameObject::GetEvent(std::string name) {
 	return nullptr;
 }
 void GameObject::RemoveEvent(std::string name) {
-	if (m_events.contains(name)) m_events.erase(name);
+	if (m_events.contains(name)) {
+		delete m_events[name];
+		m_events.erase(name);
+	}
 }
 void GameObject::AddEvent(Event* event, std::string name) {
 	if (event == nullptr) return;
@@ -257,7 +277,10 @@ collision_result GameObject::RaycastBox(std::vector<GameObject*> filter, line ra
 	return shortest;
 }
 
-void GameObject::QueueFree() {m_queued_for_freedom = true;}
+void GameObject::QueueFree() {
+	m_queued_for_freedom = true;
+	printf("QF %zu\n", m_events.size());
+}
 bool GameObject::IsQueuedForFreedom() {return m_queued_for_freedom;}
 
 void GameObject::SetUniform(Uniform uniform) {
