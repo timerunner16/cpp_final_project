@@ -139,7 +139,7 @@ std::vector<collision_result> GameObject::CollideBox(const Box& moving, vec2 v) 
 		child_outputs = val->CollideBox(moving, v);
 		for (collision_result i : child_outputs) outputs.push_back(i);
 	}
-	outputs.push_back(discrete_box_box(moving, m_box, v));
+	if (m_box.bound != vec2()) outputs.push_back(discrete_box_box(moving, m_box, v));
 	return outputs;
 }
 
