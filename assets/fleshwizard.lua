@@ -137,6 +137,7 @@ function init()
 	event = workspace:CreateEvent("TakeDamage", current)
 	event:Connect("takedamage")
 	destroyed = workspace:CreateEvent("Destroyed", current)
+	velocity = current.Transform.LookVector * 0.05
 end
 
 function process(delta)

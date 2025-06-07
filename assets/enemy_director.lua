@@ -34,12 +34,30 @@ local function create_enemy()
 	num_created = num_created + 1
 	local name = random_name()
 
+	local spawnpoint = spawnpoints[math.random(#spawnpoints)]
+
 	local new = workspace:CreateGameObject(
 		name, nil,
 		SCRIPT, resource_manager:GetMesh(MESH), resource_manager:GetMaterial(MATERIAL),
-		spawnpoints[math.random(#spawnpoints)], BOUNDS, HEIGHT
+		spawnpoint, BOUNDS, HEIGHT
 	)
 	new:GetEvent("Destroyed"):Connect("killed")
+
+	local particle_info = ParticleSystemCreateInfo.new()
+	particle_info.Position = spawnpoint.Position * 2
+	particle_info.Direction = Vector3.new(0,1,0)
+	particle_info.Size = Vector2.new(0.2, 0.2)
+	particle_info.Lifetime = 0.8
+	particle_info.Gravity = -9.81
+	particle_info.Randomization = math.pi/4
+	particle_info.NumParticles = 32
+	particle_info.NumLaunches = 3
+	particle_info.LaunchInterval = 0.2
+	particle_info.R = 200
+	particle_info.G = 30
+	particle_info.B = 30
+	particle_info.FadeOut = true
+	workspace:CreateParticleSystem(particle_info)
 end
 
 function init()
