@@ -279,7 +279,6 @@ collision_result GameObject::RaycastBox(std::vector<GameObject*> filter, line ra
 
 void GameObject::QueueFree() {
 	m_queued_for_freedom = true;
-	printf("QF %zu\n", m_events.size());
 }
 bool GameObject::IsQueuedForFreedom() {return m_queued_for_freedom;}
 

@@ -157,6 +157,7 @@ function process(delta)
 	if (health <= 0) then
 		current:QueueFree()
 		camera.Transform.Position = current.Transform.Position:withY(current.Transform.Position.y + 0.1)
+		camera.Transform.Rotation.z = 0
 	end
 
 	window:DrawString(2, math.floor(window.Height/window.Downscale)-9,

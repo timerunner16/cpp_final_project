@@ -1,6 +1,6 @@
 -- constants
-local MAX_GROUND_SPEED = 3.0
-local MAX_AIR_SPEED = 1.0
+local MAX_GROUND_SPEED = 6.0
+local MAX_AIR_SPEED = 2.0
 local FRICTION = 8
 local MAX_ACCEL = MAX_GROUND_SPEED * 10
 local GRAVITY = -30.0
@@ -9,7 +9,7 @@ local DAMAGE_FLASH_TIME = 0.2
 local ATTACK_RANGE = 3.0
 local HIT_RANGE = 2.0
 local ATTACK_COOLDOWN = 1.5
-local ATTACK_DELAY = 1.0
+local ATTACK_DELAY = 0.8
 local ATTACK_DAMAGE = 45
 local ATTACK_FORCE = 20.0
 local LUNGE_DELAY = 0.4
