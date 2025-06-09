@@ -16,6 +16,7 @@ Game::Game(std::string wad_path, int width, int height, int downscale, bool resi
 	m_pdata_manager = new PDataManager();
 	m_map = new Map(this, "MAP01");
 	m_should_shutdown = false;
+	m_swapmap = false;
 
 	m_time = 0;
 
@@ -52,6 +53,13 @@ Game::~Game() {
 }
 
 void Game::Process() {
+	if (m_swapmap) {
+		m_swapmap = false;
+		m_workspace->FreeAll();
+		delete m_map;
+		m_map = new Map(this, m_next_mapname);
+	}
+
 	m_tp_a = std::chrono::high_resolution_clock::now();
 	m_delta = (m_tp_a-m_tp_b).count()/(1e9);
 	m_time += m_delta;
@@ -114,4 +122,9 @@ std::map<std::string, Uniform>* Game::GetGlobalUniforms() {
 std::string Game::GetWADPath() {return m_wad_path;}
 void Game::SetShutdown(bool shutdown) {
 	m_should_shutdown = shutdown;
+}
+
+void Game::ChangeMap(std::string mapname) {
+	m_next_mapname = mapname;
+	m_swapmap = true;
 }

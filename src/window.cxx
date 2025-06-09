@@ -151,6 +151,7 @@ void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 		DrawGameObject(camera, val);
 	}
 	
+	if (!game_object->GetVisible()) return;
 	if (game_object->GetMesh() == nullptr) return;
 	if (game_object->GetMaterial() == nullptr) {DBPRINTF("Can't render a mesh without a material!\n"); return;}
 

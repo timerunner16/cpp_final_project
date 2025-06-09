@@ -30,10 +30,13 @@ public:
 	Camera* GetCamera();
 	
 	void Process(float delta);
+	void QueueFreeAll();
+	void FreeAll();
 private:
 	Game* m_game;
 	std::map<std::string, GameObject*> m_game_objects;
 	std::vector<ParticleSystem*> m_particle_systems; 
 	std::map<std::string, Event*> m_events;
 	Camera* m_camera;
+	bool m_queued_to_free_all;
 };

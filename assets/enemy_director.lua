@@ -6,24 +6,28 @@ local BOUNDS = Vector2.new(0.5,0.5)
 local HEIGHT = 2.3
 local NAME = "E_FleshWizard"
 local NUM_PER_BATCH = 4
-local NUM_BATCHES = 8
+local NUM_BATCHES = 1--8
 local BATCH_DELAY = 4
 
 -- properties
 local num_created = 0
 local timer = 0
 local num_killed = 0
+local spawnpoints = {}
 
 -- object references
 local workspace
 local resource_manager
 local window
 local pdata
-local spawnpoints = {}
 
 function killed()
 	num_killed = num_killed + 1
 	pdata:SetValue("mana", pdata:GetValue("mana") + 50)
+	if (num_killed >= NUM_BATCHES * NUM_PER_BATCH) then
+		local exit = workspace:GetGameObject("Exit")
+		exit:GetEvent("OpenExit"):Fire()
+	end
 end
 
 local function random_name()

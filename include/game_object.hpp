@@ -63,6 +63,9 @@ public:
 	void SetUniform(Uniform uniform);
 	std::map<std::string, Uniform> GetUniforms();
 	void RemoveUniform(std::string name);
+
+	void SetVisible(bool visible);
+	bool GetVisible();
 private:
 	Game* m_game;
 
@@ -90,4 +93,6 @@ private:
 	bool m_queued_for_freedom;
 
 	std::map<std::string, Uniform> m_uniforms;
+
+	bool m_visible;
 };

@@ -9,6 +9,7 @@ Workspace::Workspace(Game* game) {
 	m_game = game;
 
 	m_camera = new Camera(m_game, Transform{vec3(0.0f), vec3(0.0f), vec3(1.0f)}, glm::radians(45.0f));
+	m_queued_to_free_all = false;
 }
 
 Workspace::~Workspace() {
@@ -52,6 +53,8 @@ GameObject* Workspace::GetGameObject(std::string name) {
 Camera* Workspace::GetCamera() {return m_camera;}
 
 void Workspace::Process(float delta) {
+	if (m_queued_to_free_all) {FreeAll(); return;}
+
 	for (auto& [key, val] : m_game_objects) {
 		val->Process(delta);
 	}
@@ -69,4 +72,24 @@ void Workspace::Process(float delta) {
 	std::erase_if(m_particle_systems, [](const auto& particle_system) -> bool {
 		return particle_system->GetDead();
 	});
+}
+
+void Workspace::QueueFreeAll() {
+	m_queued_to_free_all = true;
+}
+
+void Workspace::FreeAll() {
+	m_queued_to_free_all = false;
+	for (auto& [key, val] : m_game_objects) {
+		delete val;
+	}
+	m_game_objects.clear();
+	for (auto& i : m_particle_systems) {
+		delete i;
+	}
+	m_particle_systems.clear();
+	for (auto& [key, val] : m_events) {
+		delete val;
+	}
+	m_events.clear();
 }

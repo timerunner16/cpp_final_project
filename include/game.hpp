@@ -12,7 +12,7 @@ class Map;
 
 class Game {
 public:
-	Game(std::string wad_path = "assets/testmap.wad", int width = 320, int height = 240, int downscale = 1, bool resizable = false);
+	Game(std::string wad_path = "assets/game.wad", int width = 320, int height = 240, int downscale = 1, bool resizable = false);
 	~Game();
 
 	void Process();
@@ -29,6 +29,7 @@ public:
 	std::map<std::string, Uniform>* GetGlobalUniforms();
 	std::string GetWADPath();
 	void SetShutdown(bool shutdown);
+	void ChangeMap(std::string mapname);
 private:
 	Window* m_window;
 	Workspace* m_workspace;
@@ -43,6 +44,9 @@ private:
 	std::map<std::string, Uniform> m_global_uniforms;
 
 	bool m_should_shutdown;
+
+	std::string m_next_mapname;
+	bool m_swapmap;
 
 	float m_delta;
 	float m_time;

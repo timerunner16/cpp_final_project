@@ -470,7 +470,7 @@ Map::Map(Game* game, std::string mapname) {
 			}
 			case THING: {
 				if (tag == "x") c_thing.x=atof(value.c_str());
-				else if (tag == "y") c_thing.y=atof(value.c_str());
+				else if (tag == "y") c_thing.y=-atof(value.c_str());
 				else if (tag == "height") c_thing.height=atof(value.c_str());
 				else if (tag == "angle") c_thing.angle=atoi(value.c_str());
 				else if (tag == "comment") {

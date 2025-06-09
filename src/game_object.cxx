@@ -29,6 +29,8 @@ GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 	m_box.center = vec2{m_transform.position.x, m_transform.position.z};
 	m_velocity = vec3{0,0,0};
 
+	m_visible = true;
+
 	m_height = height;
 
 	m_events = std::map<std::string, Event*>();
@@ -56,14 +58,6 @@ GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 }
 
 GameObject::~GameObject() {
-	if (m_lua_on_destruct.valid()) {
-		sol::protected_function_result result = m_lua_on_destruct();
-		if (!result.valid()) {
-			sol::error error = result;
-			printf("[LUA ERROR]: %s\n", error.what());
-		}
-	}
-
 	if (m_parent != nullptr) m_parent->RemoveChild(m_name);
 	for (auto& [key, val] : m_events) {delete val;}
 	for (auto& [key, val] : m_children) {delete val;}
@@ -278,6 +272,14 @@ collision_result GameObject::RaycastBox(std::vector<GameObject*> filter, line ra
 }
 
 void GameObject::QueueFree() {
+	if (m_lua_on_destruct.valid()) {
+		sol::protected_function_result result = m_lua_on_destruct();
+		if (!result.valid()) {
+			sol::error error = result;
+			printf("[LUA ERROR]: %s\n", error.what());
+		}
+	}
+
 	m_queued_for_freedom = true;
 }
 bool GameObject::IsQueuedForFreedom() {return m_queued_for_freedom;}
@@ -300,3 +302,7 @@ void GameObject::RemoveUniform(std::string name) {
 	free(m_uniforms[name].data);
 	m_uniforms.erase(name);
 }
+
+void GameObject::SetVisible(bool visible) {m_visible = visible;}
+
+bool GameObject::GetVisible() {return m_visible;}
