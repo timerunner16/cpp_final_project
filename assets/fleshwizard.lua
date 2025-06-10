@@ -137,7 +137,6 @@ function init()
 	event = workspace:CreateEvent("TakeDamage", current)
 	event:Connect("takedamage")
 	destroyed = workspace:CreateEvent("Destroyed", current)
-	velocity = current.Transform.LookVector * 0.05
 end
 
 function process(delta)
@@ -195,7 +194,9 @@ function process(delta)
 
 	process_movement(delta, wishdir)
 
-	current.Transform.Rotation.y = math.pi/2 - atan2(velocity.z, velocity.x)
+	if (Vector2.new(velocity.x, velocity.z).length > 0) then
+		current.Transform.Rotation.y = math.pi/2 - atan2(velocity.z, velocity.x)
+	end
 	current.Velocity = velocity
 
 	if (global_timer - last_hit_time < DAMAGE_FLASH_TIME) then
