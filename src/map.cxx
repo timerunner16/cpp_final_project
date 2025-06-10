@@ -553,6 +553,8 @@ Map::Map(Game* game, std::string mapname) {
 
 			float norm_x = -(v2.y-v1.y)/length;
 			float norm_y =  (v2.x-v1.x)/length;
+			float anorm_x = -norm_x;
+			float anorm_y = -norm_y;
 
 			bool lower_l = false;
 			bool mid_l = false;
@@ -605,6 +607,29 @@ Map::Map(Game* game, std::string mapname) {
 				};
 				addmapsegment(m_map_segments, vertex_data, index_data, 6, material);
 			}
+			if (!alt_sidedef.texturebottom.empty() && alt_sector.heightfloor < realfloor) {
+				lower_l = true;
+				std::shared_ptr<Material> material = m_game->GetResourceManager()->GetMaterial(alt_sidedef.texturebottom);
+
+				float v1u = alt_sidedef.offsetx_bottom/SCALE;
+				float v2u = length/SCALE + alt_sidedef.offsetx_bottom/SCALE;
+				float lowv = (alt_sector.heightfloor+realfloor+alt_sidedef.offsety_bottom)/SCALE;
+				float highv = (realfloor+alt_sidedef.offsety_bottom)/SCALE;
+
+				mesh_vertex vertex_data[6] = {
+					{glm::vec3{v2.x/SCALE,alt_sector.heightfloor/SCALE,v2.y/SCALE},glm::vec3{anorm_x,0.0f,anorm_y},glm::vec2{v2u,lowv}},
+					{glm::vec3{v1.x/SCALE,alt_sector.heightfloor/SCALE,v1.y/SCALE},glm::vec3{anorm_x,0.0f,anorm_y},glm::vec2{v1u,lowv}},
+					{glm::vec3{v1.x/SCALE,realfloor/SCALE,v1.y/SCALE},glm::vec3{anorm_x,0.0f,anorm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v2.x/SCALE,alt_sector.heightfloor/SCALE,v2.y/SCALE},glm::vec3{anorm_x,0.0f,anorm_y},glm::vec2{v2u,lowv}},
+					{glm::vec3{v1.x/SCALE,realfloor/SCALE,v1.y/SCALE},glm::vec3{anorm_x,0.0f,anorm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v2.x/SCALE,realfloor/SCALE,v2.y/SCALE},glm::vec3{anorm_x,0.0f,anorm_y},glm::vec2{v2u,highv}},
+				};
+				GLuint index_data[6] = {
+					0,1,2,
+					3,4,5
+				};
+				addmapsegment(m_map_segments, vertex_data, index_data, 6, material);
+			}
 			if (!current_sidedef.texturetop.empty() && midceiling < realceiling) {
 				higher_l = true;
 				std::shared_ptr<Material> material = m_game->GetResourceManager()->GetMaterial(current_sidedef.texturetop);
@@ -622,6 +647,30 @@ Map::Map(Game* game, std::string mapname) {
 					{glm::vec3{v1.x/SCALE,realceiling/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,highv}},
 					{glm::vec3{v2.x/SCALE,midceiling/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,lowv}},
 					{glm::vec3{v2.x/SCALE,realceiling/SCALE,v2.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v2u,highv}},
+				};
+				GLuint index_data[6] = {
+					0,1,2,
+					4,5,6
+				};
+				addmapsegment(m_map_segments, vertex_data, index_data, 6, material);
+			}
+			if (!alt_sidedef.texturetop.empty() && alt_sector.heightceiling > realceiling) {
+				higher_l = true;
+				std::shared_ptr<Material> material = m_game->GetResourceManager()->GetMaterial(alt_sidedef.texturetop);
+
+				float v1u = alt_sidedef.offsetx_top/SCALE;
+				float v2u = length/SCALE + alt_sidedef.offsetx_top/SCALE;
+				
+				float lowv = (realceiling+alt_sidedef.offsety_top)/SCALE;
+				float highv = (alt_sector.heightceiling+alt_sidedef.offsety_top)/SCALE;
+
+				mesh_vertex vertex_data[6] = {
+					{glm::vec3{v2.x/SCALE,realceiling/SCALE,v2.y/SCALE},glm::vec3{anorm_x,0.0f,anorm_y},glm::vec2{v2u,lowv}},
+					{glm::vec3{v1.x/SCALE,realceiling/SCALE,v1.y/SCALE},glm::vec3{anorm_x,0.0f,anorm_y},glm::vec2{v1u,lowv}},
+					{glm::vec3{v1.x/SCALE,alt_sector.heightceiling/SCALE,v1.y/SCALE},glm::vec3{anorm_x,0.0f,anorm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v2.x/SCALE,realceiling/SCALE,v2.y/SCALE},glm::vec3{anorm_x,0.0f,anorm_y},glm::vec2{v2u,lowv}},
+					{glm::vec3{v1.x/SCALE,alt_sector.heightceiling/SCALE,v1.y/SCALE},glm::vec3{anorm_x,0.0f,anorm_y},glm::vec2{v1u,highv}},
+					{glm::vec3{v2.x/SCALE,alt_sector.heightceiling/SCALE,v2.y/SCALE},glm::vec3{anorm_x,0.0f,anorm_y},glm::vec2{v2u,highv}},
 				};
 				GLuint index_data[6] = {
 					0,1,2,
