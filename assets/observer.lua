@@ -22,7 +22,6 @@ local x = 0.0
 local wireframe = false
 local coyote_time = 0.0
 local input_buffer = 0.0
-local health = 100
 local last_hit_time = -DAMAGE_FLASH_TIME
 
 -- object references
@@ -32,6 +31,7 @@ local workspace
 local input
 local resource_manager
 local window
+local pdata
 local event
 
 local function friction(delta)
@@ -55,7 +55,7 @@ end
 
 function takedamage()
 	last_hit_time = timer
-	health = health - event:GetValue("damage")
+	pdata:SetValue("health", pdata:GetValue("health") - event:GetValue("damage"))
 	add_velocity(event:GetValue("force"))
 end
 
@@ -66,8 +66,13 @@ function init()
 	input = Engine.InputManager
 	resource_manager = Engine.ResourceManager
 	window = Engine.Window
+	pdata = Engine.PDataManager
 	event = workspace:CreateEvent("TakeDamage", current)
 	event:Connect("takedamage")
+
+	if (not pdata:GetValue("health") or pdata:GetValue("health") <= 0) then
+		pdata:SetValue("health", 100)
+	end
 end
 
 function process(delta)
@@ -148,13 +153,13 @@ function process(delta)
 	bobstrength = bobstrength + (target_bobstrength - bobstrength) * delta * 4.0
 	camera.Transform.Position.y = camera.Transform.Position.y + math.sin(timer * 8.0) * 0.05 * bobstrength + 1.0
 
-	if (timer - last_hit_time < DAMAGE_FLASH_TIME or health <= 0) then
+	if (timer - last_hit_time < DAMAGE_FLASH_TIME or pdata:GetValue("health") <= 0) then
 		resource_manager:GetMaterial("PPDITHER"):SetUniform(Uniform.new("modulate", DAMAGE_FLASH_COLOR))
 	else
 		resource_manager:GetMaterial("PPDITHER"):SetUniform(Uniform.new("modulate", Vector4.new(1.0)))
 	end
 
-	if (health <= 0) then
+	if (pdata:GetValue("health") <= 0) then
 		current:QueueFree()
 		camera.Transform.Position = current.Transform.Position:withY(current.Transform.Position.y + 0.1)
 		camera.Transform.Rotation.z = 0
@@ -162,8 +167,8 @@ function process(delta)
 
 	window:DrawString(2, math.floor(window.Height/window.Downscale)-9,
 					  10, 80, 10, 255,
-					  "+ " .. tostring(math.ceil(health)));
+					  "+ " .. tostring(math.ceil(pdata:GetValue("health"))));
 	window:DrawString(1, math.floor(window.Height/window.Downscale)-10,
 					  30, 255, 30, 255,
-					  "+ " .. tostring(math.ceil(health)));
+					  "+ " .. tostring(math.ceil(pdata:GetValue("health"))));
 end

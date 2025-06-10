@@ -6,7 +6,7 @@ local BOUNDS = Vector2.new(0.5,0.5)
 local HEIGHT = 2.3
 local NAME = "E_FleshWizard"
 local NUM_PER_BATCH = 4
-local NUM_BATCHES = 1--8
+local NUM_BATCHES = 8
 local BATCH_DELAY = 4
 
 -- properties

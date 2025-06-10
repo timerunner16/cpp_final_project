@@ -254,8 +254,10 @@ collision_result GameObject::RaycastBox(std::vector<GameObject*> filter, line ra
 			collision_result result = val->RaycastBox(filter, ray);
 			if (result.hit) results.push_back(result);
 		}
-		collision_result result = discrete_line_box(m_box, ray);
-		if (result.hit) results.push_back(result);
+		if (m_box.bound != vec2()) {
+			collision_result result = discrete_line_box(m_box, ray);
+			if (result.hit) results.push_back(result);
+		}
 	}
 	if (results.size() == 0) return collision_result{false, vec2(), vec2(), vec2()};
 

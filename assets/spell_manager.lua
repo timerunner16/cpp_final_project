@@ -40,6 +40,7 @@ local window
 local input
 local resource_manager
 local pdata
+local spawnpoints = {}
 
 local function create_spell()
 	local current_spell = spells[current_spell_i + 1]
@@ -91,6 +92,14 @@ function init()
 end
 
 function process(delta)
+	if (#spawnpoints == 0) then
+		for _,v in pairs(workspace:GetGameObjects()) do
+			if (string.find(v:GetName(), "SP_")) then
+				table.insert(spawnpoints, v)
+			end
+		end
+	end
+
 	player = workspace:GetGameObject("Observer")
 	if (not player) then
 		return
@@ -112,6 +121,7 @@ function process(delta)
 		local endpoint = Vector2.new(endpoint_v3.x, endpoint_v3.z)
 		local filter = {v.object, player}
 		for _,w in pairs(active_spells) do table.insert(filter, w.object) end
+		for _,w in pairs(spawnpoints) do table.insert(filter, w) end
 		local result = v.object:Raycast(origin, endpoint, filter)
 		if (result.Hit) then
 			v.object:QueueFree()
