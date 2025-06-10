@@ -732,7 +732,7 @@ Map::Map(Game* game, std::string mapname) {
 		m_game->GetWorkspace()->CreateGameObject(
 			name, nullptr, scriptname,
 			mesh, mat,
-			Transform{vec3{thing.x/SCALE, thing.height/SCALE, thing.y/SCALE}, vec3{0,M_PI_2+thing.angle/180.0*M_PI,0}, vec3{1,1,1}},
+			Transform{vec3{thing.x/SCALE, thing.height/SCALE, thing.y/SCALE}, vec3{0,M_PI_2-thing.angle/180.0*M_PI,0}, vec3{1,1,1}},
 			vec2{bbx,bby}, height
 		);
 	}
