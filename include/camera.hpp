@@ -9,8 +9,9 @@ public:
 	Camera(Game* game, const Transform& viewpoint, const float& fov);
 
 	void SetTransform(const Transform& transform);
+	void SetFOV(const float& fov);
 
-	float& GetFOV();
+	float GetFOV();
 	Transform& GetTransform();
 
 	glm::mat4 GetViewMatrix() const;

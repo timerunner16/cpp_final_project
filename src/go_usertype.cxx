@@ -38,7 +38,8 @@ void go_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game_o
 
 	sol::usertype<Camera> camera_data_type = lua_state->new_usertype<Camera>(
 		"Camera", sol::no_constructor,
-		"Transform", sol::property(&Camera::GetTransform, &Camera::SetTransform)
+		"Transform", sol::property(&Camera::GetTransform, &Camera::SetTransform),
+		"FOV", sol::property(&Camera::GetFOV, &Camera::SetFOV)
 	);
 
 	

@@ -442,8 +442,8 @@ Map::Map(Game* game, std::string mapname) {
 				else if (tag == "offsety_top") c_sidedef.offsety_top=atoi(value.c_str());
 				else if (tag == "offsetx_bottom") c_sidedef.offsetx_bottom=atoi(value.c_str());
 				else if (tag == "offsety_bottom") c_sidedef.offsety_bottom=atoi(value.c_str());
-				else if (tag == "offsetx_mid") c_sidedef.offsetx_mid=atoi(value.c_str());
-				else if (tag == "offsety_mid") c_sidedef.offsety_mid=atoi(value.c_str());
+				else if (tag == "offsetx") c_sidedef.offsetx_mid=atoi(value.c_str());
+				else if (tag == "offsety") c_sidedef.offsety_mid=atoi(value.c_str());
 				else if (tag == "texturebottom") c_sidedef.texturebottom=value;
 				else if (tag == "texturetop") c_sidedef.texturetop=value;
 				else if (tag == "texturemiddle") c_sidedef.texturemiddle=value;
@@ -566,8 +566,8 @@ Map::Map(Game* game, std::string mapname) {
 
 				float v1u = (float)(current_sidedef.offsetx_mid)/material->GetTexture()->GetWidth();
 				float v2u = (float)(length + current_sidedef.offsetx_mid)/material->GetTexture()->GetWidth();
-				float lowv = (float)(midfloor+current_sidedef.offsety_mid)/material->GetTexture()->GetHeight();
-				float highv = (float)(midceiling+current_sidedef.offsety_mid)/material->GetTexture()->GetHeight();
+				float lowv = (float)(midceiling-midfloor + current_sidedef.offsety_mid)/material->GetTexture()->GetHeight();
+				float highv = (float)(current_sidedef.offsety_mid)/material->GetTexture()->GetHeight();
 				
 				mesh_vertex vertex_data[6] = {
 					{glm::vec3{v1.x/SCALE,midfloor/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,lowv}},
@@ -590,8 +590,8 @@ Map::Map(Game* game, std::string mapname) {
 
 				float v1u = current_sidedef.offsetx_bottom/SCALE;
 				float v2u = length/SCALE + current_sidedef.offsetx_bottom/SCALE;
-				float lowv = (realfloor+current_sidedef.offsety_bottom)/SCALE;
-				float highv = (midfloor+current_sidedef.offsety_bottom)/SCALE;
+				float lowv = (midfloor-realfloor+current_sidedef.offsety_bottom)/SCALE;
+				float highv = (current_sidedef.offsety_bottom)/SCALE;
 
 				mesh_vertex vertex_data[6] = {
 					{glm::vec3{v1.x/SCALE,realfloor/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,lowv}},
@@ -613,8 +613,8 @@ Map::Map(Game* game, std::string mapname) {
 
 				float v1u = alt_sidedef.offsetx_bottom/SCALE;
 				float v2u = length/SCALE + alt_sidedef.offsetx_bottom/SCALE;
-				float lowv = (alt_sector.heightfloor+realfloor+alt_sidedef.offsety_bottom)/SCALE;
-				float highv = (realfloor+alt_sidedef.offsety_bottom)/SCALE;
+				float lowv = (realfloor-alt_sector.heightfloor+realfloor+alt_sidedef.offsety_bottom)/SCALE;
+				float highv = (alt_sidedef.offsety_bottom)/SCALE;
 
 				mesh_vertex vertex_data[6] = {
 					{glm::vec3{v2.x/SCALE,alt_sector.heightfloor/SCALE,v2.y/SCALE},glm::vec3{anorm_x,0.0f,anorm_y},glm::vec2{v2u,lowv}},
@@ -637,8 +637,8 @@ Map::Map(Game* game, std::string mapname) {
 				float v1u = current_sidedef.offsetx_top/SCALE;
 				float v2u = length/SCALE + current_sidedef.offsetx_top/SCALE;
 				
-				float lowv = (midceiling+current_sidedef.offsety_top)/SCALE;
-				float highv = (realceiling+current_sidedef.offsety_top)/SCALE;
+				float lowv = (realceiling-midceiling+current_sidedef.offsety_top)/SCALE;
+				float highv = (current_sidedef.offsety_top)/SCALE;
 
 				mesh_vertex vertex_data[6] = {
 					{glm::vec3{v1.x/SCALE,midceiling/SCALE,v1.y/SCALE},glm::vec3{norm_x,0.0f,norm_y},glm::vec2{v1u,lowv}},
@@ -661,8 +661,8 @@ Map::Map(Game* game, std::string mapname) {
 				float v1u = alt_sidedef.offsetx_top/SCALE;
 				float v2u = length/SCALE + alt_sidedef.offsetx_top/SCALE;
 				
-				float lowv = (realceiling+alt_sidedef.offsety_top)/SCALE;
-				float highv = (alt_sector.heightceiling+alt_sidedef.offsety_top)/SCALE;
+				float lowv = (alt_sector.heightceiling-realceiling+alt_sidedef.offsety_top)/SCALE;
+				float highv = (alt_sidedef.offsety_top)/SCALE;
 
 				mesh_vertex vertex_data[6] = {
 					{glm::vec3{v2.x/SCALE,realceiling/SCALE,v2.y/SCALE},glm::vec3{anorm_x,0.0f,anorm_y},glm::vec2{v2u,lowv}},

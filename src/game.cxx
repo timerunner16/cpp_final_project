@@ -14,7 +14,7 @@ Game::Game(std::string wad_path, int width, int height, int downscale, bool resi
 	m_resource_manager = new ResourceManager(this);
 	m_input_manager = new InputManager(this);
 	m_pdata_manager = new PDataManager();
-	m_map = new Map(this, "MAP01");
+	m_map = new Map(this, "MENU");
 	m_should_shutdown = false;
 	m_swapmap = false;
 

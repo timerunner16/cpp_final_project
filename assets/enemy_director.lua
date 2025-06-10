@@ -14,6 +14,7 @@ local num_created = 0
 local timer = 0
 local num_killed = 0
 local spawnpoints = {}
+local time_since_player_alive = 0
 
 -- object references
 local workspace
@@ -73,6 +74,14 @@ end
 
 function process(delta)
 	timer = timer + delta
+	if (not workspace:GetGameObject("Observer")) then
+		time_since_player_alive = time_since_player_alive + delta
+		if (time_since_player_alive > 5.0) then
+			Engine.ChangeMap("MENU")
+		end
+		return
+	end
+
 	if (#spawnpoints == 0) then
 		for _,v in pairs(workspace:GetGameObjects()) do
 			if (string.find(v:GetName(), "SP_")) then

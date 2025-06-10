@@ -14,11 +14,15 @@ Transform& Camera::GetTransform() {
 	return m_transform;
 }
 
+void Camera::SetFOV(const float& fov) {
+	m_fov = fov;
+}
+
 void Camera::SetTransform(const Transform& transform) {
 	m_transform = transform;
 }
 
-float& Camera::GetFOV() {
+float Camera::GetFOV() {
 	return m_fov;
 }
 
