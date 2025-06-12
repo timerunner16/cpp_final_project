@@ -2,6 +2,7 @@
 local START_INPUT_TEXT = "Press [SPACE] to Begin."
 local CREDIT_INPUT_TEXT = "Press [F] to see Credits."
 local TITLE_INPUT_TEXT = "Press [F] to see Title."
+local HIGHSCORE_TEXT = "High Score: "
 -- properties
 local yaw = 0.0
 local timer = 0.0
@@ -11,6 +12,7 @@ local input
 local window
 local camera
 local resource_manager
+local pdata
 
 local function lerp(a, b, t)
 	return a + (b - a) * t
@@ -22,6 +24,16 @@ function init()
 	camera = Engine.Workspace:GetCamera()
 	resource_manager = Engine.ResourceManager
 	resource_manager:GetMaterial("PPDITHER"):SetUniform(Uniform.new("modulate", Vector4.new(1.0)))
+	pdata = Engine.PDataManager
+	if (pdata:GetValue("score")) then
+		if (pdata:GetValue("highscore") and pdata:GetValue("highscore") < pdata:GetValue("score")) then
+			pdata:SetValue("highscore", pdata:GetValue("score"))
+		end
+	end
+	if (not pdata:GetValue("highscore")) then
+		pdata:SetValue("highscore", 0)
+	end
+	pdata:SetValue("score", 0)
 end
 
 function process(delta)
@@ -49,6 +61,19 @@ function process(delta)
 			math.floor(window.Width/window.Downscale/2)-c_width*4,
 			math.floor(7*window.Height/window.Downscale/8)+4,
 			255, 255, 255, 255, CREDIT_INPUT_TEXT
+		)
+
+		local hs_text_formatted = HIGHSCORE_TEXT .. tostring(pdata:GetValue("highscore"))
+		local h_width = string.len(hs_text_formatted)
+		window:DrawString(
+			math.floor(window.Width/window.Downscale/2)-h_width*4+1,
+			math.floor(window.Height/window.Downscale/8)+5,
+			80, 10, 30, 255, hs_text_formatted
+		)
+		window:DrawString(
+			math.floor(window.Width/window.Downscale/2)-h_width*4,
+			math.floor(window.Height/window.Downscale/8)+4,
+			255, 30, 255, 255, hs_text_formatted
 		)
 
 		if (input:QueryKey(Keys.Space).Pressed) then

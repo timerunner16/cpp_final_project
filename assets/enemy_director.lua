@@ -8,6 +8,7 @@ local NAME = "E_FleshWizard"
 local NUM_PER_BATCH = 4
 local NUM_BATCHES = 8
 local BATCH_DELAY = 4
+local DEAD_TEXT = "You Died!"
 
 -- properties
 local num_created = 0
@@ -18,9 +19,9 @@ local time_since_player_alive = 0
 
 -- object references
 local workspace
+local pdata
 local resource_manager
 local window
-local pdata
 
 function killed()
 	num_killed = num_killed + 1
@@ -76,6 +77,32 @@ function process(delta)
 	timer = timer + delta
 	if (not workspace:GetGameObject("Observer")) then
 		time_since_player_alive = time_since_player_alive + delta
+
+		local d_width = string.len(DEAD_TEXT)
+		window:DrawString(
+			math.floor(window.Width/window.Downscale/2)-d_width*4+1,
+			math.floor(window.Height/window.Downscale/2)-3,
+			80, 80, 80, 255, DEAD_TEXT
+		)
+		window:DrawString(
+			math.floor(window.Width/window.Downscale/2)-d_width*4,
+			math.floor(window.Height/window.Downscale/2)-4,
+			255, 255, 255, 255, DEAD_TEXT
+		)
+
+		local score_text = "SCORE: " .. tostring(pdata:GetValue("score"))
+		local s_width = string.len(score_text)
+		window:DrawString(
+			math.floor(window.Width/window.Downscale/2)-s_width*4+1,
+			math.floor(window.Height/window.Downscale/2)+5,
+			80, 80, 80, 255, score_text
+		)
+		window:DrawString(
+			math.floor(window.Width/window.Downscale/2)-s_width*4,
+			math.floor(window.Height/window.Downscale/2)+4,
+			255, 255, 255, 255, score_text
+		)
+
 		if (time_since_player_alive > 5.0) then
 			Engine.ChangeMap("MENU")
 		end

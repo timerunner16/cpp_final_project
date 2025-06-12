@@ -34,6 +34,7 @@ local friction_mod = 1.0
 
 -- object references
 local workspace
+local pdata
 local current
 local event
 local destroyed
@@ -110,6 +111,8 @@ function takedamage()
 	hit_particle_info.FadeOut = true
 	workspace:CreateParticleSystem(hit_particle_info)
 
+	pdata:SetValue("score", pdata:GetValue("score") + 50)
+
 	if (health <= 0) then
 		local dead_particle_info = ParticleSystemCreateInfo.new()
 		dead_particle_info.Position = current.Transform.Position * 2 + Vector3.new(0,1,0)
@@ -133,6 +136,7 @@ end
 
 function init()
 	workspace = Engine.Workspace
+	pdata = Engine.PDataManager
 	current = Engine.CurrentGameObject
 	event = workspace:CreateEvent("TakeDamage", current)
 	event:Connect("takedamage")
@@ -209,5 +213,6 @@ function process(delta)
 end
 
 function on_destruct()
+	pdata:SetValue("score", pdata:GetValue("score") + 100)
 	destroyed:Fire()
 end
