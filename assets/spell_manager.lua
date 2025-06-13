@@ -9,6 +9,7 @@ local spells = {
 		mesh = "ORB",
 		color = Vector3.new(255,120,20),
 		damage = 60,
+		range = 3,
 		speed = 16,
 		size = 0.2,
 		force = 16.0,
@@ -21,11 +22,25 @@ local spells = {
 		mesh = "ORB",
 		color = Vector3.new(20,120,255),
 		damage = 20,
+		range = 2,
 		speed = 16,
 		size = 0.1,
 		force = 8.0,
 		spread = 3,
 		manacost = 5
+	},
+	{
+		name = "Wind Blast",
+		material = "ORB",
+		mesh = "ORB",
+		color = Vector3.new(200,200,255),
+		damage = 0,
+		range = 3,
+		speed = 10,
+		size = 0.15,
+		force = 60.0,
+		spread = 6,
+		manacost = 10
 	}
 }
 local current_spell_i = 0
@@ -79,6 +94,7 @@ local function create_spell(down)
 		speed = current_spell.speed,
 		damage = current_spell.damage,
 		force = current_spell.force,
+		range = current_spell.range,
 		object = spell,
 		down = down
 	}
@@ -127,9 +143,9 @@ function process(delta)
 	end
 
 	for i,v in pairs(active_spells) do
+		local origin = v.object.Transform.Position
+		local hit = false
 		if (v.down and v.object.Transform.Position.y <= Engine.GetHighestOverlappingSector(v.object).HeightFloor) then
-			local origin = v.object.Transform.Position
-
 			local particle_info = ParticleSystemCreateInfo.new()
 			particle_info.Position = origin * 2
 			particle_info.Direction = Vector3.new(0, 1, 0)
@@ -147,8 +163,9 @@ function process(delta)
 
 			v.object:QueueFree()
 			table.remove(active_spells, i)
+
+			hit = true
 		else
-			local origin = v.object.Transform.Position
 			local endpoint_v3 = origin + v.object.Velocity.unit
 			local endpoint = Vector2.new(endpoint_v3.x, endpoint_v3.z)
 			local filter = {v.object, player}
@@ -174,15 +191,30 @@ function process(delta)
 				particle_info.FadeOut = true
 				workspace:CreateParticleSystem(particle_info)
 
-				if ((result.Instance ~= nil) and (string.find(result.Instance:GetName(), "E_"))) then
-					local event = result.Instance:GetEvent("TakeDamage")
-					local hit = Vector3.new(result.Position.x, origin.y, result.Position.y)
-					event:SetValue("damage", v.damage)
-					event:SetValue("position", hit)
-					event:SetValue("direction", (hit:withY(result.Instance.Transform.Position.y) - result.Instance.Transform.Position).unit)
-					event:SetValue("force", (result.Instance.Transform.Position - hit:withY(result.Instance.Transform.Position.y)).unit * v.force)
-					event:Fire()
+				hit = true
+			end
+		end
+
+		if (hit) then
+			local targets = {}
+			for _,w in pairs(workspace:GetGameObjects()) do
+				if (string.find(w:GetName(), "E_") or string.find(w:GetName(), "Observer")) then
+					if ((v.object.Transform.Position-w.Transform.Position).length < v.range) then
+						table.insert(targets, w)
+					end
 				end
+			end
+			for _,w in pairs(targets) do
+				local distance = (origin-w.Transform.Position:withY(origin.y)).length
+				local impact = math.sqrt(v.range-distance)/math.sqrt(v.range)
+
+				local event = w:GetEvent("TakeDamage")
+				local direction = (origin - w.Transform.Position + Vector3.new(0,w.Height/2,0)).unit
+				event:SetValue("damage", v.damage * impact)
+				event:SetValue("position", origin)
+				event:SetValue("direction", direction)
+				event:SetValue("force", -direction * v.force * impact)
+				event:Fire()
 			end
 		end
 	end

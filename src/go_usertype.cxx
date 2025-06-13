@@ -32,7 +32,8 @@ void go_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game_o
 		"QueueFree", &GameObject::QueueFree,
 		"SetUniform", &GameObject::SetUniform,
 		"RemoveUniform", &GameObject::RemoveUniform,
-		"Visible", sol::property(&GameObject::GetVisible, &GameObject::SetVisible)
+		"Visible", sol::property(&GameObject::GetVisible, &GameObject::SetVisible),
+		"Height", sol::readonly_property(&GameObject::GetHeight)
 	);
 
 
