@@ -42,58 +42,7 @@ Window::Window(Game* game, int width, int height, int downscale, bool resizable)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glGenFramebuffers(1, &m_framebuffer);
-	glGenTextures(1, &m_color);
-	glGenTextures(1, &m_depth);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
-	glBindTexture(GL_TEXTURE_2D, m_color);
-	glTexImage2D(
-		GL_TEXTURE_2D, 0, GL_RGBA,
-		width/downscale, height/downscale,
-		0, GL_RGBA, GL_UNSIGNED_BYTE, NULL
-	);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_color, 0);
-
-	glBindTexture(GL_TEXTURE_2D, m_depth);
-	glTexImage2D(
-			GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-			width/downscale, height/downscale,
-			0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL
-	);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depth, 0);
-
-	glGenFramebuffers(1, &m_text_framebuffer);
-	glGenTextures(1, &m_text_color);
-	glGenTextures(1, &m_text_depth);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, m_text_framebuffer);
-	glBindTexture(GL_TEXTURE_2D, m_text_color);
-	glTexImage2D(
-		GL_TEXTURE_2D, 0, GL_RGBA,
-		width/downscale, height/downscale,
-		0, GL_RGBA, GL_UNSIGNED_BYTE, NULL
-	);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_text_color, 0);
-
-	glBindTexture(GL_TEXTURE_2D, m_text_depth);
-	glTexImage2D(
-			GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-			width/downscale, height/downscale,
-			0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL
-	);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_text_depth, 0);
-	
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glViewport(0,0, width/downscale, height/downscale);
+	Resize(width, height, downscale);
 
 	glGenVertexArrays(1, &m_pp_vao);
 	glBindVertexArray(m_pp_vao);
@@ -393,9 +342,11 @@ void Window::Resize(int width, int height, int downscale) {
 	m_height = height;
 	m_downscale = downscale;
 	
-	glDeleteFramebuffers(1, &m_framebuffer);
-	glDeleteTextures(1, &m_color);
-	glDeleteTextures(1, &m_depth);
+	if (m_framebuffer != 0) {
+		glDeleteFramebuffers(1, &m_framebuffer);
+		glDeleteTextures(1, &m_color);
+		glDeleteTextures(1, &m_depth);
+	}
 
 	glGenFramebuffers(1, &m_framebuffer);
 	glGenTextures(1, &m_color);
@@ -425,9 +376,11 @@ void Window::Resize(int width, int height, int downscale) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glViewport(0,0, width/downscale, height/downscale);
 
-	glDeleteFramebuffers(1, &m_text_framebuffer);
-	glDeleteTextures(1, &m_text_color);
-	glDeleteTextures(1, &m_text_depth);
+	if (m_text_framebuffer != 0) {
+		glDeleteFramebuffers(1, &m_text_framebuffer);
+		glDeleteTextures(1, &m_text_color);
+		glDeleteTextures(1, &m_text_depth);
+	}
 
 	glGenFramebuffers(1, &m_text_framebuffer);
 	glGenTextures(1, &m_text_color);
@@ -446,13 +399,13 @@ void Window::Resize(int width, int height, int downscale) {
 
 	glBindTexture(GL_TEXTURE_2D, m_text_depth);
 	glTexImage2D(
-		GL_TEXTURE_2D, 0, GL_RGBA,
+		GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
 		width/downscale, height/downscale,
-		0, GL_RGBA, GL_UNSIGNED_BYTE, NULL
+		0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL
 	);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_text_depth, 0);
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_text_depth, 0);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glViewport(0,0, width/downscale, height/downscale);
