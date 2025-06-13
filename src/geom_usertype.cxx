@@ -7,6 +7,7 @@
 #include "transform.hpp"
 #include "physics.hpp"
 #include "game_object.hpp"
+#include "map.hpp"
 
 void geom_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game_object) {
 	sol::usertype<vec2> vec2_data_type = lua_state->new_usertype<vec2>(
@@ -194,5 +195,11 @@ void geom_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game
 		"Position", sol::readonly_property(&collision_result::until_blocked),
 		"Normal", sol::readonly_property(&collision_result::hit_normal),
 		"Instance", sol::readonly_property(&collision_result::game_object)
+	);
+
+	sol::usertype<Sector> sector_data_type = lua_state->new_usertype<Sector>(
+		"Sector", sol::no_constructor,
+		"HeightFloor", sol::readonly_property(&Sector::heightfloor),
+		"HeightCeiling", sol::readonly_property(&Sector::heightfloor)
 	);
 }

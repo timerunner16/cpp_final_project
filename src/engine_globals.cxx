@@ -6,6 +6,7 @@
 #include "input.hpp"
 #include "pdata_manager.hpp"
 #include "game_object.hpp"
+#include "map.hpp"
 
 int engine_globals_deny(lua_State* L) {
 	return luaL_error(L, "Can't modify Engine global table.");
@@ -23,6 +24,7 @@ void engine_globals(Game* game, std::shared_ptr<sol::state> lua_state, GameObjec
 	engine_globals_metatable["CurrentGameObject"] = game_object;
 	engine_globals_metatable["Shutdown"] = [game]() -> void {game->SetShutdown(true);};
 	engine_globals_metatable["ChangeMap"] = [game](std::string mapname) -> void {game->ChangeMap(mapname);};
+	engine_globals_metatable["GetHighestOverlappingSector"] = [game](GameObject* game_object) -> std::optional<Sector> {return game->GetMap()->GetHighestOverlappingSector(game_object->GetBox());};
 
 	engine_globals_metatable[sol::meta_function::new_index] = engine_globals_deny;
 	engine_globals_metatable[sol::meta_function::index] = engine_globals_metatable;
