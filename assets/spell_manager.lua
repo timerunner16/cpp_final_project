@@ -9,7 +9,7 @@ local spells = {
 		mesh = "ORB",
 		color = Vector3.new(255,120,20),
 		damage = 60,
-		range = 3,
+		range = 2,
 		speed = 16,
 		size = 0.2,
 		force = 16.0,
@@ -22,7 +22,7 @@ local spells = {
 		mesh = "ORB",
 		color = Vector3.new(20,120,255),
 		damage = 20,
-		range = 2,
+		range = 1,
 		speed = 16,
 		size = 0.1,
 		force = 8.0,
@@ -68,16 +68,18 @@ local function create_spell(down)
 
 	local lookvec = -camera.Transform.LookVector
 
+	local position
 	local direction
 	if (down) then
 		direction = Vector3.new(0, -1, 0)
+		position = camera.Transform.Position
 	else
 		local angle = math.atan(lookvec.z, lookvec.x)
 		angle = -(angle + (math.random() * 2.0 - 1.0) * math.rad(current_spell.spread))
         direction = Vector3.new(math.cos(angle), 0, -math.sin(angle))
+		position = camera.Transform.Position + lookvec * SPAWNOFF
 	end
 
-	local position = camera.Transform.Position + lookvec * SPAWNOFF
 	local scale = Vector3.new(current_spell.size)
 	local transform = Transform.new(position, Vector3.new(), scale)
 	local spell = workspace:CreateGameObject(
@@ -145,6 +147,7 @@ function process(delta)
 	for i,v in pairs(active_spells) do
 		local origin = v.object.Transform.Position
 		local hit = false
+		local main_hit_instance
 		if (v.down and v.object.Transform.Position.y <= Engine.GetHighestOverlappingSector(v.object).HeightFloor) then
 			local particle_info = ParticleSystemCreateInfo.new()
 			particle_info.Position = origin * 2
@@ -192,13 +195,17 @@ function process(delta)
 				workspace:CreateParticleSystem(particle_info)
 
 				hit = true
+
+				if (result.Instance and string.find(result.Instance:GetName(), "E_")) then
+					main_hit_instance = result.Instance
+				end
 			end
 		end
 
 		if (hit) then
 			local targets = {}
 			for _,w in pairs(workspace:GetGameObjects()) do
-				if (string.find(w:GetName(), "E_") or string.find(w:GetName(), "Observer")) then
+				if (main_hit_instance ~= w and string.find(w:GetName(), "E_") or string.find(w:GetName(), "Observer")) then
 					if ((v.object.Transform.Position-w.Transform.Position).length < v.range) then
 						table.insert(targets, w)
 					end
@@ -214,6 +221,16 @@ function process(delta)
 				event:SetValue("position", origin)
 				event:SetValue("direction", direction)
 				event:SetValue("force", -direction * v.force * impact)
+				event:Fire()
+			end
+
+			if (main_hit_instance) then
+				local event = main_hit_instance:GetEvent("TakeDamage")
+				local direction = (origin - main_hit_instance.Transform.Position + Vector3.new(0,main_hit_instance.Height/2,0)).unit
+				event:SetValue("damage", v.damage)
+				event:SetValue("position", origin)
+				event:SetValue("direction", direction)
+				event:SetValue("force", -direction * v.force)
 				event:Fire()
 			end
 		end
