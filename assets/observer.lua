@@ -55,7 +55,10 @@ end
 
 function takedamage()
 	last_hit_time = timer
-	pdata:SetValue("health", pdata:GetValue("health") - event:GetValue("damage"))
+	local health = pdata:GetValue("health")
+	health = health - event:GetValue("damage")
+	if (health > 120) then health = 120 end
+	pdata:SetValue("health", health)
 	add_velocity(event:GetValue("force"))
 end
 

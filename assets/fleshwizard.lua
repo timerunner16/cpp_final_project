@@ -94,6 +94,7 @@ function takedamage()
 	local force = event:GetValue("force")
 	add_velocity(force)
 	health = health - damage
+	if (health > 120) then health = 120 end
 
 	local position = event:GetValue("position")
 	local direction = event:GetValue("direction")

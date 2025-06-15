@@ -41,6 +41,19 @@ local spells = {
 		force = 60.0,
 		spread = 6,
 		manacost = 10
+	},
+	{
+		name = "Heal",
+		material = "ORB",
+		mesh = "ORB",
+		color = Vector3.new(20,120,255),
+		damage = -35,
+		range = 2,
+		speed = 10,
+		size = 0.15,
+		force = 40.0,
+		spread = 5,
+		manacost = 15
 	}
 }
 local current_spell_i = 0
