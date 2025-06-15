@@ -18,6 +18,8 @@ public:
 	float GetTrackPosition();
 	void SetTrackPosition(float position);
 	bool IsFinished();
+	bool GetLooping();
+	void SetLooping(bool looping);
 
 	void Process();
 

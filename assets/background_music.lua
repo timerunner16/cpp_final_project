@@ -1,8 +1,10 @@
--- constants
-local SOUND_NAME = "A_Background_Music"
-local MUSIC_NAME = "BACKGRND"
+-- object references
+local sound
 
-function init()
-	local workspace = Engine.Workspace
-	workspace:CreateAudioInstance(SOUND_NAME, MUSIC_NAME, nil)
+function process(delta)
+	if (not sound) then
+		sound = Engine.Workspace:CreateAudioInstance("BACKGROUND_MUSIC", "BACKGRND", nil)
+		sound.Looping = true
+		sound:Play()
+	end
 end

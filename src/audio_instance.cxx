@@ -102,15 +102,26 @@ bool AudioInstance::IsFinished() {
 }
 
 void AudioInstance::Process() {
-	vec3 position;
 	if (m_parent != nullptr) {
-		position = m_parent->GetGlobalTransform().position;
+		vec3 position = m_parent->GetGlobalTransform().position;
+		alSource3f(m_source, AL_POSITION, position.x, position.y, position.z);
+		alSourcei(m_source, AL_SOURCE_RELATIVE, AL_FALSE);
 	} else {
-		position = m_game->GetWorkspace()->GetCamera()->GetTransform().position;
+		alSource3f(m_source, AL_POSITION, 0, 0, 0);
+		alSourcei(m_source, AL_SOURCE_RELATIVE, AL_TRUE);
 	}
-	alSource3f(m_source, AL_POSITION, position.x, position.y, position.z);
 }
 
 void AudioInstance::SetParent(GameObject* parent) {
 	m_parent = parent;
+}
+
+bool AudioInstance::GetLooping() {
+	ALint looping;
+	alGetSourcei(m_source, AL_LOOPING, &looping);
+	return looping;
+}
+
+void AudioInstance::SetLooping(bool looping) {
+	alSourcei(m_source, AL_LOOPING, looping);
 }

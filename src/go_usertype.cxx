@@ -45,7 +45,8 @@ void go_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game_o
 		"Pause", &AudioInstance::Pause,
 		"Volume", sol::property(&AudioInstance::GetVolume, &AudioInstance::SetVolume),
 		"TrackPosition", sol::property(&AudioInstance::GetTrackPosition, &AudioInstance::SetTrackPosition),
-		"IsFinished", &AudioInstance::IsFinished
+		"IsFinished", &AudioInstance::IsFinished,
+		"Looping", sol::property(&AudioInstance::GetLooping, &AudioInstance::SetLooping)
 	);
 
 
