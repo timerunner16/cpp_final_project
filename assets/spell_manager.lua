@@ -178,7 +178,14 @@ function process(delta)
 			local endpoint = Vector2.new(endpoint_v3.x, endpoint_v3.z)
 			local filter = {v.object, player}
 			for _,w in pairs(active_spells) do table.insert(filter, w.object) end
-			for _,w in pairs(spawnpoints) do table.insert(filter, w) end
+			for _,w in pairs(workspace:GetGameObjects()) do
+				if (string.find(w:GetName(), "SP_")) then table.insert(filter, w) end
+				if (string.find(w:GetName(), "E_")) then
+					if ((w.Transform.Position - origin):dot(v.object.Velocity) < 0) then
+						table.insert(filter, w)
+					end
+				end
+			end
 			local result = v.object:Raycast(origin, endpoint, filter)
 			if (result.Hit) then
 				v.object:QueueFree()
