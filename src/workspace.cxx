@@ -18,8 +18,12 @@ Workspace::~Workspace() {
 }
 
 GameObject* Workspace::CreateGameObject(std::string name, GameObject* parent,
-		std::string script_path, std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
+		std::string script_path, std::optional<std::shared_ptr<Mesh>> opt_mesh, std::optional<std::shared_ptr<Material>> opt_material,
 		const Transform& transform, const vec2& box_bounds, const float& height) {
+	std::shared_ptr<Mesh> mesh = nullptr;
+	std::shared_ptr<Material> material = nullptr;
+	if (opt_mesh.has_value()) mesh = opt_mesh.value();
+	if (opt_material.has_value()) material = opt_material.value();
 	GameObject* game_object = new GameObject(
 		m_game, name, parent,
 		script_path, mesh, material,
