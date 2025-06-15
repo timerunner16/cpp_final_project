@@ -51,7 +51,7 @@ AudioInstance::AudioInstance(std::shared_ptr<AudioSegment> audio_segment, GameOb
 			format = AL_FORMAT_STEREO16;
 		}
 	}
-	alBufferData(m_buffer, format, m_audio_segment->GetAudioBuf(), m_audio_segment->GetAudioLen(), 44100);
+	alBufferData(m_buffer, format, m_audio_segment->GetAudioBuf(), m_audio_segment->GetAudioLen(), m_audio_segment->GetSpec().freq);
 	displayALError(alGetError());
 	
 	alGenSources(1, &m_source);
@@ -92,7 +92,7 @@ float AudioInstance::GetTrackPosition() {
 }
 
 void AudioInstance::SetTrackPosition(float position) {
-	alSourcei(m_source, AL_SAMPLE_OFFSET, (int)(position*44100));
+	alSourcei(m_source, AL_SAMPLE_OFFSET, (int)(position*m_audio_segment->GetSpec().freq));
 }
 
 bool AudioInstance::IsFinished() {
