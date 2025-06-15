@@ -324,5 +324,6 @@ void GameObject::RemoveAudioInstance(std::string name) {
 }
 void GameObject::AddAudioInstance(AudioInstance* audio_instance, std::string name) {
 	if (audio_instance == nullptr) return;
+	audio_instance->SetParent(this);
 	m_audio_instances[name] = audio_instance;
 }

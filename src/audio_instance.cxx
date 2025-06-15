@@ -1,5 +1,8 @@
 #include "audio_instance.hpp"
 #include "audio_segment.hpp"
+#include "game_object.hpp"
+#include "game.hpp"
+#include "workspace.hpp"
 
 //#define MACROPRINT
 #define VERBOSE_DBPRINTF
@@ -27,7 +30,10 @@ void displayALError(ALenum error) {
 	};
 }
 
-AudioInstance::AudioInstance(std::shared_ptr<AudioSegment> audio_segment) {
+AudioInstance::AudioInstance(std::shared_ptr<AudioSegment> audio_segment, GameObject* parent, Game* game) {
+	m_parent = parent;
+	m_game = game;
+
 	m_audio_segment = audio_segment;
 	alGenBuffers(1, &m_buffer);
 	displayALError(alGetError());
@@ -52,6 +58,8 @@ AudioInstance::AudioInstance(std::shared_ptr<AudioSegment> audio_segment) {
 	displayALError(alGetError());
 	alSourcei(m_source, AL_BUFFER, m_buffer);
 	displayALError(alGetError());
+
+	Process();
 }
 
 AudioInstance::~AudioInstance() {
@@ -91,4 +99,18 @@ bool AudioInstance::IsFinished() {
 	ALenum finished;
 	alGetSourcei(m_source, AL_SOURCE_STATE, &finished);
 	return (finished == AL_STOPPED);
+}
+
+void AudioInstance::Process() {
+	vec3 position;
+	if (m_parent != nullptr) {
+		position = m_parent->GetGlobalTransform().position;
+	} else {
+		position = m_game->GetWorkspace()->GetCamera()->GetTransform().position;
+	}
+	alSource3f(m_source, AL_POSITION, position.x, position.y, position.z);
+}
+
+void AudioInstance::SetParent(GameObject* parent) {
+	m_parent = parent;
 }

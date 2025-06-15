@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <cmath>
 #include "workspace.hpp"
+#include "AL/alc.h"
 #include "game.hpp"
 #include "game_object.hpp"
 #include "audio_instance.hpp"
@@ -46,7 +47,7 @@ Event* Workspace::CreateEvent(std::string name, GameObject* parent) {
 
 AudioInstance* Workspace::CreateAudioInstance(std::string name, std::string filename, GameObject* parent) {
 	std::shared_ptr<AudioSegment> audio_segment = m_game->GetResourceManager()->GetAudioSegment(filename);
-	AudioInstance* audio_instance = new AudioInstance(audio_segment);
+	AudioInstance* audio_instance = new AudioInstance(audio_segment, parent, m_game);
 	if (parent == nullptr) m_audio_instances.insert(std::make_pair(name, audio_instance));
 	else parent->AddAudioInstance(audio_instance, name);
 	return audio_instance;
@@ -72,6 +73,19 @@ Camera* Workspace::GetCamera() {return m_camera;}
 
 void Workspace::Process(float delta) {
 	if (m_queued_to_free_all) {FreeAll(); return;}
+
+	alListener3f(AL_POSITION,
+		m_camera->GetTransform().position.x,
+		m_camera->GetTransform().position.y,
+		m_camera->GetTransform().position.z
+	);
+	vec3 lv = m_camera->GetTransform().GetLookVector();
+	vec3 rv = m_camera->GetTransform().GetRightVector();
+	float orientation[] = {
+		lv.x, lv.y, lv.z,
+		rv.x, rv.y, rv.z
+	};
+	alListenerfv(AL_ORIENTATION, orientation);
 
 	for (auto& [key, val] : m_game_objects) {
 		val->Process(delta);
