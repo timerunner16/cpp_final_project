@@ -12,6 +12,7 @@ class Game;
 class Event;
 class Mesh;
 class Material;
+class AudioInstance;
 
 class GameObject {
 public:
@@ -66,6 +67,10 @@ public:
 
 	void SetVisible(bool visible);
 	bool GetVisible();
+
+	AudioInstance* GetAudioInstance(std::string name);
+	void RemoveAudioInstance(std::string name);
+	void AddAudioInstance(AudioInstance* audio_instance, std::string name);
 private:
 	Game* m_game;
 
@@ -87,6 +92,8 @@ private:
 	std::map<std::string, GameObject*> m_children;
 
 	std::map<std::string, Event*> m_events;
+
+	std::map<std::string, AudioInstance*> m_audio_instances;
 
 	bool m_on_floor;
 

@@ -4,15 +4,18 @@
 #include "camera.hpp"
 #include "event.hpp"
 #include "particle_system.hpp"
+#include "audio_instance.hpp"
 
 void wkspc_usertype_setup(std::shared_ptr<sol::state> lua_state) {
 	sol::usertype<Workspace> workspace_data_type = lua_state->new_usertype<Workspace>(
 		"Workspace", sol::no_constructor,
 		"GetGameObject", &Workspace::GetGameObject,
 		"GetGameObjects", &Workspace::GetGameObjects_Lua,
+		"GetAudioInstance", &Workspace::GetAudioInstance,
 		"GetCamera", &Workspace::GetCamera,
 		"CreateGameObject", &Workspace::CreateGameObject,
 		"CreateParticleSystem", &Workspace::CreateParticleSystem,
-		"CreateEvent", &Workspace::CreateEvent
+		"CreateEvent", &Workspace::CreateEvent,
+		"CreateAudioInstance", &Workspace::CreateAudioInstance
 	);
 }

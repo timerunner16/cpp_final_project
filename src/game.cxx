@@ -6,6 +6,7 @@
 #include "input.hpp"
 #include "pdata_manager.hpp"
 #include "map.hpp"
+#include <AL/alc.h>
 
 Game::Game(std::string wad_path, int width, int height, int downscale, bool resizable) {
 	m_wad_path = wad_path;
@@ -17,6 +18,12 @@ Game::Game(std::string wad_path, int width, int height, int downscale, bool resi
 	m_map = new Map(this, "MENU");
 	m_should_shutdown = false;
 	m_swapmap = false;
+
+	ALCdevice* device = alcOpenDevice(NULL);
+	if (device) {
+		ALCcontext* context = alcCreateContext(device, NULL);
+		alcMakeContextCurrent(context);
+	}
 
 	m_time = 0;
 
@@ -50,6 +57,12 @@ Game::~Game() {
 	m_resource_manager = nullptr;
 	m_input_manager = nullptr;
 	m_map = nullptr;
+
+	ALCcontext* context = alcGetCurrentContext();
+	ALCdevice* device = alcGetContextsDevice(context);
+	alcMakeContextCurrent(NULL);
+	alcDestroyContext(context);
+	alcCloseDevice(device);
 }
 
 void Game::Process() {

@@ -3,6 +3,7 @@
 #include "workspace.hpp"
 #include "game.hpp"
 #include "game_object.hpp"
+#include "audio_instance.hpp"
 #include "event.hpp"
 
 Workspace::Workspace(Game* game) {
@@ -39,6 +40,14 @@ Event* Workspace::CreateEvent(std::string name, GameObject* parent) {
 	return event;
 }
 
+AudioInstance* Workspace::CreateAudioInstance(std::string name, std::string filename, GameObject* parent) {
+	std::shared_ptr<AudioSegment> audio_segment = m_game->GetResourceManager()->GetAudioSegment(filename);
+	AudioInstance* audio_instance = new AudioInstance(audio_segment);
+	if (parent == nullptr) m_audio_instances.insert(std::make_pair(name, audio_instance));
+	else parent->AddAudioInstance(audio_instance, name);
+	return audio_instance;
+}
+
 std::map<std::string, GameObject*> Workspace::GetGameObjects() {return m_game_objects;}
 std::vector<ParticleSystem*> Workspace::GetParticleSystems() {return m_particle_systems;}
 sol::as_table_t<std::map<std::string, GameObject*>> Workspace::GetGameObjects_Lua() {
@@ -47,6 +56,11 @@ sol::as_table_t<std::map<std::string, GameObject*>> Workspace::GetGameObjects_Lu
 
 GameObject* Workspace::GetGameObject(std::string name) {
 	if (m_game_objects.contains(name)) return m_game_objects[name];
+	return nullptr;
+}
+
+AudioInstance* Workspace::GetAudioInstance(std::string name) {
+	if (m_audio_instances.contains(name)) return m_audio_instances[name];
 	return nullptr;
 }
 
@@ -92,4 +106,8 @@ void Workspace::FreeAll() {
 		delete val;
 	}
 	m_events.clear();
+	for (auto& [key, val] : m_audio_instances) {
+		delete val;
+	}
+	m_audio_instances.clear();
 }

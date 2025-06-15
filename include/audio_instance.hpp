@@ -11,9 +11,10 @@ public:
 
 	void Play();
 	void Pause();
+	float GetVolume();
 	void SetVolume(float volume);
+	float GetTrackPosition();
 	void SetTrackPosition(float position);
-	float GetPosition();
 	bool IsFinished();
 private:
 	std::shared_ptr<AudioSegment> m_audio_segment;

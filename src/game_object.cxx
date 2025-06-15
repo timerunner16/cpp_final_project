@@ -6,6 +6,7 @@
 #include "map.hpp"
 #include "workspace.hpp"
 #include "event.hpp"
+#include "audio_instance.hpp"
 #include <algorithm>
 
 #define FLOOR_EPSILON 0.005f
@@ -34,6 +35,8 @@ GameObject::GameObject(Game* game, std::string name, GameObject* parent,
 	m_height = height;
 
 	m_events = std::map<std::string, Event*>();
+
+	m_audio_instances = std::map<std::string, AudioInstance*>();
 
 	m_lua_loaded = !script_path.empty();
 	if (!m_lua_loaded) return;
@@ -308,3 +311,18 @@ void GameObject::RemoveUniform(std::string name) {
 void GameObject::SetVisible(bool visible) {m_visible = visible;}
 
 bool GameObject::GetVisible() {return m_visible;}
+
+AudioInstance* GameObject::GetAudioInstance(std::string name) {
+	if (m_audio_instances.contains(name)) return m_audio_instances[name];
+	return nullptr;
+}
+void GameObject::RemoveAudioInstance(std::string name) {
+	if (m_audio_instances.contains(name)) {
+		delete m_audio_instances[name];
+		m_audio_instances.erase(name);
+	}
+}
+void GameObject::AddAudioInstance(AudioInstance* audio_instance, std::string name) {
+	if (audio_instance == nullptr) return;
+	m_audio_instances[name] = audio_instance;
+}

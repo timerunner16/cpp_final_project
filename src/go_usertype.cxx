@@ -12,6 +12,7 @@
 #include "material.hpp"
 #include "camera.hpp"
 #include "event.hpp"
+#include "audio_instance.hpp"
 
 void go_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game_object) {
 	sol::usertype<GameObject> game_object_data_type = lua_state->new_usertype<GameObject>(
@@ -33,7 +34,18 @@ void go_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject* game_o
 		"SetUniform", &GameObject::SetUniform,
 		"RemoveUniform", &GameObject::RemoveUniform,
 		"Visible", sol::property(&GameObject::GetVisible, &GameObject::SetVisible),
-		"Height", sol::readonly_property(&GameObject::GetHeight)
+		"Height", sol::readonly_property(&GameObject::GetHeight),
+		"GetAudioInstance", &GameObject::GetAudioInstance
+	);
+
+
+	sol::usertype<AudioInstance> audio_instance_data_type = lua_state->new_usertype<AudioInstance>(
+		"AudioInstance", sol::no_constructor,
+		"Play", &AudioInstance::Play,
+		"Pause", &AudioInstance::Pause,
+		"Volume", sol::property(&AudioInstance::GetVolume, &AudioInstance::SetVolume),
+		"TrackPosition", sol::property(&AudioInstance::GetTrackPosition, &AudioInstance::SetTrackPosition),
+		"IsFinished", &AudioInstance::IsFinished
 	);
 
 

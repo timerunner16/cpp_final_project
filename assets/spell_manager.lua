@@ -55,6 +55,7 @@ local window
 local input
 local resource_manager
 local pdata
+local sound
 local spawnpoints = {}
 
 local function create_spell(down)
@@ -101,6 +102,9 @@ local function create_spell(down)
 		down = down
 	}
 	table.insert(active_spells, active_spell)
+
+	sound.TrackPosition = 0
+	sound:Play()
 end
 
 function init()
@@ -109,6 +113,7 @@ function init()
 	input = Engine.InputManager
 	resource_manager = Engine.ResourceManager
 	pdata = Engine.PDataManager
+	sound = workspace:CreateAudioInstance("SPELL_FIRE_SOUND", "BANG", nil)
 	if (not pdata:GetValue("mana")) then
 		pdata:SetValue("mana", 100)
 	end

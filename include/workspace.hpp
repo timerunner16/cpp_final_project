@@ -11,6 +11,7 @@ class Event;
 class Mesh;
 class Material;
 class Box;
+class AudioInstance;
 
 class Workspace {
 public:
@@ -22,11 +23,18 @@ public:
 		const Transform& transform, const vec2& box_bounds, const float& height);
 	void CreateParticleSystem(particle_system_create_info info);
 	Event* CreateEvent(std::string name, GameObject* parent);
+	AudioInstance* CreateAudioInstance(std::string name, std::string filename, GameObject* parent);
 
 	std::map<std::string, GameObject*> GetGameObjects();
-	std::vector<ParticleSystem*> GetParticleSystems();
-	GameObject* GetGameObject(std::string name);
 	sol::as_table_t<std::map<std::string, GameObject*>> GetGameObjects_Lua();
+	GameObject* GetGameObject(std::string name);
+	
+	std::vector<ParticleSystem*> GetParticleSystems();
+	
+	AudioInstance* GetAudioInstance(std::string name);
+	
+	std::map<std::string, Event*> GetEvents();
+
 	Camera* GetCamera();
 	
 	void Process(float delta);
@@ -37,6 +45,7 @@ private:
 	std::map<std::string, GameObject*> m_game_objects;
 	std::vector<ParticleSystem*> m_particle_systems; 
 	std::map<std::string, Event*> m_events;
+	std::map<std::string, AudioInstance*> m_audio_instances;
 	Camera* m_camera;
 	bool m_queued_to_free_all;
 };
