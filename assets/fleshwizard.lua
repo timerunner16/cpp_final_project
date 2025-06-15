@@ -38,6 +38,7 @@ local pdata
 local current
 local event
 local destroyed
+local hit_sound
 
 local function friction(delta)
 	local mag = Vector2.new(velocity.x, velocity.z).length
@@ -111,6 +112,9 @@ function takedamage()
 	hit_particle_info.FadeOut = true
 	workspace:CreateParticleSystem(hit_particle_info)
 
+	hit_sound.TrackPosition = 0
+	hit_sound:Play()
+
 	pdata:SetValue("score", pdata:GetValue("score") + 50)
 
 	if (health <= 0) then
@@ -141,6 +145,7 @@ function init()
 	event = workspace:CreateEvent("TakeDamage", current)
 	event:Connect("takedamage")
 	destroyed = workspace:CreateEvent("Destroyed", current)
+	hit_sound = workspace:CreateAudioInstance("HIT_SOUND", "BANG", current)
 end
 
 function process(delta)
@@ -215,4 +220,16 @@ end
 function on_destruct()
 	pdata:SetValue("score", pdata:GetValue("score") + 100)
 	destroyed:Fire()
+
+	-- apparently lua converts sharedptr<ut> nullptr to nil, but not nil to usertype<ut> nullptr?
+	-- so i need to give this a valid mesh+material or it gives me a type error and stops
+	-- thanks lua ilysm
+	local transform = current.Transform
+	transform.Position = transform.Position + Vector3.new(0, current.Height/2, 0)
+	local rm = Engine.ResourceManager
+	workspace:CreateGameObject(
+		"DEATH_SOUND_" .. tostring(math.random(0,2147483647)), nil,
+		"assets/death_sound.lua", rm:GetMesh("ORB"), rm:GetMaterial("ORB"),
+		transform, Vector2.new(), 0
+	)
 end

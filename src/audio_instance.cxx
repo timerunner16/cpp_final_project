@@ -31,7 +31,21 @@ AudioInstance::AudioInstance(std::shared_ptr<AudioSegment> audio_segment) {
 	m_audio_segment = audio_segment;
 	alGenBuffers(1, &m_buffer);
 	displayALError(alGetError());
-	alBufferData(m_buffer, AL_FORMAT_STEREO16, m_audio_segment->GetAudioBuf(), m_audio_segment->GetAudioLen(), 44100);
+	ALenum format;
+	if (audio_segment->GetSpec().channels == 1) {
+		if (SDL_AUDIO_BITSIZE(audio_segment->GetSpec().format) == 8) {
+			format = AL_FORMAT_MONO8;
+		} else {
+			format = AL_FORMAT_MONO16;
+		}
+	} else {
+		if (SDL_AUDIO_BITSIZE(audio_segment->GetSpec().format) == 8) {
+			format = AL_FORMAT_STEREO8;
+		} else {
+			format = AL_FORMAT_STEREO16;
+		}
+	}
+	alBufferData(m_buffer, format, m_audio_segment->GetAudioBuf(), m_audio_segment->GetAudioLen(), 44100);
 	displayALError(alGetError());
 	
 	alGenSources(1, &m_source);

@@ -113,7 +113,7 @@ function init()
 	input = Engine.InputManager
 	resource_manager = Engine.ResourceManager
 	pdata = Engine.PDataManager
-	sound = workspace:CreateAudioInstance("SPELL_FIRE_SOUND", "BANG", nil)
+	sound = workspace:CreateAudioInstance("SPELL_FIRE_SOUND", "WHOOSH", nil)
 	if (not pdata:GetValue("mana")) then
 		pdata:SetValue("mana", 100)
 	end
