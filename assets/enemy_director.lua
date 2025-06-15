@@ -5,12 +5,12 @@ local MATERIAL = "FLESHWZD"
 local BOUNDS = Vector2.new(0.5,0.5)
 local HEIGHT = 2.3
 local NAME = "E_FleshWizard"
-local NUM_PER_BATCH = 4
-local NUM_BATCHES = 8
 local BATCH_DELAY = 4
 local DEAD_TEXT = "You Died!"
 
 -- properties
+local num_per_batch = math.random(2,5)
+local num_batches = math.random(3,7)
 local num_created = 0
 local timer = 0
 local num_killed = 0
@@ -26,7 +26,7 @@ local window
 function killed()
 	num_killed = num_killed + 1
 	pdata:SetValue("mana", pdata:GetValue("mana") + 50)
-	if (num_killed >= NUM_BATCHES * NUM_PER_BATCH) then
+	if (num_killed >= num_batches*num_per_batch) then
 		local exit = workspace:GetGameObject("Exit")
 		exit:GetEvent("OpenExit"):Fire()
 	end
@@ -117,16 +117,16 @@ function process(delta)
 		end
 	end
 
-	if (num_created < NUM_BATCHES*NUM_PER_BATCH and timer > BATCH_DELAY) then
-		for _=1,NUM_PER_BATCH do
+	if (num_created < num_batches*num_per_batch and timer > BATCH_DELAY) then
+		for _=1,num_per_batch do
 			create_enemy()
 		end
 		timer = 0
 	end
 
-	if (num_killed < NUM_BATCHES*NUM_PER_BATCH) then
-		window:DrawString(2,2, 80,80,80,255, tostring(num_killed) .. "/" .. tostring(NUM_BATCHES*NUM_PER_BATCH) .. " vanquished")
-		window:DrawString(1,1, 255,255,255,255, tostring(num_killed) .. "/" .. tostring(NUM_BATCHES*NUM_PER_BATCH) .. " vanquished")
+	if (num_killed < num_batches*num_per_batch) then
+		window:DrawString(2,2, 80,80,80,255, tostring(num_killed) .. "/" .. tostring(num_batches*num_per_batch) .. " vanquished")
+		window:DrawString(1,1, 255,255,255,255, tostring(num_killed) .. "/" .. tostring(num_batches*num_per_batch) .. " vanquished")
 	else
 		window:DrawString(2,2, 80, 10, 10, 255, "The exit is open!")
 		window:DrawString(1,1, 255, 30, 30, 255, "The exit is open!")
