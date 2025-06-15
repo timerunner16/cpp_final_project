@@ -39,6 +39,8 @@ add_executable(
 	src/particle_system.cxx
 	src/event.cxx
 	src/physics.cxx
+	src/audio_segment.cxx
+	src/audio_instance.cxx
 )
 target_include_directories(cpp_final_project PRIVATE include)
 
@@ -77,6 +79,7 @@ add_subdirectory(third_party)
 target_link_libraries(cpp_final_project PRIVATE sol2::sol2)
 target_link_libraries(cpp_final_project PRIVATE glm::glm)
 target_link_libraries(cpp_final_project PRIVATE TrianglePP)
+target_link_libraries(cpp_final_project PRIVATE mojoAL)
 
 
 add_custom_target(
