@@ -8,6 +8,7 @@ class Material;
 class GLTexture;
 class Shader;
 class Mesh;
+class AudioSegment;
 
 class GenericResource {
 public:
@@ -38,10 +39,12 @@ public:
 	std::shared_ptr<GLTexture> GetGLTexture(std::string lumpname);
 	std::shared_ptr<Shader> GetShader(std::string lumpname);
 	std::shared_ptr<Mesh> GetMesh(std::string lumpname);
+	std::shared_ptr<AudioSegment> GetAudioSegment(std::string lumpname);
 private:
 	std::map<std::string, std::shared_ptr<Material>> m_material_map;
 	std::map<std::string, std::shared_ptr<GLTexture>> m_texture_map;
 	std::map<std::string, std::shared_ptr<Shader>> m_shader_map;
 	std::map<std::string, std::shared_ptr<Mesh>> m_mesh_map;
+	std::map<std::string, std::shared_ptr<AudioSegment>> m_segment_map;
 	Game* m_game;
 };

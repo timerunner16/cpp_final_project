@@ -77,6 +77,7 @@ add_subdirectory(third_party)
 target_link_libraries(cpp_final_project PRIVATE sol2::sol2)
 target_link_libraries(cpp_final_project PRIVATE glm::glm)
 target_link_libraries(cpp_final_project PRIVATE TrianglePP)
+target_link_libraries(cpp_final_project PRIVATE mojoAL)
 
 
 add_custom_target(

@@ -6,6 +6,7 @@
 #include "gltexture.hpp"
 #include "shader.hpp"
 #include "mesh.hpp"
+#include "audio_segment.hpp"
 #include "game.hpp"
 #include "parse_wad.hpp"
 #include "util.hpp"
@@ -14,11 +15,13 @@
 
 ResourceManager::ResourceManager(Game* game) {
 	IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
+	SDL_Init(SDL_INIT_AUDIO);
 	m_game = game;
 	m_material_map = std::map<std::string, std::shared_ptr<Material>>();
 	m_texture_map = std::map<std::string, std::shared_ptr<GLTexture>>();
 	m_shader_map = std::map<std::string, std::shared_ptr<Shader>>();
 	m_mesh_map = std::map<std::string, std::shared_ptr<Mesh>>();
+	m_segment_map = std::map<std::string, std::shared_ptr<AudioSegment>>();
 }
 
 ResourceManager::~ResourceManager() {
@@ -26,6 +29,7 @@ ResourceManager::~ResourceManager() {
 	m_texture_map.clear();
 	m_shader_map.clear();
 	m_mesh_map.clear();
+	m_segment_map.clear();
 }
 
 std::shared_ptr<Material> ResourceManager::GetMaterial(std::string lumpname) {
@@ -85,37 +89,43 @@ std::shared_ptr<Mesh> ResourceManager::GetMesh(std::string lumpname) {
 	return m_mesh_map[lumpname];
 }
 
+std::shared_ptr<AudioSegment> ResourceManager::GetAudioSegment(std::string lumpname) {
+	if (m_segment_map.contains(lumpname)) {
+		return m_segment_map[lumpname];
+	}
+	
+	lumpdata data = extract_lump_from_wad(m_game->GetWADPath(), lumpname, "A");
+	if (!data.successful) return nullptr;
+	AudioSegment* resource = new AudioSegment(data.data, data.size);
+	m_segment_map.emplace(std::make_pair(lumpname, resource));
+	delete data.data;
+	return m_segment_map[lumpname];
+}
+
+#define RMAP_UPDATE_TIME(game, map) do {\
+for (auto& [key, val] : map) {\
+	if (val.unique() && !val->GetPersistent()) val->IterateTime(game->GetDelta());\
+	else val->ResetTimeUnused();\
+}\
+} while(0)
+
+#define RMAP_CLEAR_UNUSED(map) do {\
+std::erase_if(map, [](const auto& item) -> bool {\
+	auto const& [key, val] = item;\
+	return (val->GetTimeUnused() >= DECAY_TIME);\
+});\
+} while (0)
+
 void ResourceManager::ClearUnusedResources() {
-	for (auto& [key, val] : m_material_map) {
-		if (val.unique() && !val->GetPersistent()) val->IterateTime(m_game->GetDelta());
-		else val->ResetTimeUnused();
-	}
-	for (auto& [key, val] : m_texture_map) {
-		if (val.unique() && !val->GetPersistent()) val->IterateTime(m_game->GetDelta());
-		else val->ResetTimeUnused();
-	}
-	for (auto& [key, val] : m_shader_map) {
-		if (val.unique() && !val->GetPersistent()) val->IterateTime(m_game->GetDelta());
-		else val->ResetTimeUnused();
-	}
-	for (auto& [key, val] : m_mesh_map) {
-		if (val.unique() && !val->GetPersistent()) val->IterateTime(m_game->GetDelta());
-		else val->ResetTimeUnused();
-	}
-	std::erase_if(m_material_map, [](const auto& item) -> bool {
-		auto const& [key, val] = item;
-		return (val->GetTimeUnused() >= DECAY_TIME);
-	});
-	std::erase_if(m_texture_map, [](const auto& item) -> bool {
-		auto const& [key, val] = item;
-		return (val->GetTimeUnused() >= DECAY_TIME);
-	});
-	std::erase_if(m_shader_map, [](const auto& item) -> bool {
-		auto const& [key, val] = item;
-		return (val->GetTimeUnused() >= DECAY_TIME);
-	});
-	std::erase_if(m_mesh_map, [](const auto& item) -> bool {
-		auto const& [key, val] = item;
-		return (val->GetTimeUnused() >= DECAY_TIME);
-	});
+	RMAP_UPDATE_TIME(m_game, m_material_map);
+	RMAP_UPDATE_TIME(m_game, m_texture_map);
+	RMAP_UPDATE_TIME(m_game, m_shader_map);
+	RMAP_UPDATE_TIME(m_game, m_mesh_map);
+	RMAP_UPDATE_TIME(m_game, m_segment_map);
+
+	RMAP_CLEAR_UNUSED(m_material_map);
+	RMAP_CLEAR_UNUSED(m_texture_map);
+	RMAP_CLEAR_UNUSED(m_shader_map);
+	RMAP_CLEAR_UNUSED(m_mesh_map);
+	RMAP_CLEAR_UNUSED(m_segment_map);
 }
