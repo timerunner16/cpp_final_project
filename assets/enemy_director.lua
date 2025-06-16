@@ -41,16 +41,19 @@ local function create_enemy()
 	local name = random_name()
 
 	local spawnpoint = spawnpoints[math.random(#spawnpoints)]
+	local audio_instance = spawnpoint:GetAudioInstance("SPAWN_SOUND")
+	audio_instance.TrackPosition = 0
+	audio_instance:Play()
 
 	local new = workspace:CreateGameObject(
 		name, nil,
 		SCRIPT, resource_manager:GetMesh(MESH), resource_manager:GetMaterial(MATERIAL),
-		spawnpoint, BOUNDS, HEIGHT
+		spawnpoint.Transform, BOUNDS, HEIGHT
 	)
 	new:GetEvent("Destroyed"):Connect("killed")
 
 	local particle_info = ParticleSystemCreateInfo.new()
-	particle_info.Position = spawnpoint.Position * 2
+	particle_info.Position = spawnpoint.Transform.Position * 2
 	particle_info.Direction = Vector3.new(0,1,0)
 	particle_info.Size = Vector2.new(0.2, 0.2)
 	particle_info.Lifetime = 0.8
@@ -112,7 +115,8 @@ function process(delta)
 	if (#spawnpoints == 0) then
 		for _,v in pairs(workspace:GetGameObjects()) do
 			if (string.find(v:GetName(), "SP_")) then
-				table.insert(spawnpoints, v.Transform)
+				table.insert(spawnpoints, v)
+				workspace:CreateAudioInstance("SPAWN_SOUND", "SPAWN", v)
 			end
 		end
 	end

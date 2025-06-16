@@ -39,6 +39,7 @@ local current
 local event
 local destroyed
 local hit_sound
+local lunge_sound
 
 local function friction(delta)
 	local mag = Vector2.new(velocity.x, velocity.z).length
@@ -147,6 +148,7 @@ function init()
 	event:Connect("takedamage")
 	destroyed = workspace:CreateEvent("Destroyed", current)
 	hit_sound = workspace:CreateAudioInstance("HIT_SOUND", "BANG", current)
+	lunge_sound = workspace:CreateAudioInstance("LUNGE_SOUND", "LUNGE", current)
 end
 
 function process(delta)
@@ -183,6 +185,8 @@ function process(delta)
 			state = STATES.LUNGING
 			state_timer = 0
 			hit_player_in_lunge = false
+			lunge_sound.TrackPosition = 0
+			lunge_sound:Play()
 		end
 	elseif (state == STATES.LUNGING) then
 		friction_mod = 0.35

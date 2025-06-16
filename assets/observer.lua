@@ -33,6 +33,7 @@ local resource_manager
 local window
 local pdata
 local event
+local hit_sound
 
 local function friction(delta)
 	local mag = Vector2.new(velocity.x, velocity.z).length
@@ -60,6 +61,8 @@ function takedamage()
 	if (health > 120) then health = 120 end
 	pdata:SetValue("health", health)
 	add_velocity(event:GetValue("force"))
+	hit_sound.TrackPosition = 0
+	hit_sound:Play()
 end
 
 function init()
@@ -72,6 +75,7 @@ function init()
 	pdata = Engine.PDataManager
 	event = workspace:CreateEvent("TakeDamage", current)
 	event:Connect("takedamage")
+	hit_sound = workspace:CreateAudioInstance("PLAYER_HIT_SOUND", "HURT", nil)
 
 	if (not pdata:GetValue("health") or pdata:GetValue("health") <= 0) then
 		pdata:SetValue("health", 100)
