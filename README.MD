@@ -5,8 +5,8 @@ This list will be updated as the project continues.
 
 First, on the technical side:
 - SDL2-based core
-- OpenGL based renderer
-- OpenAL based audio
+- OpenGL based renderer with GLEW for access
+- OpenAL based audio with mojoAL for implementation
 - Lua embedded into the engine for game scripting with sol2 for integration
 
 Second, on the game side:
@@ -77,6 +77,13 @@ The `Event` class will handle:
 and will include:
 - a map of stored values
 
+The `AudioInstance` class will handle:
+- playing of audio tracks
+- 3d positioning
+- track position and volume control
+and will include:
+- a reference to an AudioSegment
+
 The `Camera` class will handle:
 - constructing a view projection matrix from its values
 and will include:
@@ -115,6 +122,11 @@ The `Uniform` class will include:
 - a name
 - a data type (INT, VEC3, etc.)
 - data matching the data type
+
+The `AudioSegment` class will handle:
+- processing a .WAV file into SDL audio
+and will include:
+- a buffer, audio spec, and audio length in samples
 
 The `vec2` class will include:
 - float `x` and `y` values
