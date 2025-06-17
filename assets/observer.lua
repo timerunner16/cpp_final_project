@@ -149,6 +149,10 @@ function process(delta)
 		add_velocity(new_velocity)
 	end
 
+	if (current:IsOnCeiling() and velocity.y > 0) then
+		velocity.y = -velocity.y * 0.9
+	end
+
 	current.Velocity = velocity
 
 	x = x + (input_vector.x - x) * delta * LEANSPEED

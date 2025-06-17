@@ -54,6 +54,7 @@ public:
 	void AddEvent(Event* event, std::string name);
 	
 	bool IsOnFloor();
+	bool IsOnCeiling();
 
 	collision_result Raycast(vec3 origin, vec2 endpoint, std::vector<GameObject*> filter);
 	collision_result RaycastBox(std::vector<GameObject*> filter, line l);
@@ -96,6 +97,7 @@ private:
 	std::map<std::string, AudioInstance*> m_audio_instances;
 
 	bool m_on_floor;
+	bool m_on_ceiling;
 
 	bool m_queued_for_freedom;
 

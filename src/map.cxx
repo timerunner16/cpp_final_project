@@ -804,7 +804,7 @@ std::vector<line> Map::GetLines() {
 	return m_lines;
 }
 
-std::optional<Sector> Map::GetHighestOverlappingSector(Box& box) {
+std::optional<Sector> Map::GetHighestFloorOverlapping(Box& box) {
 	if (m_sectors.size() == 0) return std::optional<Sector>();
 	Sector highest = m_sectors[0];
 	for (Sector sector : m_sectors) {
@@ -816,4 +816,18 @@ std::optional<Sector> Map::GetHighestOverlappingSector(Box& box) {
 		if (overlapping) highest = sector;
 	}
 	return highest;
+}
+
+std::optional<Sector> Map::GetLowestCeilingOverlapping(Box& box) {
+	if (m_sectors.size() == 0) return std::optional<Sector>();
+	Sector lowest = m_sectors[0];
+	for (Sector sector : m_sectors) {
+		if (sector.heightceiling < lowest.heightceiling) continue;
+		bool overlapping = false;
+		for (triangle t : sector.triangles) {
+			if (overlap_box_triangle(box, t)) {overlapping = true; break;}
+		}
+		if (overlapping) lowest = sector;
+	}
+	return lowest;
 }

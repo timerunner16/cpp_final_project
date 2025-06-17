@@ -33,7 +33,8 @@ public:
 
 	std::vector<line> GetLines();
 	std::vector<MapSegmentRenderData> GetMapSegments();
-	std::optional<Sector> GetHighestOverlappingSector(Box& box);
+	std::optional<Sector> GetHighestFloorOverlapping(Box& box);
+	std::optional<Sector> GetLowestCeilingOverlapping(Box& box);
 private:
 	std::vector<MapSegmentRenderData> m_map_segments;
 	std::vector<line> m_lines;

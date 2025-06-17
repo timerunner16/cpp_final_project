@@ -110,11 +110,17 @@ void GameObject::Process(float delta) {
 	m_transform.position.z += in_velocity.y;
 	m_box.center = vec2{m_transform.position.x, m_transform.position.z};
 
-	std::optional<Sector> highest_sector = m_game->GetMap()->GetHighestOverlappingSector(m_box);
-	if (highest_sector.has_value()) {
-		if (m_transform.position.y < highest_sector->heightfloor) m_transform.position.y = highest_sector->heightfloor;
-		if (abs(m_transform.position.y-highest_sector->heightfloor) < FLOOR_EPSILON) m_on_floor = true;
+	std::optional<Sector> highest_floor_sector = m_game->GetMap()->GetHighestFloorOverlapping(m_box);
+	if (highest_floor_sector.has_value()) {
+		if (m_transform.position.y < highest_floor_sector->heightfloor) m_transform.position.y = highest_floor_sector->heightfloor;
+		if (abs(m_transform.position.y-highest_floor_sector->heightfloor) < FLOOR_EPSILON) m_on_floor = true;
 		else m_on_floor = false;
+	}
+	std::optional<Sector> lowest_ceiling_sector = m_game->GetMap()->GetHighestFloorOverlapping(m_box);
+	if (lowest_ceiling_sector.has_value()) {
+		if (m_transform.position.y + m_height > lowest_ceiling_sector->heightceiling) m_transform.position.y = lowest_ceiling_sector->heightceiling-m_height;
+		if (abs(m_transform.position.y+m_height-lowest_ceiling_sector->heightceiling) < FLOOR_EPSILON) m_on_ceiling = true;
+		else m_on_ceiling = false;
 	}
 
 	for (auto& [key, val] : m_children) {val->Process(delta);}
@@ -217,6 +223,7 @@ void GameObject::AddEvent(Event* event, std::string name) {
 }
 
 bool GameObject::IsOnFloor() {return m_on_floor;}
+bool GameObject::IsOnCeiling() {return m_on_ceiling;}
 
 collision_result GameObject::Raycast(vec3 origin, vec2 endpoint, std::vector<GameObject*> filter) {
 	std::vector<collision_result> results(0);

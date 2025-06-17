@@ -166,7 +166,7 @@ function process(delta)
 		local origin = v.object.Transform.Position
 		local hit = false
 		local main_hit_instance
-		if (v.down and v.object.Transform.Position.y <= Engine.GetHighestOverlappingSector(v.object).HeightFloor) then
+		if (v.down and v.object.Transform.Position.y <= Engine.GetHighestFloorOverlapping(v.object).HeightFloor) then
 			local particle_info = ParticleSystemCreateInfo.new()
 			particle_info.Position = origin * 2
 			particle_info.Direction = Vector3.new(0, 1, 0)
