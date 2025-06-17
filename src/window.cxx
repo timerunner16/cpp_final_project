@@ -9,6 +9,7 @@
 #include "particle_system.hpp"
 #include "shader.hpp"
 #include "builtin_text_shader.h"
+#include "builtin_pp_shader.h"
 #include "gltexture.hpp"
 #include "engine_font.hpp"
 
@@ -71,15 +72,23 @@ Window::Window(Game* game, int width, int height, int downscale, bool resizable)
 
 	m_text_texture = new GLTexture((uint8_t*)__engine_font, __engine_font_len, BMP);
 
+	m_default_pp_shader = new Shader((uint8_t*)pp_shader_source.c_str(), pp_shader_source.size());
+
 	m_width = width;
 	m_height = height;
 	m_downscale = downscale;
 }
 
 Window::~Window() {
+	delete m_text_shader;
+	delete m_text_texture;
+	delete m_default_pp_shader;
 	SDL_DestroyWindow(m_window);
 	m_game = nullptr;
 	m_window = nullptr;
+	m_text_shader = nullptr;
+	m_text_texture = nullptr;
+	m_default_pp_shader = nullptr;
 }
 
 void Window::Clear() {
@@ -305,35 +314,35 @@ void Window::Present(std::shared_ptr<Material> pp_material) {
 	glViewport(0,0,m_width,m_height);
 	glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glDisable(GL_DEPTH_TEST);
 	
-	if (pp_material == NULL) {
-		glBlitNamedFramebuffer(m_framebuffer, 0,
-			0, 0, m_width/m_downscale, m_height/m_downscale,
-			0, 0, m_width, m_height,
-			GL_COLOR_BUFFER_BIT,
-			GL_NEAREST
-		);
-		glBlitNamedFramebuffer(m_text_framebuffer, 0,
-			0, 0, m_width/m_downscale, m_height/m_downscale,
-			0, 0, m_width, m_height,
-			GL_COLOR_BUFFER_BIT,
-			GL_NEAREST
-		);
-	} else {
-		glDisable(GL_DEPTH_TEST);
+	glBindVertexArray(m_pp_vao);
+	
+	if (pp_material == nullptr) {
+		glUseProgram(m_default_pp_shader->GetProgramID());
 		
-		glBindVertexArray(m_pp_vao);
-		pp_material->Bind(m_game);
 		glBindTexture(GL_TEXTURE_2D, m_color);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		
+	
 		glBindTexture(GL_TEXTURE_2D, m_text_color);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+	} else {
+		pp_material->Bind(m_game);
+		
+		glBindTexture(GL_TEXTURE_2D, m_color);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	
+		glUseProgram(m_default_pp_shader->GetProgramID());
 
-		glEnable(GL_DEPTH_TEST);
-		glBindVertexArray(0);
-		glUseProgram(0);
+		glBindTexture(GL_TEXTURE_2D, m_text_color);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
+
+	glEnable(GL_DEPTH_TEST);
+	glBindVertexArray(0);
+	glUseProgram(0);
+
 	SDL_GL_SwapWindow(m_window);
 }
 

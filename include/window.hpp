@@ -41,6 +41,7 @@ private:
 	GLuint m_text_vbo;
 	GLTexture* m_text_texture;
 	Shader* m_text_shader;
+	Shader* m_default_pp_shader;
 
 	int m_width, m_height, m_downscale;
 	bool m_wireframe;
