@@ -79,6 +79,7 @@ function init()
 
 	if (not pdata:GetValue("health") or pdata:GetValue("health") <= 0) then
 		pdata:SetValue("health", 100)
+		pdata:SetValue("mana", 100)
 	end
 
 	camera.Transform.Rotation = Vector3.new(0, current.Transform.Rotation.y, 0)
