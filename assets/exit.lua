@@ -1,7 +1,8 @@
 -- constants
 local AVAILABLE_MAPS = {
 	"MAP01",
-	"MAP02"
+	"MAP02",
+	"MAP03"
 }
 local PROXIMITY = 1.5
 

@@ -3,6 +3,11 @@ local START_INPUT_TEXT = "Press [SPACE] to Begin."
 local CREDIT_INPUT_TEXT = "Press [F] to see Credits."
 local TITLE_INPUT_TEXT = "Press [F] to see Title."
 local HIGHSCORE_TEXT = "High Score: "
+local AVAILABLE_MAPS = {
+	"MAP01",
+	"MAP02",
+	"MAP03"
+}
 -- properties
 local yaw = 0.0
 local timer = 0.0
@@ -77,7 +82,7 @@ function process(delta)
 		)
 
 		if (input:QueryKey(Keys.Space).Pressed) then
-			Engine.ChangeMap("MAP01")
+			Engine.ChangeMap(AVAILABLE_MAPS[math.random(#AVAILABLE_MAPS)])
 		end
 	else
 		local t_width = string.len(TITLE_INPUT_TEXT)
