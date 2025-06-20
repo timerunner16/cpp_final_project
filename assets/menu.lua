@@ -6,7 +6,8 @@ local HIGHSCORE_TEXT = "High Score: "
 local AVAILABLE_MAPS = {
 	"MAP01",
 	"MAP02",
-	"MAP03"
+	"MAP03",
+	"MAP04",
 }
 -- properties
 local yaw = 0.0

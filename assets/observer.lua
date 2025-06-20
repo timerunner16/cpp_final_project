@@ -23,6 +23,7 @@ local wireframe = false
 local coyote_time = 0.0
 local input_buffer = 0.0
 local last_hit_time = -DAMAGE_FLASH_TIME
+local killheight = -10.0
 
 -- object references
 local current
@@ -91,6 +92,15 @@ function process(delta)
 	coyote_time = coyote_time - delta
 
 	timer = timer + delta
+
+	if (workspace:GetGameObject("KILLHEIGHT")) then
+		killheight = workspace:GetGameObject("KILLHEIGHT").Transform.Position.y
+	end
+
+	if (current.Transform.Position.y <= killheight) then
+		print("under kill height", killheight, current.Transform.Position.y)
+		pdata:SetValue("health", 0)
+	end
 
 	if (input:SomethingPressed()) then input:SetMouseCaptured(true) end
 

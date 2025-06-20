@@ -776,6 +776,13 @@ Map::Map(Game* game, std::string mapname) {
 		}
 		float height = 0;
 		if (!heightvalue.empty()) height = atof(heightvalue.c_str());
+		Box box {vec2{bbx, bby}, vec2{thing.x/SCALE, thing.y/SCALE}};
+		std::optional<Sector> highest_floor_sector = GetHighestFloorOverlapping(box);
+		if (highest_floor_sector.has_value()) {
+			printf("%f -> ", thing.height);
+			thing.height += highest_floor_sector->heightfloor * SCALE;
+			printf("%f\n", thing.height);
+		}
 		m_game->GetWorkspace()->CreateGameObject(
 			name, nullptr, scriptname,
 			mesh, mat,
@@ -806,28 +813,36 @@ std::vector<line> Map::GetLines() {
 
 std::optional<Sector> Map::GetHighestFloorOverlapping(Box& box) {
 	if (m_sectors.size() == 0) return std::optional<Sector>();
+	float height = -FLT_MAX;
 	Sector highest = m_sectors[0];
 	for (Sector sector : m_sectors) {
-		if (sector.heightfloor < highest.heightfloor) continue;
+		if (sector.heightfloor < height) continue;
 		bool overlapping = false;
 		for (triangle t : sector.triangles) {
 			if (overlap_box_triangle(box, t)) {overlapping = true; break;}
 		}
-		if (overlapping) highest = sector;
+		if (overlapping) {
+			highest = sector;
+			height = sector.heightfloor;
+		}
 	}
 	return highest;
 }
 
 std::optional<Sector> Map::GetLowestCeilingOverlapping(Box& box) {
 	if (m_sectors.size() == 0) return std::optional<Sector>();
+	float height = FLT_MAX;
 	Sector lowest = m_sectors[0];
 	for (Sector sector : m_sectors) {
-		if (sector.heightceiling < lowest.heightceiling) continue;
+		if (sector.heightceiling > height) continue;
 		bool overlapping = false;
 		for (triangle t : sector.triangles) {
 			if (overlap_box_triangle(box, t)) {overlapping = true; break;}
 		}
-		if (overlapping) lowest = sector;
+		if (overlapping) {
+			lowest = sector;
+			height = sector.heightceiling;
+		}
 	}
 	return lowest;
 }
