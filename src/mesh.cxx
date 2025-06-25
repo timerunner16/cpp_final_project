@@ -105,7 +105,7 @@ Mesh::Mesh(std::vector<std::string> mesh_source) {
 	
 	mesh_vertex* vertex_data = new mesh_vertex[indices.size()];
 	GLuint* index_data = new GLuint[indices.size()];
-	m_num_indices = indices.size();
+	m_num_indices = (GLuint)indices.size();
 
 	for (unsigned int i = 0; i < indices.size(); i++) {
 		auto index = std::next(indices.begin(), i);

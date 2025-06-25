@@ -1,7 +1,6 @@
 #pragma once
 #include <SDL.h>
-#include <GL/glew.h>
-#include <GL/glu.h>
+#include "glcommon.hpp"
 #include <memory>
 #include "camera.hpp"
 
@@ -44,5 +43,5 @@ private:
 	Shader* m_default_pp_shader;
 
 	int m_width, m_height, m_downscale;
-	bool m_wireframe;
+	bool m_wireframe=false;
 };

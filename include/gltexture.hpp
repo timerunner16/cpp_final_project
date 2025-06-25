@@ -1,6 +1,5 @@
 #include "resource_manager.hpp"
-#include <GL/glew.h>
-#include <GL/glu.h>
+#include "glcommon.hpp"
 
 enum IMAGE_FORMAT {
 	PNG,

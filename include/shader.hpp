@@ -1,6 +1,5 @@
 #pragma once
-#include <GL/glew.h>
-#include <GL/glu.h>
+#include "glcommon.hpp"
 #include <glm/ext.hpp>
 #include <string>
 #include "resource_manager.hpp"

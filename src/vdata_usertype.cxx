@@ -17,28 +17,28 @@ void vdata_usertype_setup(std::shared_ptr<sol::state> lua_state, GameObject *gam
 		"Uniform",
 		sol::factories(
 			[](const std::string& name, const bool& data) {
-				return std::make_shared<Uniform>(name, BOOL, (void*)(&data));
+				return std::make_shared<Uniform>(name, UN_BOOL, (void*)(&data));
 			},
 			[](const std::string& name, const int& data) {
-				return std::make_shared<Uniform>(name, INT, (void*)(&data));
+				return std::make_shared<Uniform>(name, UN_INT, (void*)(&data));
 			},
 			[](const std::string& name, const float& data) {
-				return std::make_shared<Uniform>(name, FLOAT, (void*)(&data));
+				return std::make_shared<Uniform>(name, UN_FLOAT, (void*)(&data));
 			},
 			[](const std::string& name, const vec2& data) {
-				return std::make_shared<Uniform>(name, VEC2, (void*)(&data));
+				return std::make_shared<Uniform>(name, UN_VEC2, (void*)(&data));
 			},
 			[](const std::string& name, const vec3& data) {
-				return std::make_shared<Uniform>(name, VEC3, (void*)(&data));
+				return std::make_shared<Uniform>(name, UN_VEC3, (void*)(&data));
 			},
 			[](const std::string& name, const vec4& data) {
-				return std::make_shared<Uniform>(name, VEC4, (void*)(&data));
+				return std::make_shared<Uniform>(name, UN_VEC4, (void*)(&data));
 			},
 			[](const std::string& name, const ivec2& data) {
-				return std::make_shared<Uniform>(name, IVEC2, (void*)(&data));
+				return std::make_shared<Uniform>(name, UN_IVEC2, (void*)(&data));
 			},
 			[](const std::string& name, const ivec3& data) {
-				return std::make_shared<Uniform>(name, IVEC3, (void*)(&data));
+				return std::make_shared<Uniform>(name, UN_IVEC3, (void*)(&data));
 			}
 		)
 	);

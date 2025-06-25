@@ -155,16 +155,10 @@ Tested on Ubuntu 24.04 LTS:
 5. Build the project
 `cmake --build .`
 
-### Windows (MSYS2 MINGW64)
-Tested on Windows 11 w/ MSYS2 MINGW64
+### Windows (Visual Studio + vcpkg)
+Tested on Windows 11 w/ Visual Studio 2022 v17.14.7
 
-1. Install build requirements
-`pacman -S git mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-make mingw-w64-x86_64-ninja mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_image mingw-w64-x86_64-glew mingw-w64-x86_64-lua`
-2. Clone the repository
-`git clone https://github.com/timerunner16/cpp_final_project --recursive`
-3. Prepare build directory
-`mkdir cpp_final_project/build && cd cpp_final_project/build`
-4. Create build files
-`cmake <OPTIONS> ..`
-5. Build the project
-`cmake --build .`
+1. Open Visual Studio 2022
+2. Clone repo through dashboard
+3. Generate CMake files
+4. Build/run cpp_final_project.exe target

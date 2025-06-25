@@ -185,7 +185,7 @@ void addmapsegment(std::vector<MapSegmentRenderData>& map_segments, mesh_vertex*
 
 struct vertexloop_t {
 	std::vector<tri_vertex> vertices;
-	float area;
+	float area=0;
 
 	bool operator<(const vertexloop_t& obj) const {return area < obj.area;}
 };
@@ -201,10 +201,10 @@ std::vector<tri_triangle> edges_to_faces(std::vector<tri_edge> edges) {
 		char c1[24];
 		char c2[24];
 		char c3[24];
-		sprintf(c0, "%zu", std::hash<float>()(i.v0.x));
-		sprintf(c1, "%zu", std::hash<float>()(i.v0.y));
-		sprintf(c2, "%zu", std::hash<float>()(i.v1.x));
-		sprintf(c3, "%zu", std::hash<float>()(i.v1.y));
+		sprintf_s(c0, "%zu", std::hash<float>()(i.v0.x));
+		sprintf_s(c1, "%zu", std::hash<float>()(i.v0.y));
+		sprintf_s(c2, "%zu", std::hash<float>()(i.v1.x));
+		sprintf_s(c3, "%zu", std::hash<float>()(i.v1.y));
 		check += std::string(c0) + std::string(c1) + std::string(c2) + std::string(c3);
 	}
 	DBPRINTF("edge hash: %zu\n", std::hash<std::string>()(check));
@@ -288,10 +288,14 @@ std::vector<tri_triangle> edges_to_faces(std::vector<tri_edge> edges) {
 			if (v3 < 0) fit.Apex(&p3);
 			else p3 = points[v3];
 
-			tri_triangle triangle(tri_vertex(p1[0],p1[1]), tri_vertex(p2[0],p2[1]), tri_vertex(p3[0],p3[1]));
-			float p01 = sqrt(pow(triangle.v1.x-triangle.v0.x, 2.0) + pow(triangle.v1.y-triangle.v0.y, 2.0));
-			float p12 = sqrt(pow(triangle.v2.x-triangle.v1.x, 2.0) + pow(triangle.v2.y-triangle.v1.y, 2.0));
-			float p02 = sqrt(pow(triangle.v2.x-triangle.v0.x, 2.0) + pow(triangle.v2.y-triangle.v0.y, 2.0));
+			tri_triangle triangle(
+				tri_vertex((float)p1[0], (float)p1[1]),
+				tri_vertex((float)p2[0], (float)p2[1]),
+				tri_vertex((float)p3[0], (float)p3[1])
+			);
+			float p01 = (float)sqrt(pow(triangle.v1.x-triangle.v0.x, 2.0) + pow(triangle.v1.y-triangle.v0.y, 2.0));
+			float p12 = (float)sqrt(pow(triangle.v2.x-triangle.v1.x, 2.0) + pow(triangle.v2.y-triangle.v1.y, 2.0));
+			float p02 = (float)sqrt(pow(triangle.v2.x-triangle.v0.x, 2.0) + pow(triangle.v2.y-triangle.v0.y, 2.0));
 			float semiperimeter = (p01+p12+p02)/2;
 			area += sqrt(semiperimeter * (semiperimeter - p01) * (semiperimeter - p12) * (semiperimeter - p02));
 		}
@@ -317,9 +321,9 @@ std::vector<tri_triangle> edges_to_faces(std::vector<tri_edge> edges) {
 		
 		for (size_t j = 0; j < vertexloop.vertices.size(); j++) {
 			points.push_back(Delaunay::Point{vertexloop.vertices[j].x, vertexloop.vertices[j].y});
-			segments.push_back(offset+j);
-			if (j == vertexloop.vertices.size()-1) segments.push_back(offset);
-			else segments.push_back(offset+j+1);
+			segments.push_back((int)(offset+j));
+			if (j == vertexloop.vertices.size()-1) segments.push_back((int)offset);
+			else segments.push_back((int)(offset+j+1));
 		}
 		offset += vertexloop.vertices.size();
 	}
@@ -349,7 +353,11 @@ std::vector<tri_triangle> edges_to_faces(std::vector<tri_edge> edges) {
 			p2 = temp;
 		}
 
-		output.push_back(tri_triangle(tri_vertex(p1[0],p1[1]),tri_vertex(p2[0],p2[1]),tri_vertex(p3[0],p3[1])));
+		output.push_back(tri_triangle(
+			tri_vertex((float)p1[0], (float)p1[1]),
+			tri_vertex((float)p2[0], (float)p2[1]),
+			tri_vertex((float)p3[0], (float)p3[1])
+		));
 	}
 
 	return output;
@@ -415,8 +423,8 @@ Map::Map(Game* game, std::string mapname) {
 				break;
 			}
 			case VERTEX: {
-				if (tag == "x") c_vertex.x=atof(value.c_str());
-				else if (tag == "y") c_vertex.y=-atof(value.c_str());
+				if (tag == "x") c_vertex.x=(float)atof(value.c_str());
+				else if (tag == "y") c_vertex.y=-(float)atof(value.c_str());
 				else if (tag == "}") {
 					state = UNDEFINED;
 					vertices.push_back(c_vertex);
@@ -469,9 +477,9 @@ Map::Map(Game* game, std::string mapname) {
 				break;
 			}
 			case THING: {
-				if (tag == "x") c_thing.x=atof(value.c_str());
-				else if (tag == "y") c_thing.y=-atof(value.c_str());
-				else if (tag == "height") c_thing.height=atof(value.c_str());
+				if (tag == "x") c_thing.x=(float)atof(value.c_str());
+				else if (tag == "y") c_thing.y=-(float)atof(value.c_str());
+				else if (tag == "height") c_thing.height=(float)atof(value.c_str());
 				else if (tag == "angle") c_thing.angle=atoi(value.c_str());
 				else if (tag == "comment") {
 					c_thing.data=value;
@@ -521,7 +529,7 @@ Map::Map(Game* game, std::string mapname) {
 		int realfloor = current_sector.heightfloor;
 		int realceiling = current_sector.heightceiling;
 
-		for (auto current_linedef : connected_linedefs) {
+		for (auto& current_linedef : connected_linedefs) {
 			DBPRINTF("\tcreating edge: %d - %d\n", current_linedef.v1, current_linedef.v2);
 			udmf_vertex v1 = vertices[current_linedef.v1];
 			udmf_vertex v2 = vertices[current_linedef.v2];
@@ -728,13 +736,13 @@ Map::Map(Game* game, std::string mapname) {
 			ceiling_vertex_data[index] = mesh_vertex{glm::vec3{triangle.v0.x/SCALE, realceiling/SCALE, triangle.v0.y/SCALE}, glm::vec3{0,-1,0}, glm::vec2{triangle.v0.x/SCALE,triangle.v0.y/SCALE}};
 			ceiling_vertex_data[index+1] = mesh_vertex{glm::vec3{triangle.v1.x/SCALE, realceiling/SCALE, triangle.v1.y/SCALE}, glm::vec3{0,-1,0}, glm::vec2{triangle.v1.x/SCALE,triangle.v1.y/SCALE}};
 			ceiling_vertex_data[index+2] = mesh_vertex{glm::vec3{triangle.v2.x/SCALE, realceiling/SCALE, triangle.v2.y/SCALE}, glm::vec3{0,-1,0}, glm::vec2{triangle.v2.x/SCALE,triangle.v2.y/SCALE}};
-			index_data[index] = index;
-			index_data[index+1] = index+1;
-			index_data[index+2] = index+2;
+			index_data[index] = (GLuint)index;
+			index_data[index+1] = (GLuint)(index+1);
+			index_data[index+2] = (GLuint)(index+2);
 		}
 		
-		addmapsegment(m_map_segments, floor_vertex_data, index_data, floor_triangles.size()*3, floor_material);
-		addmapsegment(m_map_segments, ceiling_vertex_data, index_data, floor_triangles.size()*3, floor_material);
+		addmapsegment(m_map_segments, floor_vertex_data, index_data, (GLuint)floor_triangles.size()*3, floor_material);
+		addmapsegment(m_map_segments, ceiling_vertex_data, index_data, (GLuint)floor_triangles.size()*3, floor_material);
 	}
 	
 	for (udmf_thing thing : things) {
@@ -771,11 +779,11 @@ Map::Map(Game* game, std::string mapname) {
 		float bby = 0;
 		if (!bbvalue.empty()) {
 			std::vector<std::string> bbsplit = split_string(bbvalue, ",");
-			bbx = atof(bbsplit[0].c_str());
-			bby = atof(bbsplit[1].c_str());
+			bbx = (float)atof(bbsplit[0].c_str());
+			bby = (float)atof(bbsplit[1].c_str());
 		}
 		float height = 0;
-		if (!heightvalue.empty()) height = atof(heightvalue.c_str());
+		if (!heightvalue.empty()) height = (float)atof(heightvalue.c_str());
 		Box box {vec2{bbx, bby}, vec2{thing.x/SCALE, thing.y/SCALE}};
 		std::optional<Sector> highest_floor_sector = GetHighestFloorOverlapping(box);
 		if (highest_floor_sector.has_value()) {
@@ -818,7 +826,7 @@ std::optional<Sector> Map::GetHighestFloorOverlapping(Box& box) {
 	for (Sector sector : m_sectors) {
 		if (sector.heightfloor < height) continue;
 		bool overlapping = false;
-		for (triangle t : sector.triangles) {
+		for (triangle& t : sector.triangles) {
 			if (overlap_box_triangle(box, t)) {overlapping = true; break;}
 		}
 		if (overlapping) {
@@ -836,7 +844,7 @@ std::optional<Sector> Map::GetLowestCeilingOverlapping(Box& box) {
 	for (Sector sector : m_sectors) {
 		if (sector.heightceiling > height) continue;
 		bool overlapping = false;
-		for (triangle t : sector.triangles) {
+		for (triangle& t : sector.triangles) {
 			if (overlap_box_triangle(box, t)) {overlapping = true; break;}
 		}
 		if (overlapping) {

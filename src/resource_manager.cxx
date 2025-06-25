@@ -104,7 +104,7 @@ std::shared_ptr<AudioSegment> ResourceManager::GetAudioSegment(std::string lumpn
 
 #define RMAP_UPDATE_TIME(game, map) do {\
 for (auto& [key, val] : map) {\
-	if (val.unique() && !val->GetPersistent()) val->IterateTime(game->GetDelta());\
+	if (val.use_count() == 1 && !val->GetPersistent()) val->IterateTime(game->GetDelta());\
 	else val->ResetTimeUnused();\
 }\
 } while(0)

@@ -1,7 +1,8 @@
 #include <SDL2/SDL.h>
 #include <cmath>
 #include "workspace.hpp"
-#include "AL/alc.h"
+#define AL_LIBTYPE_STATIC
+#include <AL/alc.h>
 #include "game.hpp"
 #include "game_object.hpp"
 #include "audio_instance.hpp"

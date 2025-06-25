@@ -2,8 +2,7 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include "GL/glew.h"
-#include "GL/gl.h"
+#include "glcommon.hpp"
 #include "physics.hpp"
 
 #define SCALE (32.0f)
@@ -21,8 +20,8 @@ struct MapSegmentRenderData {
 };
 
 struct Sector {
-	float heightfloor;
-	float heightceiling;
+	float heightfloor=0;
+	float heightceiling=0;
 	std::vector<triangle> triangles;
 };
 

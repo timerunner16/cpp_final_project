@@ -3,18 +3,18 @@
 #include <map>
 #include <sol/sol.hpp>
 
-class vec2;
-class vec3;
-class ivec2;
-class ivec3;
-class particle_system_create_info;
+struct vec2;
+struct vec3;
+struct ivec2;
+struct ivec3;
+struct particle_system_create_info;
 class Transform;
-class Box;
+struct Box;
 class Mesh;
 class GLTexture;
 class Shader;
 class Material;
-class Uniform;
+struct Uniform;
 
 typedef std::variant<
 	int, bool, float,

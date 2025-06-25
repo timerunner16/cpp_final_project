@@ -34,13 +34,17 @@
 *.out
 *.app
 
-# Project-specific Directories
+# Build Directories
 build/
-.cache/
+out/
 
-# Doombuilder save files
+# Editor/IDE Directories
+.cache/
+.vs/
+
+# Doombuilder Save Files
 *.dbs
 *.wad.*
 
-# Blender backup save files
+# Blender Backup Save Files
 *.blend*

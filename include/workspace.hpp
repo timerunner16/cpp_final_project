@@ -10,7 +10,7 @@ class GameObject;
 class Event;
 class Mesh;
 class Material;
-class Box;
+struct Box;
 class AudioInstance;
 
 class Workspace {

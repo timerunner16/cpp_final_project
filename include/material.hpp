@@ -9,22 +9,22 @@ class GLTexture;
 class Shader;
 
 enum UniformType {
-	BOOL,
-	INT,
-	FLOAT,
-	VEC2,
-	VEC3,
-	VEC4,
-	MAT4,
-	IVEC2,
-	IVEC3,
-	IVEC4,
+	UN_BOOL,
+	UN_INT,
+	UN_FLOAT,
+	UN_VEC2,
+	UN_VEC3,
+	UN_VEC4,
+	UN_MAT4,
+	UN_IVEC2,
+	UN_IVEC3,
+	UN_IVEC4,
 };
 
 struct Uniform {
-	std::string name;
-	UniformType type;
-	void* data;
+	std::string name="";
+	UniformType type=UN_INT;
+	void* data=nullptr;
 };
 
 size_t get_uniform_data_size(UniformType type);

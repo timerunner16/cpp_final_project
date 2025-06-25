@@ -1,5 +1,4 @@
-#include <GL/glew.h>
-#include <GL/glu.h>
+#include "glcommon.hpp"
 #include "material.hpp"
 #include "shader.hpp"
 #include "gltexture.hpp"
@@ -10,16 +9,16 @@
 
 size_t get_uniform_data_size(UniformType type) {
 	switch (type) {
-		case BOOL: return sizeof(bool);
-		case INT: return sizeof(int);
-		case FLOAT: return sizeof(float);
-		case VEC2: return sizeof(glm::vec2);
-		case VEC3: return sizeof(glm::vec3);
-		case VEC4: return sizeof(glm::vec4);
-		case MAT4: return sizeof(glm::mat4);
-		case IVEC2: return sizeof(glm::ivec2);
-		case IVEC3: return sizeof(glm::ivec3);
-		case IVEC4: return sizeof(glm::ivec4);
+		case UN_BOOL: return sizeof(bool);
+		case UN_INT: return sizeof(int);
+		case UN_FLOAT: return sizeof(float);
+		case UN_VEC2: return sizeof(glm::vec2);
+		case UN_VEC3: return sizeof(glm::vec3);
+		case UN_VEC4: return sizeof(glm::vec4);
+		case UN_MAT4: return sizeof(glm::mat4);
+		case UN_IVEC2: return sizeof(glm::ivec2);
+		case UN_IVEC3: return sizeof(glm::ivec3);
+		case UN_IVEC4: return sizeof(glm::ivec4);
 		default: return 1;
 	}
 }
@@ -47,21 +46,21 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 				bool data = data_s == "true";
 				SetUniform(Uniform{
 					name,
-					BOOL,
+					UN_BOOL,
 					(void*)&data
 				});
 			} else if (type_s == "int") {
 				int data = std::stoi(data_s);
 				SetUniform(Uniform{
 					name,
-					INT,
+					UN_INT,
 					(void*)&data
 				});
 			} else if (type_s == "float") {
 				float data = std::stof(data_s);
 				SetUniform(Uniform{
 					name,
-					FLOAT,
+					UN_FLOAT,
 					(void*)&data
 				});
 			} else if (type_s == "vec2") {
@@ -73,7 +72,7 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 				};
 				SetUniform(Uniform{
 					name,
-					VEC2,
+					UN_VEC2,
 					(void*)&data
 				});
 			} else if (type_s == "vec3") {
@@ -86,7 +85,7 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 				};
 				SetUniform(Uniform{
 					name,
-					VEC3,
+					UN_VEC3,
 					(void*)&data
 				});
 			} else if (type_s == "vec4") {
@@ -100,7 +99,7 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 				};
 				SetUniform(Uniform{
 					name,
-					VEC4,
+					UN_VEC4,
 					(void*)&data
 				});
 			} else if (type_s == "ivec2") {
@@ -112,7 +111,7 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 				};
 				SetUniform(Uniform{
 					name,
-					IVEC2,
+					UN_IVEC2,
 					(void*)&data
 				});
 			} else if (type_s == "ivec3") {
@@ -125,7 +124,7 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 				};
 				SetUniform(Uniform{
 					name,
-					IVEC3,
+					UN_IVEC3,
 					(void*)&data
 				});
 			} else if (type_s == "ivec4") {
@@ -139,7 +138,7 @@ Material::Material(Game* game, std::string wad_path, std::vector<std::string> da
 				};
 				SetUniform(Uniform{
 					name,
-					IVEC4,
+					UN_IVEC4,
 					(void*)&data
 				});
 			}
@@ -186,52 +185,52 @@ void Material::Bind(Game* game) {
 
 void Material::ApplyUniform(const Uniform& uniform) {
 	switch (uniform.type) {
-		case BOOL: {
+		case UN_BOOL: {
 			bool data = *(bool *)uniform.data;
 			m_shader->UniformBool(uniform.name, data);
 			break;
 		}
-		case INT: {
+		case UN_INT: {
 			int data = *(int *)uniform.data;
 			m_shader->UniformInt(uniform.name, data);
 			break;
 		}
-		case FLOAT: {
+		case UN_FLOAT: {
 			float data = *(float *)uniform.data;
 			m_shader->UniformFloat(uniform.name, data);
 			break;
 		}
-		case VEC2: {
+		case UN_VEC2: {
 			glm::vec2 data = *(glm::vec2 *)uniform.data;
 			m_shader->UniformVec2(uniform.name, data);
 			break;
 		}
-		case VEC3: {
+		case UN_VEC3: {
 			glm::vec3 data = *(glm::vec3 *)uniform.data;
 			m_shader->UniformVec3(uniform.name, data);
 			break;
 		}
-		case VEC4: {
+		case UN_VEC4: {
 			glm::vec4 data = *(glm::vec4 *)uniform.data;
 			m_shader->UniformVec4(uniform.name, data);
 			break;
 		}
-		case MAT4: {
+		case UN_MAT4: {
 			glm::mat4 data = *(glm::mat4 *)uniform.data;
 			m_shader->UniformMat4(uniform.name, data);
 			break;
 		}
-		case IVEC2: {
+		case UN_IVEC2: {
 			glm::ivec2 data = *(glm::ivec2 *)uniform.data;
 			m_shader->UniformIVec2(uniform.name, data);
 			break;
 		}
-		case IVEC3: {
+		case UN_IVEC3: {
 			glm::ivec3 data = *(glm::ivec3 *)uniform.data;
 			m_shader->UniformIVec3(uniform.name, data);
 			break;
 		}
-		case IVEC4: {
+		case UN_IVEC4: {
 			glm::ivec4 data = *(glm::ivec4 *)uniform.data;
 			m_shader->UniformIVec4(uniform.name, data);
 			break;

@@ -2,7 +2,7 @@
 #include <glm/ext.hpp>
 #include <string>
 
-class vec2;
+struct vec2;
 
 struct ivec2 : public glm::ivec2 {
 	using glm::ivec2::vec;

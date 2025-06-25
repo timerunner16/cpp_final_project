@@ -1,0 +1,9 @@
+{
+  "dependencies": [
+    "glew",
+    "lua",
+    "sdl2",
+    "sdl2-image",
+    "opengl"
+  ]
+}

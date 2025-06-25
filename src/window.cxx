@@ -68,11 +68,11 @@ Window::Window(Game* game, int width, int height, int downscale, bool resizable)
 
 	glGenBuffers(1, &m_text_vbo);
 
-	m_text_shader = new Shader((uint8_t*)shader_source.c_str(), shader_source.size());
+	m_text_shader = new Shader((uint8_t*)shader_source.c_str(), (uint32_t)shader_source.size());
 
 	m_text_texture = new GLTexture((uint8_t*)__engine_font, __engine_font_len, BMP);
 
-	m_default_pp_shader = new Shader((uint8_t*)pp_shader_source.c_str(), pp_shader_source.size());
+	m_default_pp_shader = new Shader((uint8_t*)pp_shader_source.c_str(), (uint32_t)pp_shader_source.size());
 
 	m_width = width;
 	m_height = height;
@@ -137,11 +137,11 @@ void Window::DrawGameObject(Camera* camera, GameObject* game_object) {
 	glm::mat4 inv_view_matrix = glm::transpose(glm::inverse(view_matrix));
 	glm::mat4 projection_matrix = camera->GetProjectionMatrix();
 
-	Uniform u_model_view_matrix = Uniform{"model_view_matrix", MAT4, &model_view_matrix};
-	Uniform u_normal_matrix = Uniform{"normal_matrix", MAT4, &normal_matrix};
-	Uniform u_inv_model_view_matrix = Uniform{"inv_model_view_matrix", MAT4, &inv_model_view_matrix};
-	Uniform u_inv_view_matrix = Uniform{"inv_view_matrix", MAT4, &inv_view_matrix};
-	Uniform u_projection_matrix = Uniform{"projection_matrix", MAT4, &projection_matrix};
+	Uniform u_model_view_matrix = Uniform{"model_view_matrix", UN_MAT4, &model_view_matrix};
+	Uniform u_normal_matrix = Uniform{"normal_matrix", UN_MAT4, &normal_matrix};
+	Uniform u_inv_model_view_matrix = Uniform{"inv_model_view_matrix", UN_MAT4, &inv_model_view_matrix};
+	Uniform u_inv_view_matrix = Uniform{"inv_view_matrix", UN_MAT4, &inv_view_matrix};
+	Uniform u_projection_matrix = Uniform{"projection_matrix", UN_MAT4, &projection_matrix};
 	
 	game_object->GetMaterial()->SetUniform(u_model_view_matrix);
 	game_object->GetMaterial()->SetUniform(u_normal_matrix);
@@ -181,11 +181,11 @@ void Window::DrawMap(Camera* camera) {
 	glm::mat4 inv_view_matrix = glm::transpose(glm::inverse(view_matrix));
 	glm::mat4 projection_matrix = camera->GetProjectionMatrix();
 
-	Uniform u_model_view_matrix = Uniform{"model_view_matrix", MAT4, &model_view_matrix};
-	Uniform u_normal_matrix = Uniform{"normal_matrix", MAT4, &normal_matrix};
-	Uniform u_inv_model_view_matrix = Uniform{"inv_model_view_matrix", MAT4, &inv_model_view_matrix};
-	Uniform u_inv_view_matrix = Uniform{"inv_view_matrix", MAT4, &inv_view_matrix};
-	Uniform u_projection_matrix = Uniform{"projection_matrix", MAT4, &projection_matrix};
+	Uniform u_model_view_matrix = Uniform{"model_view_matrix", UN_MAT4, &model_view_matrix};
+	Uniform u_normal_matrix = Uniform{"normal_matrix", UN_MAT4, &normal_matrix};
+	Uniform u_inv_model_view_matrix = Uniform{"inv_model_view_matrix", UN_MAT4, &inv_model_view_matrix};
+	Uniform u_inv_view_matrix = Uniform{"inv_view_matrix", UN_MAT4, &inv_view_matrix};
+	Uniform u_projection_matrix = Uniform{"projection_matrix", UN_MAT4, &projection_matrix};
 	
 	if (m_wireframe) {
 		glDisable(GL_CULL_FACE);
@@ -268,7 +268,7 @@ void Window::DrawString(int x, int y, uint8_t r, uint8_t g, uint8_t b, uint8_t a
 	
 	glDisable(GL_DEPTH_TEST);
 
-	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)vertices.size());
 	
 	glEnable(GL_DEPTH_TEST);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -287,8 +287,8 @@ void Window::DrawParticleSystem(Camera* camera, ParticleSystem* particle_system)
 	glm::mat4 view_matrix = camera->GetViewMatrix();
 	glm::mat4 projection_matrix = camera->GetProjectionMatrix();
 	
-	Uniform u_model_view_matrix = Uniform{"view", MAT4, &view_matrix};
-	Uniform u_projection_matrix = Uniform{"projection", MAT4, &projection_matrix};
+	Uniform u_model_view_matrix = Uniform{"view", UN_MAT4, &view_matrix};
+	Uniform u_projection_matrix = Uniform{"projection", UN_MAT4, &projection_matrix};
 	
 	particle_system->GetMaterial()->SetUniform(u_model_view_matrix);
 	particle_system->GetMaterial()->SetUniform(u_projection_matrix);
@@ -301,7 +301,7 @@ void Window::DrawParticleSystem(Camera* camera, ParticleSystem* particle_system)
 	}
 
 	//glDrawArrays(GL_TRIANGLES, 0, 6);
-	glDrawArraysInstanced(GL_TRIANGLES, 0, 6, particle_system->GetInstances());
+	glDrawArraysInstanced(GL_TRIANGLES, 0, 6, (GLsizei)particle_system->GetInstances());
 
 	if (m_wireframe) {
 		glEnable(GL_CULL_FACE);

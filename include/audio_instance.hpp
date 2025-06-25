@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#define AL_LIBTYPE_STATIC
 #include <AL/al.h>
 
 class AudioSegment;

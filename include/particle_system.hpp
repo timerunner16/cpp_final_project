@@ -1,8 +1,7 @@
 #pragma once
-#include <GL/glew.h>
-#include <GL/glu.h>
 #include <memory>
 #include <vector>
+#include "glcommon.hpp"
 #include "vec2.hpp"
 #include "vec3.hpp"
 
@@ -12,7 +11,7 @@ struct particle_system_create_info {
 	vec3 position=vec3(0,0,0);
 	vec3 direction=vec3(0,1,0);
 	vec2 size=vec2(0.5f,0.5f);
-	float randomization=M_PI_4;
+	float randomization=1;
 	float speed=10;
 	float gravity=-9.81f;
 	float lifetime=1;

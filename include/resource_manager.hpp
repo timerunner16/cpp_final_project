@@ -23,9 +23,9 @@ public:
 	void IterateTime(float delta) {m_time_unused += delta;}
 	void ResetTimeUnused() {m_time_unused=0.0f;}
 private:
-	bool m_persistent;
+	bool m_persistent=false;
 
-	float m_time_unused;
+	float m_time_unused=0;
 };
 
 class ResourceManager {
