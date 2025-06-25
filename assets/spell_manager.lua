@@ -56,7 +56,7 @@ local spells = {
 		manacost = 15
 	}
 }
-local current_spell_i = 0
+local current_spell_i = 1
 
 local active_spells = {}
 
@@ -72,7 +72,7 @@ local sound
 local spawnpoints = {}
 
 local function create_spell(down)
-	local current_spell = spells[current_spell_i + 1]
+	local current_spell = spells[current_spell_i]
 
 	if (pdata:GetValue("mana") < current_spell.manacost) then
 		return
@@ -133,6 +133,13 @@ function init()
 	camera = workspace:GetCamera()
 end
 
+local function switchcheck(key, index)
+	local switch = input:QueryKey(key)
+	if (index >= 1 and index <= #spells and switch.Pressed and switch.OnEdge) then
+		current_spell_i = index
+	end
+end
+
 function process(delta)
 	if (#spawnpoints == 0) then
 		for _,v in pairs(workspace:GetGameObjects()) do
@@ -147,10 +154,15 @@ function process(delta)
 		return
 	end
 
-	local switch = input:QueryKey(Keys.Q)
-	if (switch.Pressed and switch.OnEdge) then
-		current_spell_i = (current_spell_i + 1)%(#spells)
-	end
+	switchcheck(Keys["1"], 1)
+	switchcheck(Keys["2"], 2)
+	switchcheck(Keys["3"], 3)
+	switchcheck(Keys["4"], 4)
+	switchcheck(Keys["5"], 5)
+	switchcheck(Keys["6"], 6)
+	switchcheck(Keys["7"], 7)
+	switchcheck(Keys["8"], 8)
+	switchcheck(Keys["9"], 9)
 
 	local fire = input:QueryKey(Keys.F)
 	if (fire.Pressed and fire.OnEdge) then
@@ -261,7 +273,7 @@ function process(delta)
 		end
 	end
 
-	local current_spell = spells[current_spell_i + 1]
+	local current_spell = spells[current_spell_i]
 	local spelltext = "Spell: " .. current_spell.name
 	window:DrawString(math.floor(window.Width/window.Downscale)-1-string.len(spelltext)*8, 2,
 					  80, 80, 0, 255,
