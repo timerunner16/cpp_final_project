@@ -9,9 +9,10 @@
 #define AL_LIBTYPE_STATIC
 #include <AL/alc.h>
 
-Game::Game(std::string wad_path, int width, int height, int downscale, bool resizable) {
+Game::Game(std::string wad_path, int width, int height, int downscale, bool resizable, bool find_size) {
+	SDL_Init(SDL_INIT_VIDEO);
 	m_wad_path = wad_path;
-	m_window = new Window(this, width, height, downscale, resizable);
+	m_window = new Window(this, width, height, downscale, resizable, find_size);
 	m_workspace = new Workspace(this);
 	m_resource_manager = new ResourceManager(this);
 	m_input_manager = new InputManager(this);
@@ -64,6 +65,8 @@ Game::~Game() {
 	alcMakeContextCurrent(NULL);
 	alcDestroyContext(context);
 	alcCloseDevice(device);
+
+	SDL_Quit();
 }
 
 void Game::Process() {

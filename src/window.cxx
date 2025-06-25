@@ -17,15 +17,31 @@
 #define VERBOSE_DBPRINTF
 #include "macroprint.h"
 
-Window::Window(Game* game, int width, int height, int downscale, bool resizable) {
+Window::Window(Game* game, int width, int height, int downscale, bool resizable, bool find_size) {
 	SDL_Init(SDL_INIT_VIDEO);
 	
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
+	if (find_size) {
+		SDL_DisplayMode dm;
+		SDL_GetDesktopDisplayMode(0, &dm);
+		int d_width = dm.w;
+		int d_height = dm.h;
+		if (d_width/4 < d_height/3) {
+			downscale = d_width / 320 - 1;
+			width = downscale * 320;
+			height = (width / 4) * 3;
+		} else {
+			downscale = d_height / 240 - 1;
+			height = downscale * 240;
+			width = (height / 3) * 4;
+		}
+	}
+
 	m_game = game;
-	m_window = SDL_CreateWindow("Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+	m_window = SDL_CreateWindow("Window", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL);
 	SDL_SetWindowResizable(m_window, resizable ? SDL_TRUE : SDL_FALSE);
 
 	m_context = SDL_GL_CreateContext(m_window);

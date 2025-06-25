@@ -13,7 +13,7 @@ class ParticleSystem;
 
 class Window {
 public:
-	Window(Game* game, int width = 640, int height = 480, int downscale = 2, bool resizable = false);
+	Window(Game* game, int width = 640, int height = 480, int downscale = 2, bool resizable = false, bool find_size = false);
 	~Window();
 
 	void Clear();

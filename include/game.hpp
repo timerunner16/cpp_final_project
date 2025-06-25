@@ -12,7 +12,7 @@ class Map;
 
 class Game {
 public:
-	Game(std::string wad_path = "assets/game.wad", int width = 320, int height = 240, int downscale = 1, bool resizable = false);
+	Game(std::string wad_path = "assets/game.wad", int width = 320, int height = 240, int downscale = 1, bool resizable = false, bool find_size = false);
 	~Game();
 
 	void Process();
