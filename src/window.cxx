@@ -13,15 +13,15 @@
 #include "gltexture.hpp"
 #include "engine_font.hpp"
 
-#define MACROPRINT
-#define VERBOSE_DBPRINTF
+//#define MACROPRINT
+//#define VERBOSE_DBPRINTF
 #include "macroprint.h"
 
 Window::Window(Game* game, int width, int height, int downscale, bool resizable, bool find_size) {
 	SDL_Init(SDL_INIT_VIDEO);
 	
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 	if (find_size) {
@@ -62,8 +62,6 @@ Window::Window(Game* game, int width, int height, int downscale, bool resizable,
 	Resize(width, height, downscale);
 
 	glGenVertexArrays(1, &m_pp_vao);
-	glBindVertexArray(m_pp_vao);
-
 	glm::vec4 vertices[6] = {
 		{-1.0f,-1.0f,  0.0f, 0.0f},
 		{ 1.0f,-1.0f,  1.0f, 0.0f},
@@ -74,6 +72,7 @@ Window::Window(Game* game, int width, int height, int downscale, bool resizable,
 	};
 	GLuint vertex_buffer;
 	glGenBuffers(1, &vertex_buffer);
+	glBindVertexArray(m_pp_vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
 
@@ -81,7 +80,6 @@ Window::Window(Game* game, int width, int height, int downscale, bool resizable,
 	glEnableVertexAttribArray(0);
 
 	glBindVertexArray(0);
-
 	glGenBuffers(1, &m_text_vbo);
 
 	m_text_shader = new Shader((uint8_t*)shader_source.c_str(), (uint32_t)shader_source.size());
@@ -275,6 +273,10 @@ void Window::DrawString(int x, int y, uint8_t r, uint8_t g, uint8_t b, uint8_t a
 	glBindBuffer(GL_ARRAY_BUFFER, m_text_vbo);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(glm::vec4), vertices.data(), GL_STATIC_DRAW);
 	
+	GLuint VAO;
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)0);
 	glEnableVertexAttribArray(0);
 
@@ -290,6 +292,9 @@ void Window::DrawString(int x, int y, uint8_t r, uint8_t g, uint8_t b, uint8_t a
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glUseProgram(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	
+	glBindVertexArray(0);
+	glDeleteVertexArrays(1, &VAO);
 }
 
 void Window::DrawParticleSystem(Camera* camera, ParticleSystem* particle_system) {

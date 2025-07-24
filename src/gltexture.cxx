@@ -37,7 +37,7 @@ GLTexture::GLTexture(uint8_t* data, uint32_t size, IMAGE_FORMAT format) {
 	glGenTextures(1, &m_texture_id);
 	glBindTexture(GL_TEXTURE_2D, m_texture_id);
 	glTexImage2D(
-		GL_TEXTURE_2D, 0, num_colors,
+		GL_TEXTURE_2D, 0, texture_format,
 		surface->w, surface->h,
 		0, texture_format, GL_UNSIGNED_BYTE,
 		surface->pixels
