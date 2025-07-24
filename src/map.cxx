@@ -771,9 +771,9 @@ Map::Map(Game* game, std::string mapname) {
 		Box box {vec2{bbx, bby}, vec2{thing.x/SCALE, thing.y/SCALE}};
 		std::optional<Sector> highest_floor_sector = GetHighestFloorOverlapping(box);
 		if (highest_floor_sector.has_value()) {
-			printf("%f -> ", thing.height);
+			DBPRINTF("%f -> ", thing.height);
 			thing.height += highest_floor_sector->heightfloor * SCALE;
-			printf("%f\n", thing.height);
+			DBPRINTF("%f\n", thing.height);
 		}
 		m_game->GetWorkspace()->CreateGameObject(
 			name, nullptr, scriptname,
