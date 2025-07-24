@@ -17,8 +17,8 @@
 #include "workspace.hpp"
 using namespace tpp;
 
-#define MACROPRINT
-#define VERBOSE_DBPRINTF
+//#define MACROPRINT
+//#define VERBOSE_DBPRINTF
 #include "macroprint.h"
 
 struct udmf_vertex {
@@ -193,22 +193,6 @@ struct vertexloop_t {
 std::vector<tri_triangle> edges_to_faces(std::vector<tri_edge> edges) {
 	if (edges.size() <= 2) return std::vector<tri_triangle>();
 	
-	DBPRINTF("edges:\n");
-	std::string check;
-	for (auto i : edges) {
-		DBPRINTF("\t{%f,%f}, {%f,%f}\n", i.v0.x, i.v0.y, i.v1.x, i.v1.y);
-		char c0[24];
-		char c1[24];
-		char c2[24];
-		char c3[24];
-		sprintf_s(c0, "%zu", std::hash<float>()(i.v0.x));
-		sprintf_s(c1, "%zu", std::hash<float>()(i.v0.y));
-		sprintf_s(c2, "%zu", std::hash<float>()(i.v1.x));
-		sprintf_s(c3, "%zu", std::hash<float>()(i.v1.y));
-		check += std::string(c0) + std::string(c1) + std::string(c2) + std::string(c3);
-	}
-	DBPRINTF("edge hash: %zu\n", std::hash<std::string>()(check));
-
 	std::vector<vertexloop_t> vertexloops(1);
 	bool clear = false;
 	while (!clear) {
